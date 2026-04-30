@@ -1,16 +1,49 @@
 /* ================================================================
-   STNDRD — Main Stylesheet
+   A&M — Main Stylesheet  (style.css)
+   
+   ★ QUICK TWEAK GUIDE — the most common things you'll want to change:
+   
+   COLOURS:
+     Change --color-accent in :root to change the gold highlight
+     colour that appears on hover states, eyebrows, and the cursor.
+     Example: swap #C8A97E for a red (#E03C3C) or a blue (#4A90E2).
+   
+   FONTS:
+     --font-display controls the big Bebas Neue headlines.
+     --font-body controls all paragraph/label text (DM Sans).
+     To change: update the Google Fonts <link> in index.html first,
+     then change the font name in these two variables.
+   
+   HERO CANVAS (animated background):
+     Controlled in main.js section 7 (HERO CANVAS).
+     Look for CANVAS_CONFIG — you can change dot count, speed, 
+     line colour, and more there.
+   
+   CURSOR RING:
+     .cursor-follower { border-width } — controls ring thickness
+     .cursor-follower { width/height } — controls ring size at rest
+     .cursor-follower.is-hovering { width/height } — size when over links
+     border-color inside .is-hovering — ring colour on hover
+   
+   MARQUEE SPEED:
+     .marquee__track { animation-duration } — lower = faster ticker
+   
+   SECTION SPACING:
+     --space-xl in :root controls the top/bottom padding of each section.
+     Reduce it to make sections feel tighter; increase for more breathing room.
+   
+   ================================================================
    
    FILE STRUCTURE:
-   1. CSS Custom Properties (variables / design tokens)
-   2. Reset & Base
-   3. Custom Cursor
-   4. Navigation
-   5. Hero Section
-   6. Marquee / Ticker
-   7. Shared Section Styles
-   8. Products Grid & Cards
-   9. Product Modal
+   1.  CSS Custom Properties (variables / design tokens)
+   2.  Reset & Base
+   3.  Custom Cursor
+   4.  Navigation + Language Switcher
+   5.  Hero Section + Canvas
+   6.  Marquee / Ticker
+   7.  Shared Section Styles
+   8.  Products Grid & Cards
+   9.  Product Modal
    10. Instagram Feed
    11. Contact Form
    12. Footer
@@ -22,50 +55,70 @@
 /* ================================================================
    1. CSS CUSTOM PROPERTIES — Design Tokens
    
-   These variables define the entire visual identity.
-   Change a value here and it updates everywhere.
+   ★ TWEAK GUIDE — Variables and what they control:
    
-   Usage: var(--color-navy) pulls the navy blue color.
+   --color-black:    Main background colour of the page.
+   --color-white:    Text colour on dark backgrounds. Also button fill.
+   --color-navy:     Section background for Instagram + modal panel.
+   --color-navy-mid: Slightly lighter navy — product card hover bg, 
+                     placeholder for missing images.
+   --color-accent:   The warm gold highlight. Used on: eyebrow labels, 
+                     hover underlines, cursor ring, form focus underline,
+                     badge text, and the marquee dot. Change this one 
+                     value to re-theme the whole site's accent colour.
+   --color-grey:     Muted text (categories, footer copy, placeholder labels).
+   --color-border:   Subtle white line used for dividers and card outlines.
+   
+   --font-display:   The big headline font (Bebas Neue).
+   --font-body:      All other text (DM Sans).
+   
+   --text-hero:      Responsive hero title size. clamp(min, preferred, max).
+                     "5rem" = min size on small screens.
+                     "12vw" = scales with viewport width.
+                     "10rem" = max size on large screens.
+   
+   --space-xl:       Section top/bottom padding. Currently 8rem (~128px).
+   --space-lg:       Used for gaps between header and content within sections.
+   
+   --nav-height:     Height of the fixed nav bar. Affects hero padding-top 
+                     so content doesn't hide behind the nav.
+   
+   --ease-spring:    The cubic-bezier that gives buttons a slight bounce.
+                     (0.34, 1.56, 0.64, 1) — the "1.56" overshoots slightly.
+                     Change to (0.4, 0, 0.2, 1) for a more reserved feel.
 ================================================================ */
 :root {
-  /* --- Color Palette --- */
-  --color-black:    #0A0A0A;   /* Near-black for backgrounds */
-  --color-white:    #F5F5F5;   /* Warm white for text on dark */
-  --color-navy:     #0D1B2A;   /* Deep navy for section backgrounds */
-  --color-navy-mid: #162232;   /* Slightly lighter navy for cards */
-  --color-accent:   #C8A97E;   /* Warm gold accent — used sparingly */
-  --color-grey:     #888888;   /* Muted text color */
-  --color-border:   rgba(255,255,255,0.08); /* Subtle borders */
+  --color-black:    #0A0A0A;
+  --color-white:    #F5F5F5;
+  --color-navy:     #0D1B2A;
+  --color-navy-mid: #162232;
+  --color-accent:   #C8A97E;
+  --color-grey:     #888888;
+  --color-border:   rgba(255,255,255,0.08);
 
-  /* --- Typography --- */
-  --font-display: 'Bebas Neue', sans-serif;   /* Headlines only */
-  --font-body:    'DM Sans', sans-serif;      /* All other text */
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-body:    'DM Sans', sans-serif;
 
-  /* --- Font Sizes (fluid scale) --- */
-  --text-xs:   0.75rem;    /* 12px */
-  --text-sm:   0.875rem;   /* 14px */
-  --text-base: 1rem;       /* 16px */
-  --text-lg:   1.125rem;   /* 18px */
-  --text-xl:   1.5rem;     /* 24px */
-  --text-2xl:  2rem;       /* 32px */
-  --text-3xl:  3rem;       /* 48px */
-  --text-4xl:  5rem;       /* 80px */
-  --text-hero: clamp(5rem, 12vw, 10rem); /* Responsive hero title */
+  --text-xs:   0.75rem;
+  --text-sm:   0.875rem;
+  --text-base: 1rem;
+  --text-lg:   1.125rem;
+  --text-xl:   1.5rem;
+  --text-2xl:  2rem;
+  --text-3xl:  3rem;
+  --text-hero: clamp(5rem, 12vw, 10rem);
 
-  /* --- Spacing --- */
   --space-xs:  0.5rem;
   --space-sm:  1rem;
   --space-md:  2rem;
   --space-lg:  4rem;
   --space-xl:  8rem;
 
-  /* --- Layout --- */
   --container-width: 1280px;
   --nav-height: 72px;
 
-  /* --- Transitions --- */
   --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
-  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1); /* Slight overshoot */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   --duration-fast: 200ms;
   --duration-base: 400ms;
   --duration-slow: 700ms;
@@ -73,11 +126,16 @@
 
 
 /* ================================================================
-   2. RESET & BASE STYLES
+   2. RESET & BASE
    
-   Removes browser inconsistencies and sets sensible defaults.
-   box-sizing: border-box means padding is included in width — 
-   this makes layout math much more predictable.
+   box-sizing: border-box — padding is included in element width.
+   This makes layout math predictable (no surprise overflow).
+   
+   scroll-behavior: smooth — makes anchor links (e.g. #products) 
+   animate instead of jumping.
+   
+   overflow-x: hidden — prevents any element from causing a 
+   horizontal scrollbar.
 ================================================================ */
 *, *::before, *::after {
   box-sizing: border-box;
@@ -86,9 +144,7 @@
 }
 
 html {
-  /* smooth-scroll makes anchor links (#products) animate smoothly */
   scroll-behavior: smooth;
-  /* Prevent layout shift from scrollbar appearing/disappearing */
   scrollbar-gutter: stable;
 }
 
@@ -98,37 +154,21 @@ body {
   font-family: var(--font-body);
   font-size: var(--text-base);
   line-height: 1.6;
-  /* cursor: none hides the default cursor so our custom one shows */
-  cursor: none;
-  overflow-x: hidden; /* Prevent horizontal scrollbar */
+  cursor: none; /* Hide default cursor — our custom one replaces it */
+  overflow-x: hidden;
 }
 
-/* Re-enable default cursor on touch devices (custom cursor is mouse-only) */
+/* Restore default cursor on touch screens (no mouse = no custom cursor) */
 @media (hover: none) {
   body { cursor: auto; }
   .cursor, .cursor-follower { display: none; }
 }
 
-img {
-  max-width: 100%;
-  display: block;
-}
+img    { max-width: 100%; display: block; }
+a      { color: inherit; text-decoration: none; }
+ul     { list-style: none; }
+button { cursor: none; font-family: var(--font-body); border: none; background: none; }
 
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-ul { list-style: none; }
-
-button {
-  cursor: none; /* Keep our custom cursor on buttons too */
-  font-family: var(--font-body);
-  border: none;
-  background: none;
-}
-
-/* Utility: max-width container, centered */
 .container {
   width: 100%;
   max-width: var(--container-width);
@@ -140,65 +180,105 @@ button {
 /* ================================================================
    3. CUSTOM CURSOR
    
-   Two-layer cursor: a small sharp dot (cursor) and a larger
-   circle that follows with a slight delay (cursor-follower).
-   The delay creates the "trailing" effect.
+   ★ TWEAK GUIDE:
    
-   Position is set by JS on every mousemove event.
-   The --x and --y CSS variables are also set by JS, but we 
-   use transform for actual positioning for better performance.
+   .cursor (the sharp inner dot):
+     width / height   → dot size (currently 8×8px)
+     background       → dot colour (currently white)
+   
+   .cursor-follower (the outer ring):
+     width / height   → ring diameter at rest (currently 38×38px)
+     border-width     → ring stroke thickness (currently 2px)
+                        ↑ Increase for a bolder ring (e.g. 3px or 4px)
+     border-color     → ring colour at rest
+   
+   .cursor-follower.is-hovering (ring when over a link/button):
+     width / height   → expanded ring diameter (currently 60×60px)
+     border-color     → ring colour on hover (currently --color-accent gold)
+                        Change to e.g. white for a neutral hover ring.
+     border-width     → can be different from the resting width
+   
+   SPEED of the trailing effect:
+     Controlled by the lerp factor in main.js initCursor():
+     0.12 = current (snappier). Lower = more lag (e.g. 0.06). Higher = faster.
+   
+   HOW IT WORKS:
+     The cursor dot moves instantly via requestAnimationFrame + transform.
+     The follower ring uses linear interpolation (lerp) each frame — 
+     it moves 12% of the remaining distance toward the mouse every frame,
+     creating the smooth trailing deceleration.
+     
+     Using transform: translate() instead of left/top is critical for 
+     performance — transform is handled by the GPU compositor and 
+     never triggers a layout recalculation (reflow).
 ================================================================ */
 .cursor,
 .cursor-follower {
   position: fixed;
   border-radius: 50%;
-  pointer-events: none; /* Never blocks clicks */
+  pointer-events: none;
   z-index: 9999;
-  /* transform: translate(-50%,-50%) centers the circle on the mouse */
-  transform: translate(-50%, -50%);
-  transition: opacity var(--duration-fast) var(--ease-smooth);
+  top: 0;
+  left: 0;
+  /* will-change tells the browser to prepare a GPU layer for this element */
+  will-change: transform;
 }
 
 .cursor {
   width: 8px;
   height: 8px;
   background: var(--color-white);
-  /* No transition — follows mouse instantly */
+  /* Offset so the dot's centre is at the cursor tip */
+  margin: -4px 0 0 -4px;
 }
 
 .cursor-follower {
-  width: 36px;
-  height: 36px;
-  border: 1px solid rgba(255,255,255,0.4);
+  width: 38px;
+  height: 38px;
+  border: 2px solid rgba(255,255,255,0.5); /* ← increase border-width for thicker ring */
   background: transparent;
-  /* Slight lag for the trailing effect */
-  transition: 
+  margin: -19px 0 0 -19px; /* Always half of width/height to centre the ring */
+  transition:
     width 300ms var(--ease-smooth),
     height 300ms var(--ease-smooth),
-    opacity var(--duration-fast) var(--ease-smooth);
+    margin 300ms var(--ease-smooth),
+    border-color 250ms var(--ease-smooth),
+    border-width 250ms var(--ease-smooth);
 }
 
-/* When hovering links/buttons: expand the follower ring */
+/* Ring state when hovering over interactive elements */
 .cursor-follower.is-hovering {
-  width: 56px;
-  height: 56px;
-  border-color: var(--color-accent);
+  width: 60px;
+  height: 60px;
+  margin: -30px 0 0 -30px; /* Half of new size to keep ring centred */
+  border-color: var(--color-accent); /* Changes to gold on hover */
+  border-width: 2px; /* Can differ from resting width if desired */
 }
 
 
 /* ================================================================
-   4. NAVIGATION
+   4. NAVIGATION + LANGUAGE SWITCHER
    
-   Fixed position so it stays at the top while scrolling.
-   - z-index: 100 keeps it above all other content
-   - backdrop-filter: adds the frosted glass blur effect
-   - The .is-scrolled class is toggled by JS after scrolling down
+   ★ TWEAK GUIDE:
+   
+   --nav-height:            Height of the nav bar (also in :root above).
+                            Changing it here only — update :root too.
+   
+   .nav.is-scrolled:        The frosted glass bg after scrolling.
+     background: rgba(...)  Adjust the last value (0.85) for more/less 
+                            transparency. 1 = fully opaque.
+     backdrop-filter: blur  Increase px for more blur.
+   
+   .nav__links a::after:    The underline slide-in animation on nav links.
+     background:            Change colour of the underline (currently accent gold).
+     transition: width:     Change duration for faster/slower reveal.
+   
+   .lang-btn.active:        Style of the currently selected language button.
+   .lang-btn:hover:         Hover state for inactive language button.
 ================================================================ */
 .nav {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
+  top: 0; left: 0; right: 0;
   height: var(--nav-height);
   display: flex;
   align-items: center;
@@ -208,19 +288,26 @@ button {
   transition: background var(--duration-slow) var(--ease-smooth);
 }
 
-/* When scrolled: add a semi-transparent dark background */
 .nav.is-scrolled {
-  background: rgba(10, 10, 10, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(10, 10, 10, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--color-border);
 }
 
-.nav__logo {
-  font-family: var(--font-display);
-  font-size: 1.75rem;
-  letter-spacing: 0.1em;
-  color: var(--color-white);
+/* Logo image — constrained size, vertically centred */
+.nav__logo-link {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.nav__logo-img {
+  max-height: 48px; /* ← adjust to scale your logo up or down */
+  max-width: 120px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
 }
 
 .nav__links {
@@ -239,35 +326,73 @@ button {
   position: relative;
 }
 
-/* Underline that slides in from left on hover */
 .nav__links a::after {
   content: '';
   position: absolute;
-  bottom: -2px;
-  left: 0;
-  width: 0;
-  height: 1px;
+  bottom: -2px; left: 0;
+  width: 0; height: 1px;
   background: var(--color-accent);
   transition: width var(--duration-base) var(--ease-smooth);
 }
 
-.nav__links a:hover {
+.nav__links a:hover            { color: var(--color-white); }
+.nav__links a:hover::after     { width: 100%; }
+
+/* Language switcher */
+.lang-switcher {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.lang-divider {
+  color: var(--color-border);
+  font-size: var(--text-xs);
+}
+
+.lang-btn {
+  font-size: var(--text-xs);
+  letter-spacing: 0.12em;
+  font-weight: 500;
+  color: rgba(255,255,255,0.4);
+  padding: 4px 2px;
+  transition: color var(--duration-fast);
+  cursor: none;
+}
+
+.lang-btn.active,
+.lang-btn:hover {
   color: var(--color-white);
 }
 
-.nav__links a:hover::after {
-  width: 100%;
+.lang-btn.active {
+  border-bottom: 1px solid var(--color-accent);
 }
 
 
 /* ================================================================
-   5. HERO SECTION
+   5. HERO SECTION + CANVAS
    
-   Full-screen opening — 100svh uses small viewport height on 
-   mobile to avoid issues with the browser address bar.
+   ★ TWEAK GUIDE:
    
-   The grain overlay is a pseudo-element with a noise texture
-   created via SVG data URI — no external image needed.
+   .hero__canvas:           The animated background layer.
+     opacity: 0.6           Lower for a more subtle effect (e.g. 0.3).
+                            Higher for more contrast (e.g. 0.9).
+   
+   Canvas animation values are in main.js section 7 (CANVAS_CONFIG):
+     particleCount          Number of floating dots
+     speed                  How fast dots drift
+     lineDistance           How close dots must be to draw a connecting line
+     dotSize                Radius of each dot
+     lineColor / dotColor   Colour of lines and dots (defaults to white)
+   
+   .hero__title--outline:   The hollow/outline version of the headline.
+     -webkit-text-stroke:   "1px" = stroke width, rgba = colour.
+                            Increase px for a bolder outline.
+   
+   .hero__scroll-line:      The animated line under "Scroll".
+     height: 40px           Make taller for a longer indicator.
+     animation duration:    Change 1.8s to speed up/slow the pulse.
 ================================================================ */
 .hero {
   position: relative;
@@ -276,28 +401,35 @@ button {
   align-items: center;
   padding: var(--nav-height) var(--space-md) var(--space-lg);
   overflow: hidden;
-  background: 
-    radial-gradient(ellipse at 20% 50%, rgba(13,27,42,0.8) 0%, transparent 60%),
-    var(--color-black);
+  background: var(--color-black);
 }
 
-/* Grain noise overlay — creates the high-end editorial texture */
+/* The canvas sits behind everything in the hero */
+.hero__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.6; /* ← lower for subtler effect, raise for bolder */
+  z-index: 0;
+}
+
 .grain {
   position: absolute;
   inset: 0;
-  opacity: 0.035;
+  opacity: 0.03;
   pointer-events: none;
+  z-index: 1;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
   background-size: 200px 200px;
 }
 
 .hero__content {
   position: relative;
-  z-index: 1;
+  z-index: 2; /* Sits above canvas and grain */
   max-width: 900px;
 }
 
-/* Small label above the main title */
 .hero__eyebrow {
   font-size: var(--text-sm);
   letter-spacing: 0.2em;
@@ -306,20 +438,18 @@ button {
   margin-bottom: var(--space-sm);
 }
 
-/* The giant headline — each span is its own line via flex column */
 .hero__title {
   font-family: var(--font-display);
   font-size: var(--text-hero);
-  line-height: 0.92; /* Tight line height for display type */
+  line-height: 0.92;
   letter-spacing: 0.02em;
   display: flex;
   flex-direction: column;
   margin-bottom: var(--space-md);
 }
 
-/* "YOUR" gets an outlined/hollow style for visual contrast */
 .hero__title--outline {
-  -webkit-text-stroke: 1px rgba(255,255,255,0.3);
+  -webkit-text-stroke: 1px rgba(255,255,255,0.3); /* ← increase px for bolder outline */
   color: transparent;
 }
 
@@ -331,7 +461,6 @@ button {
   max-width: 400px;
 }
 
-/* Scroll hint: absolute at bottom-center */
 .hero__scroll-hint {
   position: absolute;
   bottom: var(--space-md);
@@ -345,10 +474,9 @@ button {
   letter-spacing: 0.15em;
   text-transform: uppercase;
   color: rgba(255,255,255,0.4);
-  z-index: 1;
+  z-index: 2;
 }
 
-/* The animated line under "Scroll" */
 .hero__scroll-line {
   width: 1px;
   height: 40px;
@@ -365,9 +493,19 @@ button {
 /* ================================================================
    SHARED BUTTON STYLES
    
-   .btn = base button styles
-   .btn--primary = the filled dark button with hover lift
-   .btn--full = stretches button to full width (used in form)
+   ★ TWEAK GUIDE:
+   
+   .btn:           Base — controls padding, font size, letter spacing.
+     padding:      "14px 32px" = vertical horizontal. Increase for bigger buttons.
+     font-size:    Button label size (currently --text-sm = 14px).
+   
+   .btn--primary:  The filled white button.
+     background:   Button fill colour.
+     color:        Button text colour.
+   
+   .btn--primary:hover: Inverts to transparent with white border/text.
+     transform: translateY(-2px): The upward "lift" on hover.
+     Change -2px to -4px for a more dramatic lift, or 0 to remove it.
 ================================================================ */
 .btn {
   display: inline-flex;
@@ -408,13 +546,21 @@ button {
 /* ================================================================
    6. MARQUEE / TICKER
    
-   The scrolling text band.
-   overflow: hidden hides the overflow so only the visible strip shows.
-   The .marquee__track contains two identical .marquee__content divs.
+   ★ TWEAK GUIDE:
    
-   @keyframes marquee moves the track from 0 to -50% — 
-   at exactly 50%, the second copy is in the same position as 
-   the first started, creating a seamless loop.
+   .marquee__track { animation-duration }:
+     25s = current speed. Lower number = faster scroll.
+     Try 15s for faster, 40s for a slower drift.
+   
+   .marquee__content { font-size / color }:
+     Controls the text size and colour of the ticker items.
+   
+   .marquee__dot { color }:
+     The · separator dot colour (currently --color-accent gold).
+   
+   @media (prefers-reduced-motion):
+     Pauses the animation for users who have enabled "Reduce Motion"
+     in their OS settings — important for accessibility.
 ================================================================ */
 .marquee {
   overflow: hidden;
@@ -426,12 +572,10 @@ button {
 
 .marquee__track {
   display: flex;
-  /* The track is 200% wide to fit both content copies side by side */
   width: max-content;
-  animation: marquee 25s linear infinite;
+  animation: marquee 25s linear infinite; /* ← change 25s to adjust speed */
 }
 
-/* Each "half" of the marquee track */
 .marquee__content {
   display: flex;
   align-items: center;
@@ -445,18 +589,13 @@ button {
   color: rgba(255,255,255,0.5);
 }
 
-.marquee__dot {
-  color: var(--color-accent);
-  font-size: 1.2em;
-}
+.marquee__dot { color: var(--color-accent); font-size: 1.2em; }
 
-/* Moving 50% to the left creates the loop (50% = one full copy) */
 @keyframes marquee {
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }
 }
 
-/* Pause the ticker when the user prefers less motion */
 @media (prefers-reduced-motion: reduce) {
   .marquee__track { animation-play-state: paused; }
 }
@@ -464,9 +603,6 @@ button {
 
 /* ================================================================
    7. SHARED SECTION STYLES
-   
-   Reusable styles for section headers, eyebrows, and titles.
-   Applied to all major sections (Products, Instagram, Contact).
 ================================================================ */
 .section {
   padding: var(--space-xl) var(--space-md);
@@ -474,43 +610,27 @@ button {
   margin: 0 auto;
 }
 
-/* Alternate sections have full-bleed navy background */
-.section--dark {
-  max-width: none;
-  background: var(--color-navy);
-}
-
-.section--dark > .section {
-  margin: 0 auto;
-}
-
-.section__header {
-  margin-bottom: var(--space-lg);
-}
-
-/* "The Collection" small label above section title */
-.section__eyebrow {
-  font-size: var(--text-xs);
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--color-accent);
-  margin-bottom: var(--space-xs);
-}
-
-/* Big section heading */
-.section__title {
-  font-family: var(--font-display);
-  font-size: var(--text-3xl);
-  letter-spacing: 0.05em;
-  line-height: 1;
-}
+.section__header     { margin-bottom: var(--space-lg); }
+.section__eyebrow    { font-size: var(--text-xs); letter-spacing: 0.2em; text-transform: uppercase; color: var(--color-accent); margin-bottom: var(--space-xs); }
+.section__title      { font-family: var(--font-display); font-size: var(--text-3xl); letter-spacing: 0.05em; line-height: 1; }
 
 
 /* ================================================================
    8. PRODUCTS GRID & CARDS
+   
+   ★ TWEAK GUIDE:
+   
+   .product-grid { grid-template-columns }:
+     minmax(260px, 1fr) means each card is at least 260px wide.
+     Increase 260px for fewer, wider cards. Decrease for more columns.
+   
+   .product-card__image-wrap { padding-top }:
+     120% = portrait ratio (taller than wide, good for apparel).
+     100% = square. 75% = landscape.
+   
+   .product-card__badge { color }:
+     The "New" / "Best Seller" label above the product name.
 ================================================================ */
-
-/* Filter buttons row */
 .products__filters {
   display: flex;
   flex-wrap: wrap;
@@ -527,10 +647,7 @@ button {
   color: rgba(255,255,255,0.5);
   border: 1px solid var(--color-border);
   background: transparent;
-  transition:
-    color var(--duration-fast),
-    border-color var(--duration-fast),
-    background var(--duration-fast);
+  transition: color var(--duration-fast), border-color var(--duration-fast), background var(--duration-fast);
 }
 
 .filter-btn:hover,
@@ -540,58 +657,41 @@ button {
   border-color: var(--color-white);
 }
 
-/* 
-  Product grid: responsive auto-fill columns.
-  minmax(260px, 1fr) = each card is at least 260px wide,
-  and they stretch to fill available space equally.
-*/
 .product-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 1px; /* Creates the thin grid lines between cards */
-  background: var(--color-border); /* Shows through the 1px gaps */
+  gap: 1px;
+  background: var(--color-border);
 }
 
-/* Individual product card */
 .product-card {
   background: var(--color-black);
   cursor: none;
   overflow: hidden;
   transition: background var(--duration-base);
-  /* For the data-reveal stagger animation (see section 13) */
   opacity: 0;
   transform: translateY(20px);
 }
 
-.product-card:hover {
-  background: var(--color-navy-mid);
-}
+.product-card:hover { background: var(--color-navy-mid); }
 
-/* Image container — fixed aspect ratio using padding trick */
 .product-card__image-wrap {
   position: relative;
-  /* padding-top: 120% creates a portrait aspect ratio (5:6) */
   padding-top: 120%;
   overflow: hidden;
   background: var(--color-navy);
 }
 
-/* The actual product image — stretched to fill container */
 .product-card__image-wrap img {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover; /* Cover = zoom and crop to fill, no distortion */
+  width: 100%; height: 100%;
+  object-fit: cover;
   transition: transform var(--duration-slow) var(--ease-smooth);
 }
 
-/* Subtle zoom on hover */
-.product-card:hover .product-card__image-wrap img {
-  transform: scale(1.04);
-}
+.product-card:hover .product-card__image-wrap img { transform: scale(1.04); }
 
-/* Overlay that appears on hover with "View Product" CTA */
 .product-card__overlay {
   position: absolute;
   inset: 0;
@@ -603,9 +703,7 @@ button {
   transition: opacity var(--duration-base);
 }
 
-.product-card:hover .product-card__overlay {
-  opacity: 1;
-}
+.product-card:hover .product-card__overlay { opacity: 1; }
 
 .product-card__overlay-btn {
   font-size: var(--text-xs);
@@ -619,70 +717,41 @@ button {
   transition: background var(--duration-fast), color var(--duration-fast);
 }
 
-.product-card__overlay-btn:hover {
-  background: var(--color-white);
-  color: var(--color-black);
-}
+.product-card__overlay-btn:hover { background: var(--color-white); color: var(--color-black); }
 
-/* Text content below the image */
-.product-card__body {
-  padding: 1rem 1.25rem 1.5rem;
-}
-
-/* "New" / "Best Seller" badge */
-.product-card__badge {
-  font-size: 10px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  font-weight: 500;
-  color: var(--color-accent);
-  margin-bottom: 6px;
-  display: block;
-}
-
-.product-card__name {
-  font-size: var(--text-base);
-  font-weight: 500;
-  margin-bottom: 4px;
-}
-
-.product-card__category {
-  font-size: var(--text-sm);
-  color: var(--color-grey);
-  margin-bottom: var(--space-sm);
-}
-
-.product-card__price {
-  font-size: var(--text-lg);
-  font-weight: 400;
-}
-
-/* When filtered out by JS — hidden cards */
-.product-card.is-hidden {
-  display: none;
-}
+.product-card__body     { padding: 1rem 1.25rem 1.5rem; }
+.product-card__badge    { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 500; color: var(--color-accent); margin-bottom: 6px; display: block; }
+.product-card__name     { font-size: var(--text-base); font-weight: 500; margin-bottom: 4px; }
+.product-card__category { font-size: var(--text-sm); color: var(--color-grey); margin-bottom: var(--space-sm); }
+.product-card__price    { font-size: var(--text-lg); }
+.product-card.is-hidden { display: none; }
 
 
 /* ================================================================
    9. PRODUCT MODAL
    
-   The modal has two layers:
-   1. .modal__backdrop — the dark overlay behind the panel
-   2. .modal__panel — the actual content drawer/sheet
+   ★ TWEAK GUIDE:
    
-   aria-hidden="true" means screen readers skip it when closed.
-   JS toggles .is-open on both .modal and .modal__panel.
+   .modal__panel { width }:
+     min(600px, 95vw) = max 600px wide, but shrinks on small screens.
+     Change 600px to make the panel wider or narrower.
+   
+   .modal__panel transition:
+     --duration-slow (700ms) controls how fast the panel slides in.
+     Change to e.g. 500ms for a snappier open.
+   
+   .size-btn.selected { background, border-color }:
+     Style of the selected size button.
 ================================================================ */
 .modal {
   position: fixed;
   inset: 0;
   z-index: 200;
-  pointer-events: none; /* Doesn't capture clicks when closed */
+  pointer-events: none;
   opacity: 0;
   transition: opacity var(--duration-base) var(--ease-smooth);
 }
 
-/* When open: becomes visible and captures clicks */
 .modal.is-open {
   pointer-events: all;
   opacity: 1;
@@ -695,35 +764,24 @@ button {
   backdrop-filter: blur(4px);
 }
 
-/* The panel slides in from the right */
 .modal__panel {
   position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: min(600px, 95vw); /* Never wider than the screen */
+  top: 0; right: 0; bottom: 0;
+  width: min(600px, 95vw);
   background: var(--color-navy);
   border-left: 1px solid var(--color-border);
-  overflow-y: auto; /* Scroll inside the panel if content is tall */
-  transform: translateX(100%); /* Start off-screen to the right */
+  overflow-y: auto;
+  transform: translateX(100%);
   transition: transform var(--duration-slow) var(--ease-smooth);
 }
 
-/* Slide in when modal opens */
-.modal.is-open .modal__panel {
-  transform: translateX(0);
-}
+.modal.is-open .modal__panel { transform: translateX(0); }
 
-/* Close button — absolute top-right of the panel */
 .modal__close {
   position: absolute;
-  top: var(--space-md);
-  right: var(--space-md);
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  top: var(--space-md); right: var(--space-md);
+  width: 40px; height: 40px;
+  display: flex; align-items: center; justify-content: center;
   color: rgba(255,255,255,0.6);
   border: 1px solid var(--color-border);
   z-index: 1;
@@ -731,77 +789,21 @@ button {
   cursor: none;
 }
 
-.modal__close:hover {
-  color: var(--color-white);
-  border-color: rgba(255,255,255,0.4);
-}
+.modal__close:hover { color: var(--color-white); border-color: rgba(255,255,255,0.4); }
 
-/* Inner content layout */
-.modal__content {
-  padding: var(--space-xl) var(--space-md) var(--space-lg);
-}
+.modal__content  { padding: var(--space-xl) var(--space-md) var(--space-lg); }
+.modal__image    { width: 100%; aspect-ratio: 4/5; object-fit: cover; background: var(--color-navy-mid); margin-bottom: var(--space-md); }
+.modal__category { font-size: var(--text-xs); letter-spacing: 0.2em; text-transform: uppercase; color: var(--color-accent); margin-bottom: 8px; }
+.modal__title    { font-family: var(--font-display); font-size: var(--text-2xl); letter-spacing: 0.05em; margin-bottom: 8px; }
+.modal__price    { font-size: var(--text-xl); margin-bottom: var(--space-md); color: rgba(255,255,255,0.8); }
+.modal__desc     { color: rgba(255,255,255,0.6); font-size: var(--text-sm); line-height: 1.7; margin-bottom: var(--space-lg); }
 
-/* Product image inside the modal */
-.modal__image {
-  width: 100%;
-  aspect-ratio: 4/5;
-  object-fit: cover;
-  background: var(--color-navy-mid);
-  margin-bottom: var(--space-md);
-}
-
-.modal__category {
-  font-size: var(--text-xs);
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--color-accent);
-  margin-bottom: 8px;
-}
-
-.modal__title {
-  font-family: var(--font-display);
-  font-size: var(--text-2xl);
-  letter-spacing: 0.05em;
-  margin-bottom: 8px;
-}
-
-.modal__price {
-  font-size: var(--text-xl);
-  margin-bottom: var(--space-md);
-  color: rgba(255,255,255,0.8);
-}
-
-.modal__desc {
-  color: rgba(255,255,255,0.6);
-  font-size: var(--text-sm);
-  line-height: 1.7;
-  margin-bottom: var(--space-lg);
-}
-
-/* Size selector grid */
-.modal__sizes {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: var(--space-md);
-}
-
-.modal__sizes-label {
-  font-size: var(--text-xs);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--color-grey);
-  margin-bottom: 10px;
-  display: block;
-  width: 100%;
-}
+.modal__sizes       { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: var(--space-md); }
+.modal__sizes-label { font-size: var(--text-xs); letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-grey); margin-bottom: 10px; display: block; width: 100%; }
 
 .size-btn {
-  width: 44px;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 44px; height: 44px;
+  display: flex; align-items: center; justify-content: center;
   border: 1px solid var(--color-border);
   font-size: var(--text-sm);
   color: rgba(255,255,255,0.6);
@@ -810,19 +812,26 @@ button {
 }
 
 .size-btn:hover,
-.size-btn.selected {
-  border-color: var(--color-white);
-  color: var(--color-white);
-  background: rgba(255,255,255,0.08);
-}
+.size-btn.selected { border-color: var(--color-white); color: var(--color-white); background: rgba(255,255,255,0.08); }
 
 
 /* ================================================================
    10. INSTAGRAM FEED
+   
+   ★ TWEAK GUIDE:
+   
+   .instagram__grid { grid-template-columns }:
+     repeat(6, 1fr) = 6 equal columns.
+     Change to repeat(4, 1fr) for a 4-column grid,
+     or repeat(3, 1fr) for a larger 3-column grid.
+   
+   .ig-card { padding-top: 100% }:
+     100% = square posts (like Instagram).
+     Change to 125% for portrait posts.
 ================================================================ */
 .instagram {
   background: var(--color-navy);
-  max-width: none; /* Full-bleed background */
+  max-width: none;
   padding: var(--space-xl) var(--space-md);
 }
 
@@ -831,22 +840,16 @@ button {
   margin: 0 auto var(--space-lg);
 }
 
-/* 
-  The feed grid — 6 columns of equal width.
-  This creates the classic Instagram-style grid.
-*/
 .instagram__grid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(6, 1fr); /* ← change 6 to adjust columns */
   gap: 2px;
   max-width: var(--container-width);
   margin: 0 auto;
 }
 
-/* Individual Instagram post card */
 .ig-card {
   position: relative;
-  /* 1/1 aspect ratio — square posts */
   padding-top: 100%;
   overflow: hidden;
   background: var(--color-navy-mid);
@@ -856,19 +859,13 @@ button {
 .ig-card img {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
+  width: 100%; height: 100%;
   object-fit: cover;
   transition: transform var(--duration-slow) var(--ease-smooth);
-  /* Placeholder gradient for missing images */
-  background: linear-gradient(135deg, var(--color-navy-mid), var(--color-black));
 }
 
-.ig-card:hover img {
-  transform: scale(1.06);
-}
+.ig-card:hover img { transform: scale(1.06); }
 
-/* Hover overlay with like/comment counts */
 .ig-card__overlay {
   position: absolute;
   inset: 0;
@@ -882,27 +879,29 @@ button {
   transition: opacity var(--duration-base);
 }
 
-.ig-card:hover .ig-card__overlay {
-  opacity: 1;
-}
-
-.ig-card__stat {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: var(--text-sm);
-  font-weight: 500;
-}
+.ig-card:hover .ig-card__overlay { opacity: 1; }
+.ig-card__stat { display: flex; align-items: center; gap: 6px; font-size: var(--text-sm); font-weight: 500; }
 
 
 /* ================================================================
    11. CONTACT FORM
+   
+   ★ TWEAK GUIDE:
+   
+   .contact__inner { grid-template-columns }:
+     "1fr 1fr" = two equal columns. Change to "1fr 2fr" to make 
+     the form wider than the text, or "1fr" (mobile) to stack them.
+   
+   .form-field input:focus ~ .form-field__line { width: 100% }:
+     This is the expanding accent underline on focus.
+     Change background in .form-field__line to change the underline colour.
+   
+   .form-success:
+     Shown after form submit. background / border-color / color control 
+     the appearance of the confirmation message box.
 ================================================================ */
-.contact {
-  background: var(--color-black);
-}
+.contact { background: var(--color-black); }
 
-/* Two-column layout: text on left, form on right */
 .contact__inner {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -910,29 +909,10 @@ button {
   align-items: start;
 }
 
-.contact__desc {
-  color: rgba(255,255,255,0.5);
-  font-size: var(--text-base);
-  line-height: 1.8;
-  margin: var(--space-md) 0;
-}
+.contact__desc   { color: rgba(255,255,255,0.5); font-size: var(--text-base); line-height: 1.8; margin: var(--space-md) 0; }
+.contact__detail { font-size: var(--text-sm); letter-spacing: 0.1em; color: var(--color-accent); }
 
-.contact__detail {
-  font-size: var(--text-sm);
-  letter-spacing: 0.1em;
-  color: var(--color-accent);
-}
-
-/* 
-  Floating label form field:
-  The label sits inside the input area (position: absolute).
-  When the input is focused or has content, CSS moves the label 
-  up and shrinks it using the :focus-within and .has-value class.
-*/
-.form-field {
-  position: relative;
-  margin-bottom: var(--space-md);
-}
+.form-field          { position: relative; margin-bottom: var(--space-md); }
 
 .form-field input,
 .form-field textarea {
@@ -945,30 +925,22 @@ button {
   font-size: var(--text-base);
   color: var(--color-white);
   outline: none;
-  resize: none; /* Disable textarea resize handle */
+  resize: none;
   transition: border-color var(--duration-base);
 }
 
 .form-field input:focus,
-.form-field textarea:focus {
-  border-bottom-color: rgba(255,255,255,0.4);
-}
+.form-field textarea:focus { border-bottom-color: rgba(255,255,255,0.4); }
 
-/* The floating label */
 .form-field label {
   position: absolute;
-  left: 0;
-  top: 24px;
+  left: 0; top: 24px;
   font-size: var(--text-base);
   color: rgba(255,255,255,0.35);
-  pointer-events: none; /* Don't block clicks on the input */
-  transition: 
-    top var(--duration-base) var(--ease-smooth),
-    font-size var(--duration-base) var(--ease-smooth),
-    color var(--duration-base);
+  pointer-events: none;
+  transition: top var(--duration-base) var(--ease-smooth), font-size var(--duration-base) var(--ease-smooth), color var(--duration-base);
 }
 
-/* Move label up when input is focused or has a value */
 .form-field input:focus ~ label,
 .form-field input.has-value ~ label,
 .form-field textarea:focus ~ label,
@@ -980,48 +952,35 @@ button {
   color: var(--color-accent);
 }
 
-/* The animated underline that expands on focus */
 .form-field__line {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 0;
-  height: 1px;
+  bottom: 0; left: 0;
+  width: 0; height: 1px;
   background: var(--color-accent);
   transition: width var(--duration-base) var(--ease-smooth);
 }
 
 .form-field input:focus ~ .form-field__line,
-.form-field textarea:focus ~ .form-field__line {
-  width: 100%;
-}
+.form-field textarea:focus ~ .form-field__line { width: 100%; }
 
-/* Success confirmation message — hidden by default */
 .form-success {
   display: none;
   margin-top: var(--space-sm);
   padding: 14px var(--space-sm);
-  background: rgba(200, 169, 126, 0.1);
-  border: 1px solid rgba(200, 169, 126, 0.3);
+  background: rgba(200,169,126,0.1);
+  border: 1px solid rgba(200,169,126,0.3);
   color: var(--color-accent);
   font-size: var(--text-sm);
   letter-spacing: 0.05em;
 }
 
-/* JS adds .is-visible class to show it */
-.form-success.is-visible {
-  display: block;
-}
+.form-success.is-visible { display: block; }
 
 
 /* ================================================================
    12. FOOTER
 ================================================================ */
-.footer {
-  border-top: 1px solid var(--color-border);
-  padding: var(--space-md);
-  background: var(--color-black);
-}
+.footer { border-top: 1px solid var(--color-border); padding: var(--space-md); background: var(--color-black); }
 
 .footer__inner {
   max-width: var(--container-width);
@@ -1033,40 +992,30 @@ button {
   gap: var(--space-sm);
 }
 
-.footer__brand {
-  font-family: var(--font-display);
-  font-size: 1.5rem;
-  letter-spacing: 0.1em;
-}
+.footer__brand { font-family: var(--font-display); font-size: 1.5rem; letter-spacing: 0.1em; }
+.footer__copy  { font-size: var(--text-xs); color: var(--color-grey); }
 
-.footer__copy {
-  font-size: var(--text-xs);
-  color: var(--color-grey);
-}
-
-.footer__links {
-  display: flex;
-  gap: var(--space-md);
-  font-size: var(--text-xs);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--color-grey);
-}
-
-.footer__links a:hover {
-  color: var(--color-white);
-}
+.footer__links { display: flex; gap: var(--space-md); font-size: var(--text-xs); letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-grey); }
+.footer__links a:hover { color: var(--color-white); }
 
 
 /* ================================================================
    13. SCROLL REVEAL ANIMATIONS
    
-   Elements with [data-reveal] start invisible (opacity: 0, 
-   shifted down). When they scroll into the viewport, JS adds 
-   .is-revealed, which animates them to their final position.
+   ★ TWEAK GUIDE:
    
-   Product cards use a staggered delay based on their index,
-   set via the --delay CSS variable from JS.
+   [data-reveal] initial state:
+     opacity: 0       = starts invisible
+     translateY(30px) = starts 30px below final position
+     Increase 30px for a more dramatic entry. Use 0px to disable movement.
+   
+   transition duration:
+     --duration-slow (700ms) = how long the reveal animation takes.
+     Change to --duration-base (400ms) for snappier reveals.
+   
+   .product-card stagger:
+     The --delay variable is set per card in JS (index % 4) * 80ms.
+     Change 80ms in main.js initScrollReveal() to adjust stagger spacing.
 ================================================================ */
 [data-reveal] {
   opacity: 0;
@@ -1081,7 +1030,6 @@ button {
   transform: translateY(0);
 }
 
-/* Product cards use their --delay variable for stagger */
 .product-card {
   transition:
     opacity var(--duration-slow) var(--ease-smooth) var(--delay, 0ms),
@@ -1098,38 +1046,27 @@ button {
 /* ================================================================
    14. RESPONSIVE — MOBILE
    
-   Below 768px (tablet/mobile), adjust the layout:
-   - Stack contact form below text (single column)
-   - Reduce the Instagram grid to 3 columns
-   - Reduce products grid to 2 columns minimum
-   - Simplify nav (could add a hamburger menu here later)
+   Below 768px (tablet/mobile):
+   - Contact form stacks vertically
+   - Instagram grid shrinks to 3 columns
+   - Product grid allows narrower cards
+   - Nav language switcher stays visible; nav links hide
+   
+   ★ TWEAK GUIDE:
+   
+   The 768px breakpoint is a standard tablet-portrait threshold.
+   Change it to 1024px to also affect large tablets,
+   or 640px to only target phones.
 ================================================================ */
 @media (max-width: 768px) {
   :root {
-    --space-xl: 4rem; /* Reduce section padding on mobile */
+    --space-xl: 4rem;
     --space-lg: 2rem;
   }
 
-  .contact__inner {
-    grid-template-columns: 1fr; /* Stack vertically */
-    gap: var(--space-lg);
-  }
-
-  .instagram__grid {
-    grid-template-columns: repeat(3, 1fr); /* 3 columns on mobile */
-  }
-
-  .product-grid {
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  }
-
-  .nav__links {
-    display: none; /* Hide nav links on mobile (could add hamburger menu) */
-  }
-
-  .footer__inner {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--space-sm);
-  }
+  .contact__inner          { grid-template-columns: 1fr; gap: var(--space-lg); }
+  .instagram__grid         { grid-template-columns: repeat(3, 1fr); }
+  .product-grid            { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+  .nav__links              { display: none; }
+  .footer__inner           { flex-direction: column; align-items: flex-start; gap: var(--space-sm); }
 }
