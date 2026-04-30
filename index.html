@@ -123,18 +123,36 @@
       <h2 class="section__title"  data-i18n="products.title">Shop Everything</h2>
     </div>
 
-    <div class="products__filters" data-reveal>
-      <button class="filter-btn active" data-filter="all"          data-i18n="filter.all">All</button>
-      <button class="filter-btn"        data-filter="tshirt"       data-i18n="filter.tshirt">T-Shirts</button>
-      <button class="filter-btn"        data-filter="tshirt-nolog" data-i18n="filter.tshirt-nolog">T-Shirts No Logo</button>
-      <button class="filter-btn"        data-filter="hoodie"       data-i18n="filter.hoodie">Hoodies</button>
-      <button class="filter-btn"        data-filter="sweatshirt"   data-i18n="filter.sweatshirt">Sweatshirts</button>
-      <button class="filter-btn"        data-filter="shorts"       data-i18n="filter.shorts">Shorts</button>
-      <button class="filter-btn"        data-filter="bottle"       data-i18n="filter.bottle">Water Bottles</button>
-      <button class="filter-btn"        data-filter="cap"          data-i18n="filter.cap">Caps</button>
-      <button class="filter-btn"        data-filter="socks"        data-i18n="filter.socks">Socks</button>
-      <button class="filter-btn"        data-filter="tote"         data-i18n="filter.tote">Totebags</button>
-      <button class="filter-btn"        data-filter="pack"         data-i18n="filter.pack">Packs</button>
+    <!-- Filter + Sort bar -->
+    <div class="products__toolbar" data-reveal>
+      <!-- Category filters -->
+      <div class="products__filters">
+        <button class="filter-btn active" data-filter="all"          data-i18n="filter.all">All</button>
+        <button class="filter-btn"        data-filter="tshirt"       data-i18n="filter.tshirt">T-Shirts</button>
+        <button class="filter-btn"        data-filter="tshirt-nolog" data-i18n="filter.tshirt-nolog">T-Shirts No Logo</button>
+        <button class="filter-btn"        data-filter="hoodie"       data-i18n="filter.hoodie">Hoodies</button>
+        <button class="filter-btn"        data-filter="sweatshirt"   data-i18n="filter.sweatshirt">Sweatshirts</button>
+        <button class="filter-btn"        data-filter="shorts"       data-i18n="filter.shorts">Shorts</button>
+        <button class="filter-btn"        data-filter="bottle"       data-i18n="filter.bottle">Water Bottles</button>
+        <button class="filter-btn"        data-filter="cap"          data-i18n="filter.cap">Caps</button>
+        <button class="filter-btn"        data-filter="socks"        data-i18n="filter.socks">Socks</button>
+        <button class="filter-btn"        data-filter="tote"         data-i18n="filter.tote">Totebags</button>
+        <button class="filter-btn"        data-filter="pack"         data-i18n="filter.pack">Packs</button>
+      </div>
+
+      <!-- Sort dropdown
+           JS listens to change on #sortSelect and re-orders visible cards.
+           data-i18n keys are on the <option> elements for translation. -->
+      <div class="products__sort">
+        <label for="sortSelect" class="sort-label" data-i18n="sort.label">Sort:</label>
+        <select id="sortSelect" class="sort-select">
+          <option value="default"      data-i18n="sort.default">Default</option>
+          <option value="name-asc"     data-i18n="sort.nameAsc">Name A→Z</option>
+          <option value="name-desc"    data-i18n="sort.nameDesc">Name Z→A</option>
+          <option value="price-asc"    data-i18n="sort.priceAsc">Price ↑</option>
+          <option value="price-desc"   data-i18n="sort.priceDesc">Price ↓</option>
+        </select>
+      </div>
     </div>
 
     <div class="product-grid" id="productGrid"></div>
@@ -176,7 +194,7 @@
   ============================================================ -->
   <section class="section instagram" id="instagram">
     <div class="section__header" data-reveal>
-      <p class="section__eyebrow">@sofiavalequaresma</p>
+      <p class="section__eyebrow">@aem.thebest</p>
       <h2 class="section__title" data-i18n="instagram.title">The Feed</h2>
     </div>
     <!-- JS populates this — either from Behold API or fallback images -->
