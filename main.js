@@ -79,3 +79,59 @@ animate();
 window.addEventListener('resize', () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
+
+const productsData = [
+  { name: "Core Tee", price: 35, type: "tshirt", img: "p1.jpg" },
+  { name: "Heavy Hoodie", price: 85, type: "hoodie", img: "p2.jpg" },
+  { name: "Classic Sweat", price: 70, type: "sweatshirt", img: "p3.jpg" },
+  { name: "Black Socks", price: 15, type: "other", img: "p4.jpg" },
+  { name: "White Tee", price: 30, type: "tshirt", img: "p5.jpg" },
+  { name: "Zip Hoodie", price: 90, type: "hoodie", img: "p6.jpg" },
+  { name: "Grey Sweat", price: 65, type: "sweatshirt", img: "p7.jpg" },
+  { name: "Sport Socks", price: 18, type: "other", img: "p8.jpg" },
+  { name: "Oversized Tee", price: 40, type: "tshirt", img: "p9.jpg" },
+  { name: "Premium Hoodie", price: 110, type: "hoodie", img: "p10.jpg" }
+];
+
+const container = document.getElementById("products");
+const filterEl = document.getElementById("filter");
+const sortEl = document.getElementById("sort");
+
+function renderProducts(data) {
+  container.innerHTML = "";
+
+  data.forEach(p => {
+    const el = document.createElement("div");
+    el.className = "product";
+
+    el.innerHTML = `
+      <img src="${p.img}" />
+      <h3>${p.name}</h3>
+      <span>€${p.price}</span>
+    `;
+
+    container.appendChild(el);
+  });
+}
+
+function update() {
+  let data = [...productsData];
+
+  const filter = filterEl.value;
+  const sort = sortEl.value;
+
+  if (filter !== "all") {
+    data = data.filter(p => p.type === filter);
+  }
+
+  if (sort === "price-asc") data.sort((a,b)=>a.price-b.price);
+  if (sort === "price-desc") data.sort((a,b)=>b.price-a.price);
+  if (sort === "name") data.sort((a,b)=>a.name.localeCompare(b.name));
+
+  renderProducts(data);
+}
+
+filterEl.addEventListener("change", update);
+sortEl.addEventListener("change", update);
+
+renderProducts(productsData);
