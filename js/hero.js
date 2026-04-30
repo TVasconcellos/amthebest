@@ -1,68 +1,64 @@
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.158/build/three.module.js';
+import * as THREE from '../lib/three.module.js';
 
 export function initHero() {
-  const canvas = document.getElementById('webgl');
+  const canvas = document.getElementById('hero-canvas');
 
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 100);
-  camera.position.z = 2;
 
-  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
+  const camera = new THREE.PerspectiveCamera(
+    75,
+    window.innerWidth / window.innerHeight,
+    0.1,
+    1000
+  );
+
+  const renderer = new THREE.WebGLRenderer({
+    canvas,
+    alpha: true,
+    antialias: true
+  });
+
   renderer.setSize(window.innerWidth, window.innerHeight);
 
-  // Geometry
-  const geometry = new THREE.PlaneGeometry(3, 3, 64, 64);
+  // GEOMETRY (interactive mesh)
+  const geometry = new THREE.PlaneGeometry(20, 20, 100, 100);
 
-  const material = new THREE.ShaderMaterial({
-    uniforms: {
-      time: { value: 0 },
-      mouse: { value: new THREE.Vector2(0, 0) }
-    },
-    vertexShader: `
-      uniform float time;
-      uniform vec2 mouse;
-      varying vec2 vUv;
-
-      void main() {
-        vUv = uv;
-        vec3 pos = position;
-
-        float dist = distance(uv, mouse);
-        pos.z += sin(dist * 10.0 - time) * 0.1;
-
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
-      }
-    `,
-    fragmentShader: `
-      varying vec2 vUv;
-
-      void main() {
-        float shade = smoothstep(0.2, 0.8, vUv.y);
-        gl_FragColor = vec4(0.05, 0.1, 0.2, 1.0) * shade;
-      }
-    `,
+  const material = new THREE.MeshStandardMaterial({
+    color: 0x0b1a2f,
     wireframe: true
   });
 
   const mesh = new THREE.Mesh(geometry, material);
   scene.add(mesh);
 
-  // Mouse interaction
+  const light = new THREE.PointLight(0xffffff, 2);
+  light.position.set(5, 5, 5);
+  scene.add(light);
+
+  camera.position.z = 5;
+
+  let mouseX = 0;
+  let mouseY = 0;
+
   window.addEventListener('mousemove', (e) => {
-    material.uniforms.mouse.value.x = e.clientX / window.innerWidth;
-    material.uniforms.mouse.value.y = 1 - (e.clientY / window.innerHeight);
+    mouseX = (e.clientX / window.innerWidth - 0.5);
+    mouseY = (e.clientY / window.innerHeight - 0.5);
   });
 
-  // Animation loop
   function animate() {
     requestAnimationFrame(animate);
-    material.uniforms.time.value += 0.03;
+
+    mesh.rotation.x += 0.002;
+    mesh.rotation.y += 0.003;
+
+    mesh.rotation.x += mouseY * 0.01;
+    mesh.rotation.y += mouseX * 0.01;
+
     renderer.render(scene, camera);
   }
 
   animate();
 
-  // Resize
   window.addEventListener('resize', () => {
     renderer.setSize(window.innerWidth, window.innerHeight);
     camera.aspect = window.innerWidth / window.innerHeight;
