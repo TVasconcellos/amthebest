@@ -26,27 +26,28 @@ const material = new THREE.ShaderMaterial({
     }
   `,
   fragmentShader: `
-    uniform float uTime;
-    uniform vec2 uMouse;
+uniform float uTime;
+uniform vec2 uMouse;
 
-    void main() {
-      vec2 uv = gl_FragCoord.xy / vec2(${window.innerWidth.toFixed(1)}, ${window.innerHeight.toFixed(1)});
+void main() {
+  vec2 uv = gl_FragCoord.xy / vec2(${window.innerWidth.toFixed(1)}, ${window.innerHeight.toFixed(1)});
 
-      float d = distance(uv, uMouse);
+  float d = distance(uv, uMouse);
 
-      float glow = 0.12 / (d + 0.25);
+  // tighter falloff (closer to cursor)
+  float glow = 0.18 / (d * 4.0 + 0.15);
 
-      vec3 base = vec3(0.02, 0.025, 0.04);
-      vec3 accent = vec3(0.05, 0.12, 0.3);
+  vec3 base = vec3(0.015, 0.02, 0.035);
+  vec3 accent = vec3(0.08, 0.18, 0.45);
 
-      vec3 color = base + glow * accent;
+  vec3 color = base + glow * accent;
 
-      // slow subtle movement
-      color += sin(uv.x * 8.0 + uTime * 0.6) * 0.01;
+  // slower movement
+  color += sin(uv.x * 6.0 + uTime * 0.25) * 0.008;
 
-      gl_FragColor = vec4(color, 1.0);
-    }
-  `
+  gl_FragColor = vec4(color, 1.0);
+}
+`
 });
 
 const mesh = new THREE.Mesh(new THREE.PlaneGeometry(2,2), material);
