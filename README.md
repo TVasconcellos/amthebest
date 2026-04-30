@@ -1,138 +1,130 @@
-# STNDRD — Merch Store
+# A&M — Merch Store
 
-A single-page, static merch website. No backend, no build tools, no dependencies. Just HTML, CSS, and vanilla JavaScript.
+Single-page merch website. No backend, no build tools, no dependencies.
 
 ---
 
 ## Project Structure
 
 ```
-stndrd/
-├── index.html          ← The entire website (one file)
+a-and-m-store/
+├── logo.png             ← YOUR LOGO GOES HERE (same level as index.html)
+├── index.html           ← The entire website
 ├── css/
-│   └── style.css       ← All styles + animations
+│   └── style.css        ← All styles + design tokens
 ├── js/
-│   └── main.js         ← All interactions + product data
+│   └── main.js          ← All logic, product data, translations
 ├── images/
-│   ├── products/       ← Your product photos go here
-│   └── ig-01.jpg       ← Instagram feed images (ig-01 to ig-06)
-└── README.md           ← This file
+│   ├── products/        ← Product photos (shirt1.jpg, hoodie1.jpg, etc.)
+│   ├── ig1.jpg          ← Instagram feed images
+│   ├── ig2.jpg
+│   ├── ig3.jpg
+│   ├── ig4.jpg
+│   ├── ig5.jpg
+│   └── ig6.jpg
+└── README.md
 ```
 
 ---
 
-## Hosting on GitHub Pages
+## Logo
 
-1. Create a new repository on GitHub (e.g. `stndrd-store`)
-2. Push all files to the `main` branch
-3. Go to **Settings → Pages**
-4. Set Source to **Deploy from a branch → main → / (root)**
-5. Your site will be live at `https://yourusername.github.io/stndrd-store`
+Put `logo.png` in the **root folder** (same level as `index.html`).
+
+- Format: PNG with transparent background (recommended)
+- Size: any — CSS scales it to max 120px wide / 48px tall
+- It appears in the nav bar on the left
+
+---
+
+## Product Images
+
+Put images in `images/products/`. Naming convention:
+
+| Type        | Names                              |
+|-------------|------------------------------------|
+| T-Shirts    | `shirt1.jpg`, `shirt2.jpg`, ...    |
+| Hoodies     | `hoodie1.jpg`, `hoodie2.jpg`, ...  |
+| Sweatshirts | `sweatshirt1.jpg`, `sweatshirt2.jpg`, ... |
+| Socks       | `socks1.jpg`, `socks2.jpg`, ...    |
+| Accessories | `tote1.jpg`, `beanie1.jpg`, ...    |
+
+Recommended size: **800 × 1000px**, JPEG at 80% quality.
+
+Update the `image` field in the `PRODUCTS` array in `main.js` to match.
 
 ---
 
 ## Adding Products
 
-Open `js/main.js` and find the `PRODUCTS` array at the top of the file.
-
-Each product looks like this:
+Edit the `PRODUCTS` array in `js/main.js`:
 
 ```js
 {
-  id: 1,                                  // Unique number — don't repeat
-  name: "Core Logo Tee",                  // Product name
-  category: "tshirt",                     // Must be: tshirt | hoodie | sweatshirt | socks | accessories
-  price: "€35",                           // Display price (string)
-  badge: "Best Seller",                   // Optional label. Use null for no badge.
-  image: "images/products/tshirt-01.jpg", // Path to product image
-  description: "Description text here.",  // Shown in the modal
-  sizes: ["XS", "S", "M", "L", "XL"]    // Available sizes
+  id: 11,                                  // Unique number — never repeat
+  name: "New Item",
+  category: "tshirt",                      // tshirt | hoodie | sweatshirt | socks | accessories
+  price: "€40",
+  badge: "New",                            // or null for no badge
+  image: "images/products/shirt3.jpg",
+  description: "Product description here.",
+  sizes: ["XS", "S", "M", "L", "XL"]
 }
 ```
 
-Just copy an existing entry, change the values, and add it to the array. The grid updates automatically.
+---
+
+## Instagram Feed
+
+Put 6 images in `images/` named `ig1.jpg` through `ig6.jpg`.  
+These simulate the @sofiavalequaresma feed.
+
+To connect a **live feed**, use [Behold.so](https://behold.so) — it creates an API endpoint you replace the `INSTAGRAM_POSTS` array with.
 
 ---
 
-## Adding Product Images
+## Contact Form (Formspree)
 
-1. Drop your images into `images/products/`
-2. Name them clearly: `tshirt-01.jpg`, `hoodie-02.jpg`, etc.
-3. Update the `image` field in the PRODUCTS array to match
-4. Recommended size: **800 × 1000px** (portrait, 4:5 ratio)
-5. Format: JPEG at 80% quality for best file size/quality balance
+1. Go to [formspree.io](https://formspree.io) and create a free account
+2. Click "New Form" → enter `thebest.aem@gmail.com`
+3. Copy the Form ID (8-character code, e.g. `xpzvwqbo`)
+4. In `js/main.js`, find: `const FORMSPREE_ID = 'YOUR_FORM_ID'`
+5. Replace `YOUR_FORM_ID` with your actual ID
 
-If an image is missing, the card shows an empty navy placeholder — no errors.
-
----
-
-## Adding Instagram Feed Images
-
-Replace the placeholder paths in the `INSTAGRAM_POSTS` array in `main.js`:
-
-```js
-{ image: "images/ig-01.jpg", likes: "1.2k", comments: "34" },
-```
-
-- Put images in the `images/` folder
-- Recommended size: **600 × 600px** (square)
-- To connect to a real Instagram feed, see the comment in `main.js` about the Instagram Basic Display API or Behold.so
+Free plan: 50 submissions/month.
 
 ---
 
-## Connecting the Contact Form
+## Languages
 
-The form currently shows a success message but doesn't actually send an email. To make it real:
+The site supports **English** and **Portuguese (PT-PT)**.  
+A switcher in the nav lets the visitor toggle.  
+User preference is saved in localStorage (persists across visits).
 
-### Option A — Formspree (easiest, free tier)
-1. Sign up at [formspree.io](https://formspree.io)
-2. Create a form and copy your Form ID
-3. In `main.js`, find the `handleSubmit` function and replace the placeholder with:
-
-```js
-fetch('https://formspree.io/f/YOUR_FORM_ID', {
-  method: 'POST',
-  body: new FormData(form),
-  headers: { 'Accept': 'application/json' }
-}).then(() => showSuccess());
-```
-
-### Option B — Netlify Forms (if hosting on Netlify)
-Add `netlify` attribute to the form tag in `index.html`:
-```html
-<form class="contact__form" id="contactForm" data-netlify="true">
-```
-Netlify handles the rest automatically.
+To edit or add translations, find the `TRANSLATIONS` object in `js/main.js`.
 
 ---
 
-## Customising the Brand
+## Hosting on GitHub Pages
 
-All visual design tokens live at the top of `css/style.css` in the `:root {}` block:
+1. Create a repo on GitHub (e.g. `am-store`)
+2. Push all files to the `main` branch
+3. Go to **Settings → Pages → Deploy from branch → main → / (root)**
+4. Site goes live at `https://yourusername.github.io/am-store`
+
+---
+
+## Customising the Look
+
+All visual values are CSS variables at the top of `css/style.css`:
 
 ```css
 :root {
-  --color-black:    #0A0A0A;
-  --color-white:    #F5F5F5;
-  --color-navy:     #0D1B2A;
-  --color-accent:   #C8A97E;   /* Gold accent — change this for a different pop color */
-  --font-display:   'Bebas Neue', sans-serif;
-  --font-body:      'DM Sans', sans-serif;
+  --color-accent: #C8A97E;   /* Gold highlight — change to re-theme */
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --space-xl: 8rem;          /* Section padding */
 }
 ```
 
-Change a value once here and it updates everywhere on the site.
-
----
-
-## Changing the Brand Name
-
-Search and replace `STNDRD` in:
-- `index.html` — nav logo, page title, footer
-- `main.js` — console.log at the bottom
-
----
-
-## No Build Tools Needed
-
-This is a fully static site. No Node.js, no npm, no Webpack, no React. Open `index.html` directly in a browser to preview locally, or use VS Code's Live Server extension for a better local dev experience.
+Each section in both `style.css` and `main.js` has a `★ TWEAK GUIDE` comment explaining what each value controls.
