@@ -1,27 +1,22 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-lang="en">
 <head>
   <!-- ============================================================
-    HEAD — Meta, fonts, and stylesheet links
-    This section is invisible to the user but critical:
-    - charset: ensures special characters display correctly
-    - viewport: makes the site responsive on mobile devices
-    - title: what appears on the browser tab
-    - Google Fonts: loads our two typefaces from the web
-      · "Bebas Neue" = the bold display/headline font
-      · "DM Sans" = the clean body/paragraph font
-    - style.css: links to our own stylesheet
+    HEAD
+    - charset: ensures special characters (ã, ç, €) display correctly
+    - viewport: makes the site responsive on all screen sizes
+    - title: shown on the browser tab
+    - Google Fonts: Bebas Neue (headlines) + DM Sans (body text)
+    - style.css: our main stylesheet
   ============================================================ -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>STNDRD — Premium Merch</title>
+  <title>A&amp;M — Premium Merch</title>
 
-  <!-- Google Fonts: display font + body font -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
 
-  <!-- Our main stylesheet -->
   <link rel="stylesheet" href="css/style.css" />
 </head>
 
@@ -29,94 +24,138 @@
 
   <!-- ============================================================
     CUSTOM CURSOR
-    A small dot that follows the mouse for a premium feel.
-    The actual movement logic lives in main.js.
+    Two overlapping circles that follow the mouse.
+    Movement is handled in main.js using CSS transform (fast).
+    The outer ring grows and changes colour on hover.
   ============================================================ -->
   <div class="cursor" id="cursor"></div>
   <div class="cursor-follower" id="cursorFollower"></div>
 
   <!-- ============================================================
     NAVIGATION BAR
-    Fixed to the top of the screen, always visible.
-    - data-scroll: used by JS to detect when user has scrolled
-      and apply a frosted glass / solid background effect
-    - The nav uses flexbox: logo on the left, links on the right
+    Fixed to top, always visible while scrolling.
+    Contains:
+    - Logo image (logo.png) on the left
+    - Nav links in the centre/right
+    - Language switcher (EN / PT) on the far right
+    
+    The .is-scrolled class is added by JS after the user scrolls
+    down 50px, which applies the frosted glass background.
   ============================================================ -->
   <nav class="nav" id="mainNav">
-    <div class="nav__logo">STNDRD</div>
+    <!-- 
+      LOGO IMAGE
+      ★ Where to put the file: logo.png goes in the ROOT folder,
+        the same level as index.html (not inside css/ or js/).
+      
+      Project structure:
+        your-store/
+        ├── logo.png        ← HERE
+        ├── index.html
+        ├── css/
+        └── js/
+      
+      Size: any resolution — CSS constrains it to max 120px wide / 48px tall.
+      Format: PNG with a transparent background is recommended so it 
+              works on both the transparent nav and the frosted glass nav.
+    -->
+    <a href="#hero" class="nav__logo-link">
+      <img src="logo.png" alt="A&amp;M" class="nav__logo-img" />
+    </a>
+
     <ul class="nav__links">
-      <li><a href="#products">Shop</a></li>
-      <li><a href="#instagram">Feed</a></li>
-      <li><a href="#contact">Contact</a></li>
+      <!-- data-i18n="KEY": JS reads this to swap text when language changes -->
+      <li><a href="#products" data-i18n="nav.shop">Shop</a></li>
+      <li><a href="#instagram" data-i18n="nav.feed">Feed</a></li>
+      <li><a href="#contact" data-i18n="nav.contact">Contact</a></li>
     </ul>
+
+    <!-- 
+      LANGUAGE SWITCHER
+      Two buttons: EN and PT.
+      Clicking one calls setLanguage() in main.js, which updates all
+      [data-i18n] elements on the page from the TRANSLATIONS object.
+      The active language gets the .active class for styling.
+    -->
+    <div class="lang-switcher">
+      <button class="lang-btn active" data-lang="en">EN</button>
+      <span class="lang-divider">|</span>
+      <button class="lang-btn" data-lang="pt">PT</button>
+    </div>
   </nav>
 
   <!-- ============================================================
     HERO SECTION
-    The full-screen opening statement.
-    - The large headline uses "Bebas Neue" for impact
-    - The marquee (scrolling ticker) adds motion and energy
-    - data-reveal: used by JS to trigger the scroll-in animation
+    Full-screen opening section.
+    
+    hero__canvas: a <canvas> element where JS draws an animated 
+    particle network — floating dots connected by dynamic lines,
+    creating a living, premium motion background.
+    
+    Everything else sits on top of the canvas (higher z-index).
   ============================================================ -->
   <section class="hero" id="hero">
-    <!-- Grain texture overlay — creates that film/editorial feel -->
+    <!-- Animated canvas background — JS draws on this in initHeroCanvas() -->
+    <canvas class="hero__canvas" id="heroCanvas"></canvas>
+
+    <!-- Film grain texture overlay on top of the canvas -->
     <div class="grain"></div>
 
     <div class="hero__content">
-      <p class="hero__eyebrow" data-reveal>New Season Drop</p>
+      <p class="hero__eyebrow" data-reveal data-i18n="hero.eyebrow">New Season Drop</p>
       <h1 class="hero__title" data-reveal>
-        <span>WEAR</span>
-        <span class="hero__title--outline">YOUR</span>
-        <span>STANDARD</span>
+        <span data-i18n="hero.line1">WEAR</span>
+        <span class="hero__title--outline" data-i18n="hero.line2">YOUR</span>
+        <span data-i18n="hero.line3">STANDARD</span>
       </h1>
-      <p class="hero__sub" data-reveal>
+      <p class="hero__sub" data-reveal data-i18n="hero.sub">
         Premium quality. Minimal design. Built to last.
       </p>
-      <a href="#products" class="btn btn--primary" data-reveal>Shop the Collection</a>
+      <a href="#products" class="btn btn--primary" data-reveal data-i18n="hero.cta">Shop the Collection</a>
     </div>
 
-    <!-- Scroll indicator: the small animated arrow at the bottom -->
     <div class="hero__scroll-hint">
-      <span>Scroll</span>
+      <span data-i18n="hero.scroll">Scroll</span>
       <div class="hero__scroll-line"></div>
     </div>
   </section>
 
   <!-- ============================================================
     MARQUEE / TICKER
-    A horizontally scrolling band between sections.
-    The animation is pure CSS (see style.css @keyframes marquee).
-    Duplicating the inner content ensures it loops seamlessly.
+    Horizontally scrolling text band. Pure CSS animation.
+    To edit the text: change the spans inside BOTH .marquee__content 
+    divs (they must stay identical for the loop to work seamlessly).
+    aria-hidden="true" hides it from screen readers (decorative only).
   ============================================================ -->
   <div class="marquee" aria-hidden="true">
     <div class="marquee__track">
       <div class="marquee__content">
-        <span>Premium Merch</span>
+        <span data-i18n="ticker.1">Premium Merch</span>
         <span class="marquee__dot">·</span>
-        <span>Free Shipping Over €50</span>
+        <span data-i18n="ticker.2">Free Shipping Over €50</span>
         <span class="marquee__dot">·</span>
-        <span>New Drops Weekly</span>
+        <span data-i18n="ticker.3">New Drops Weekly</span>
         <span class="marquee__dot">·</span>
-        <span>Unisex Sizing</span>
+        <span data-i18n="ticker.4">Unisex Sizing</span>
         <span class="marquee__dot">·</span>
-        <span>100% Organic Cotton</span>
+        <span data-i18n="ticker.5">100% Organic Cotton</span>
         <span class="marquee__dot">·</span>
-        <span>Limited Quantities</span>
+        <span data-i18n="ticker.6">Limited Quantities</span>
         <span class="marquee__dot">·</span>
       </div>
-      <!-- Duplicate for seamless loop -->
+      <!-- Exact duplicate for seamless loop — keep in sync with the one above -->
       <div class="marquee__content" aria-hidden="true">
-        <span>Premium Merch</span>
+        <span data-i18n="ticker.1">Premium Merch</span>
         <span class="marquee__dot">·</span>
-        <span>Free Shipping Over €50</span>
+        <span data-i18n="ticker.2">Free Shipping Over €50</span>
         <span class="marquee__dot">·</span>
-        <span>New Drops Weekly</span>
+        <span data-i18n="ticker.3">New Drops Weekly</span>
         <span class="marquee__dot">·</span>
-        <span>Unisex Sizing</span>
+        <span data-i18n="ticker.4">Unisex Sizing</span>
         <span class="marquee__dot">·</span>
-        <span>100% Organic Cotton</span>
+        <span data-i18n="ticker.5">100% Organic Cotton</span>
         <span class="marquee__dot">·</span>
-        <span>Limited Quantities</span>
+        <span data-i18n="ticker.6">Limited Quantities</span>
         <span class="marquee__dot">·</span>
       </div>
     </div>
@@ -124,39 +163,33 @@
 
   <!-- ============================================================
     PRODUCTS SECTION
-    The main shop grid. 
-    - id="products": used for scroll navigation from the nav links
-    - Each product card is built dynamically by JS (see main.js)
-      so you only need to edit the PRODUCTS array in main.js
-      to add/remove/update items — no HTML changes needed.
-    - The empty div#product-grid is the container JS fills in.
+    The shop grid. Product cards are injected by JS.
+    To add/edit products → edit PRODUCTS array in main.js only.
+    Filter buttons show/hide cards by their data-category attribute.
   ============================================================ -->
   <section class="section products" id="products">
     <div class="section__header" data-reveal>
-      <p class="section__eyebrow">The Collection</p>
-      <h2 class="section__title">Shop Everything</h2>
+      <p class="section__eyebrow" data-i18n="products.eyebrow">The Collection</p>
+      <h2 class="section__title" data-i18n="products.title">Shop Everything</h2>
     </div>
 
-    <!-- Filter buttons: JS reads data-filter to show/hide cards -->
     <div class="products__filters" data-reveal>
-      <button class="filter-btn active" data-filter="all">All</button>
-      <button class="filter-btn" data-filter="tshirt">T-Shirts</button>
-      <button class="filter-btn" data-filter="hoodie">Hoodies</button>
-      <button class="filter-btn" data-filter="sweatshirt">Sweatshirts</button>
-      <button class="filter-btn" data-filter="socks">Socks</button>
-      <button class="filter-btn" data-filter="accessories">Accessories</button>
+      <button class="filter-btn active" data-filter="all"         data-i18n="filter.all">All</button>
+      <button class="filter-btn"        data-filter="tshirt"      data-i18n="filter.tshirt">T-Shirts</button>
+      <button class="filter-btn"        data-filter="hoodie"      data-i18n="filter.hoodie">Hoodies</button>
+      <button class="filter-btn"        data-filter="sweatshirt"  data-i18n="filter.sweatshirt">Sweatshirts</button>
+      <button class="filter-btn"        data-filter="socks"       data-i18n="filter.socks">Socks</button>
+      <button class="filter-btn"        data-filter="accessories" data-i18n="filter.accessories">Accessories</button>
     </div>
 
-    <!-- JS injects product cards here -->
     <div class="product-grid" id="productGrid"></div>
   </section>
 
   <!-- ============================================================
     PRODUCT MODAL
-    The overlay that appears when you click a product card.
-    - aria-hidden: starts hidden from screen readers; JS toggles this
-    - Clicking the backdrop (.modal__backdrop) closes the modal
-    - The inner content is populated dynamically by JS
+    Slides in from the right when a product card is clicked.
+    Backdrop click or Escape key closes it.
+    Content is populated dynamically by openModal() in main.js.
   ============================================================ -->
   <div class="modal" id="productModal" aria-hidden="true">
     <div class="modal__backdrop" id="modalBackdrop"></div>
@@ -166,87 +199,82 @@
           <path d="M2 2L18 18M18 2L2 18" stroke="currentColor" stroke-width="1.5"/>
         </svg>
       </button>
-      <!-- JS fills this div with product details when opened -->
       <div class="modal__content" id="modalContent"></div>
     </div>
   </div>
 
   <!-- ============================================================
-    INSTAGRAM FEED SECTION
-    Simulates a social media feed grid.
-    - In a real deployment, you'd connect this to the Instagram
-      Basic Display API or a service like Behold.so
-    - For now, JS populates this with placeholder cards
-    - Each card has a hover overlay with likes/comments
+    INSTAGRAM FEED
+    Shows a 6-post grid styled like an Instagram profile.
+    Instagram handle: @sofiavalequaresma
+    Images: name them ig1.jpg, ig2.jpg ... ig6.jpg and put in images/
+    Cards are built by renderInstagram() in main.js.
+    
+    To connect to a live Instagram feed in the future, see the
+    comment in main.js section 2 about Behold.so.
   ============================================================ -->
   <section class="section instagram" id="instagram">
     <div class="section__header" data-reveal>
-      <p class="section__eyebrow">@stndrd.official</p>
-      <h2 class="section__title">The Feed</h2>
+      <p class="section__eyebrow">@sofiavalequaresma</p>
+      <h2 class="section__title" data-i18n="instagram.title">The Feed</h2>
     </div>
-    <!-- JS injects Instagram-style cards here -->
     <div class="instagram__grid" id="instagramGrid"></div>
   </section>
 
   <!-- ============================================================
     CONTACT SECTION
-    Simple email contact form — no backend required.
-    - The form uses mailto: as a fallback (see JS handleFormSubmit)
-    - For real form handling, swap the JS submit handler to call
-      a service like Formspree, Netlify Forms, or EmailJS
-    - Each input uses the "floating label" pattern: the label
-      starts inside the input and moves up when you type
+    Two-column layout: info text left, form right.
+    Form submits to Formspree (email set in main.js CONTACT_EMAIL).
+    Floating labels animate up when the user types.
   ============================================================ -->
   <section class="section contact" id="contact">
     <div class="contact__inner">
       <div class="contact__text" data-reveal>
-        <p class="section__eyebrow">Get in Touch</p>
-        <h2 class="section__title">Let's Talk</h2>
-        <p class="contact__desc">
+        <p class="section__eyebrow" data-i18n="contact.eyebrow">Get in Touch</p>
+        <h2 class="section__title"  data-i18n="contact.title">Let's Talk</h2>
+        <p class="contact__desc"    data-i18n="contact.desc">
           Questions about sizing, wholesale, or collabs?<br />
           We usually reply within 24 hours.
         </p>
         <div class="contact__detail">
-          <span>hello@stndrd.com</span>
+          <span>thebest.aem@gmail.com</span>
         </div>
       </div>
 
       <form class="contact__form" id="contactForm" data-reveal>
-        <!-- Each .form-field wraps the input + its label together -->
         <div class="form-field">
           <input type="text" id="fieldName" name="name" required autocomplete="off" />
-          <label for="fieldName">Your Name</label>
+          <label for="fieldName" data-i18n="contact.name">Your Name</label>
           <div class="form-field__line"></div>
         </div>
 
         <div class="form-field">
           <input type="email" id="fieldEmail" name="email" required autocomplete="off" />
-          <label for="fieldEmail">Email Address</label>
+          <label for="fieldEmail" data-i18n="contact.email">Email Address</label>
           <div class="form-field__line"></div>
         </div>
 
         <div class="form-field">
           <input type="text" id="fieldSubject" name="subject" autocomplete="off" />
-          <label for="fieldSubject">Subject</label>
+          <label for="fieldSubject" data-i18n="contact.subject">Subject</label>
           <div class="form-field__line"></div>
         </div>
 
         <div class="form-field">
           <textarea id="fieldMessage" name="message" rows="4" required></textarea>
-          <label for="fieldMessage">Your Message</label>
+          <label for="fieldMessage" data-i18n="contact.message">Your Message</label>
           <div class="form-field__line"></div>
         </div>
 
         <button type="submit" class="btn btn--primary btn--full">
-          Send Message
+          <span data-i18n="contact.send">Send Message</span>
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
             <path d="M2 8H14M9 3L14 8L9 13" stroke="currentColor" stroke-width="1.5"/>
           </svg>
         </button>
 
-        <!-- JS shows/hides this confirmation message on submit -->
         <div class="form-success" id="formSuccess" aria-live="polite">
-          ✓ Message sent! We'll be in touch soon.
+          <span data-i18n="contact.success">✓ Message sent! We'll be in touch soon.</span>
         </div>
       </form>
     </div>
@@ -254,22 +282,21 @@
 
   <!-- ============================================================
     FOOTER
-    Simple bottom strip with brand name and copyright.
-    The year is set dynamically by JS so it never goes stale.
+    The copyright year is auto-set by JS (never goes stale).
+    The & in A&M must be written as &amp; in HTML to be valid.
   ============================================================ -->
   <footer class="footer">
     <div class="footer__inner">
-      <div class="footer__brand">STNDRD</div>
-      <p class="footer__copy">© <span id="footerYear"></span> STNDRD. All rights reserved.</p>
+      <div class="footer__brand">A&amp;M</div>
+      <p class="footer__copy">© <span id="footerYear"></span> A&amp;M. <span data-i18n="footer.rights">All rights reserved.</span></p>
       <div class="footer__links">
-        <a href="#">Privacy</a>
-        <a href="#">Shipping</a>
-        <a href="#">Returns</a>
+        <a href="#" data-i18n="footer.privacy">Privacy</a>
+        <a href="#" data-i18n="footer.shipping">Shipping</a>
+        <a href="#" data-i18n="footer.returns">Returns</a>
       </div>
     </div>
   </footer>
 
-  <!-- Link to our JavaScript file — placed at end of body so HTML loads first -->
   <script src="js/main.js"></script>
 
 </body>
