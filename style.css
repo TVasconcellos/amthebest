@@ -1,135 +1,1135 @@
-/* ========= BASE ========= */
+/* ================================================================
+   STNDRD — Main Stylesheet
+   
+   FILE STRUCTURE:
+   1. CSS Custom Properties (variables / design tokens)
+   2. Reset & Base
+   3. Custom Cursor
+   4. Navigation
+   5. Hero Section
+   6. Marquee / Ticker
+   7. Shared Section Styles
+   8. Products Grid & Cards
+   9. Product Modal
+   10. Instagram Feed
+   11. Contact Form
+   12. Footer
+   13. Scroll Reveal Animations
+   14. Responsive (mobile)
+================================================================ */
 
+
+/* ================================================================
+   1. CSS CUSTOM PROPERTIES — Design Tokens
+   
+   These variables define the entire visual identity.
+   Change a value here and it updates everywhere.
+   
+   Usage: var(--color-navy) pulls the navy blue color.
+================================================================ */
 :root {
-  --bg: #050505;
-  --text: #f5f5f5;
+  /* --- Color Palette --- */
+  --color-black:    #0A0A0A;   /* Near-black for backgrounds */
+  --color-white:    #F5F5F5;   /* Warm white for text on dark */
+  --color-navy:     #0D1B2A;   /* Deep navy for section backgrounds */
+  --color-navy-mid: #162232;   /* Slightly lighter navy for cards */
+  --color-accent:   #C8A97E;   /* Warm gold accent — used sparingly */
+  --color-grey:     #888888;   /* Muted text color */
+  --color-border:   rgba(255,255,255,0.08); /* Subtle borders */
+
+  /* --- Typography --- */
+  --font-display: 'Bebas Neue', sans-serif;   /* Headlines only */
+  --font-body:    'DM Sans', sans-serif;      /* All other text */
+
+  /* --- Font Sizes (fluid scale) --- */
+  --text-xs:   0.75rem;    /* 12px */
+  --text-sm:   0.875rem;   /* 14px */
+  --text-base: 1rem;       /* 16px */
+  --text-lg:   1.125rem;   /* 18px */
+  --text-xl:   1.5rem;     /* 24px */
+  --text-2xl:  2rem;       /* 32px */
+  --text-3xl:  3rem;       /* 48px */
+  --text-4xl:  5rem;       /* 80px */
+  --text-hero: clamp(5rem, 12vw, 10rem); /* Responsive hero title */
+
+  /* --- Spacing --- */
+  --space-xs:  0.5rem;
+  --space-sm:  1rem;
+  --space-md:  2rem;
+  --space-lg:  4rem;
+  --space-xl:  8rem;
+
+  /* --- Layout --- */
+  --container-width: 1280px;
+  --nav-height: 72px;
+
+  /* --- Transitions --- */
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1); /* Slight overshoot */
+  --duration-fast: 200ms;
+  --duration-base: 400ms;
+  --duration-slow: 700ms;
 }
 
-* {
+
+/* ================================================================
+   2. RESET & BASE STYLES
+   
+   Removes browser inconsistencies and sets sensible defaults.
+   box-sizing: border-box means padding is included in width — 
+   this makes layout math much more predictable.
+================================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
+}
+
+html {
+  /* smooth-scroll makes anchor links (#products) animate smoothly */
+  scroll-behavior: smooth;
+  /* Prevent layout shift from scrollbar appearing/disappearing */
+  scrollbar-gutter: stable;
 }
 
 body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: -apple-system, sans-serif;
+  background-color: var(--color-black);
+  color: var(--color-white);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: 1.6;
+  /* cursor: none hides the default cursor so our custom one shows */
+  cursor: none;
+  overflow-x: hidden; /* Prevent horizontal scrollbar */
 }
 
-/* ========= HERO ========= */
+/* Re-enable default cursor on touch devices (custom cursor is mouse-only) */
+@media (hover: none) {
+  body { cursor: auto; }
+  .cursor, .cursor-follower { display: none; }
+}
 
+img {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+ul { list-style: none; }
+
+button {
+  cursor: none; /* Keep our custom cursor on buttons too */
+  font-family: var(--font-body);
+  border: none;
+  background: none;
+}
+
+/* Utility: max-width container, centered */
+.container {
+  width: 100%;
+  max-width: var(--container-width);
+  margin: 0 auto;
+  padding: 0 var(--space-md);
+}
+
+
+/* ================================================================
+   3. CUSTOM CURSOR
+   
+   Two-layer cursor: a small sharp dot (cursor) and a larger
+   circle that follows with a slight delay (cursor-follower).
+   The delay creates the "trailing" effect.
+   
+   Position is set by JS on every mousemove event.
+   The --x and --y CSS variables are also set by JS, but we 
+   use transform for actual positioning for better performance.
+================================================================ */
+.cursor,
+.cursor-follower {
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none; /* Never blocks clicks */
+  z-index: 9999;
+  /* transform: translate(-50%,-50%) centers the circle on the mouse */
+  transform: translate(-50%, -50%);
+  transition: opacity var(--duration-fast) var(--ease-smooth);
+}
+
+.cursor {
+  width: 8px;
+  height: 8px;
+  background: var(--color-white);
+  /* No transition — follows mouse instantly */
+}
+
+.cursor-follower {
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(255,255,255,0.4);
+  background: transparent;
+  /* Slight lag for the trailing effect */
+  transition: 
+    width 300ms var(--ease-smooth),
+    height 300ms var(--ease-smooth),
+    opacity var(--duration-fast) var(--ease-smooth);
+}
+
+/* When hovering links/buttons: expand the follower ring */
+.cursor-follower.is-hovering {
+  width: 56px;
+  height: 56px;
+  border-color: var(--color-accent);
+}
+
+
+/* ================================================================
+   4. NAVIGATION
+   
+   Fixed position so it stays at the top while scrolling.
+   - z-index: 100 keeps it above all other content
+   - backdrop-filter: adds the frosted glass blur effect
+   - The .is-scrolled class is toggled by JS after scrolling down
+================================================================ */
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--nav-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-md);
+  z-index: 100;
+  transition: background var(--duration-slow) var(--ease-smooth);
+}
+
+/* When scrolled: add a semi-transparent dark background */
+.nav.is-scrolled {
+  background: rgba(10, 10, 10, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.nav__logo {
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  letter-spacing: 0.1em;
+  color: var(--color-white);
+}
+
+.nav__links {
+  display: flex;
+  gap: var(--space-md);
+  align-items: center;
+}
+
+.nav__links a {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.7);
+  transition: color var(--duration-fast);
+  position: relative;
+}
+
+/* Underline that slides in from left on hover */
+.nav__links a::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: var(--color-accent);
+  transition: width var(--duration-base) var(--ease-smooth);
+}
+
+.nav__links a:hover {
+  color: var(--color-white);
+}
+
+.nav__links a:hover::after {
+  width: 100%;
+}
+
+
+/* ================================================================
+   5. HERO SECTION
+   
+   Full-screen opening — 100svh uses small viewport height on 
+   mobile to avoid issues with the browser address bar.
+   
+   The grain overlay is a pseudo-element with a noise texture
+   created via SVG data URI — no external image needed.
+================================================================ */
 .hero {
   position: relative;
-  height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  padding: var(--nav-height) var(--space-md) var(--space-lg);
+  overflow: hidden;
+  background: 
+    radial-gradient(ellipse at 20% 50%, rgba(13,27,42,0.8) 0%, transparent 60%),
+    var(--color-black);
 }
 
-canvas {
+/* Grain noise overlay — creates the high-end editorial texture */
+.grain {
   position: absolute;
   inset: 0;
+  opacity: 0.035;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
 }
 
-.hero-inner {
+.hero__content {
   position: relative;
-  z-index: 2;
-  height: 100%;
+  z-index: 1;
+  max-width: 900px;
+}
+
+/* Small label above the main title */
+.hero__eyebrow {
+  font-size: var(--text-sm);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  margin-bottom: var(--space-sm);
+}
+
+/* The giant headline — each span is its own line via flex column */
+.hero__title {
+  font-family: var(--font-display);
+  font-size: var(--text-hero);
+  line-height: 0.92; /* Tight line height for display type */
+  letter-spacing: 0.02em;
   display: flex;
   flex-direction: column;
+  margin-bottom: var(--space-md);
+}
+
+/* "YOUR" gets an outlined/hollow style for visual contrast */
+.hero__title--outline {
+  -webkit-text-stroke: 1px rgba(255,255,255,0.3);
+  color: transparent;
+}
+
+.hero__sub {
+  font-size: var(--text-lg);
+  color: rgba(255,255,255,0.55);
+  font-weight: 300;
+  margin-bottom: var(--space-lg);
+  max-width: 400px;
+}
+
+/* Scroll hint: absolute at bottom-center */
+.hero__scroll-hint {
+  position: absolute;
+  bottom: var(--space-md);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: var(--text-xs);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.4);
+  z-index: 1;
+}
+
+/* The animated line under "Scroll" */
+.hero__scroll-line {
+  width: 1px;
+  height: 40px;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.4), transparent);
+  animation: scrollPulse 1.8s ease-in-out infinite;
+}
+
+@keyframes scrollPulse {
+  0%, 100% { opacity: 0.4; transform: scaleY(1); }
+  50%       { opacity: 1;   transform: scaleY(1.3); }
+}
+
+
+/* ================================================================
+   SHARED BUTTON STYLES
+   
+   .btn = base button styles
+   .btn--primary = the filled dark button with hover lift
+   .btn--full = stretches button to full width (used in form)
+================================================================ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 14px 32px;
+  border: 1px solid transparent;
+  transition:
+    transform var(--duration-base) var(--ease-spring),
+    background var(--duration-base),
+    color var(--duration-base),
+    border-color var(--duration-base);
+}
+
+.btn--primary {
+  background: var(--color-white);
+  color: var(--color-black);
+  border-color: var(--color-white);
+}
+
+.btn--primary:hover {
+  background: transparent;
+  color: var(--color-white);
+  transform: translateY(-2px);
+}
+
+.btn--full {
+  width: 100%;
   justify-content: center;
-  padding: 0 40px;
 }
 
-.logo {
-  width: 90px;
-  margin-bottom: 30px;
+
+/* ================================================================
+   6. MARQUEE / TICKER
+   
+   The scrolling text band.
+   overflow: hidden hides the overflow so only the visible strip shows.
+   The .marquee__track contains two identical .marquee__content divs.
+   
+   @keyframes marquee moves the track from 0 to -50% — 
+   at exactly 50%, the second copy is in the same position as 
+   the first started, creating a seamless loop.
+================================================================ */
+.marquee {
+  overflow: hidden;
+  background: var(--color-navy);
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  padding: 14px 0;
 }
 
-h1 {
-  font-size: clamp(3rem, 6vw, 5rem);
-  margin-bottom: 30px;
-}
-
-/* Button */
-.cta {
-  border: 1px solid white;
-  background: transparent;
-  color: white;
-  padding: 12px 28px;
-  cursor: pointer;
-}
-
-/* ========= PRODUCTS ========= */
-
-.products-section {
-  padding: 120px 40px;
-  max-width: 1200px;
-  margin: auto;
-}
-
-.products-header {
+.marquee__track {
   display: flex;
-  justify-content: space-between;
-  margin-bottom: 40px;
+  /* The track is 200% wide to fit both content copies side by side */
+  width: max-content;
+  animation: marquee 25s linear infinite;
 }
 
-.controls select {
+/* Each "half" of the marquee track */
+.marquee__content {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  white-space: nowrap;
+  padding: 0 var(--space-md);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.5);
+}
+
+.marquee__dot {
+  color: var(--color-accent);
+  font-size: 1.2em;
+}
+
+/* Moving 50% to the left creates the loop (50% = one full copy) */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* Pause the ticker when the user prefers less motion */
+@media (prefers-reduced-motion: reduce) {
+  .marquee__track { animation-play-state: paused; }
+}
+
+
+/* ================================================================
+   7. SHARED SECTION STYLES
+   
+   Reusable styles for section headers, eyebrows, and titles.
+   Applied to all major sections (Products, Instagram, Contact).
+================================================================ */
+.section {
+  padding: var(--space-xl) var(--space-md);
+  max-width: var(--container-width);
+  margin: 0 auto;
+}
+
+/* Alternate sections have full-bleed navy background */
+.section--dark {
+  max-width: none;
+  background: var(--color-navy);
+}
+
+.section--dark > .section {
+  margin: 0 auto;
+}
+
+.section__header {
+  margin-bottom: var(--space-lg);
+}
+
+/* "The Collection" small label above section title */
+.section__eyebrow {
+  font-size: var(--text-xs);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  margin-bottom: var(--space-xs);
+}
+
+/* Big section heading */
+.section__title {
+  font-family: var(--font-display);
+  font-size: var(--text-3xl);
+  letter-spacing: 0.05em;
+  line-height: 1;
+}
+
+
+/* ================================================================
+   8. PRODUCTS GRID & CARDS
+================================================================ */
+
+/* Filter buttons row */
+.products__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-lg);
+}
+
+.filter-btn {
+  padding: 8px 20px;
+  font-size: var(--text-xs);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: rgba(255,255,255,0.5);
+  border: 1px solid var(--color-border);
   background: transparent;
-  color: white;
-  border: 1px solid rgba(255,255,255,0.3);
-  padding: 8px;
+  transition:
+    color var(--duration-fast),
+    border-color var(--duration-fast),
+    background var(--duration-fast);
 }
 
-/* Grid layout */
-.products-grid {
+.filter-btn:hover,
+.filter-btn.active {
+  color: var(--color-black);
+  background: var(--color-white);
+  border-color: var(--color-white);
+}
+
+/* 
+  Product grid: responsive auto-fill columns.
+  minmax(260px, 1fr) = each card is at least 260px wide,
+  and they stretch to fill available space equally.
+*/
+.product-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 30px;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1px; /* Creates the thin grid lines between cards */
+  background: var(--color-border); /* Shows through the 1px gaps */
 }
 
-/* Each product */
-.product img {
+/* Individual product card */
+.product-card {
+  background: var(--color-black);
+  cursor: none;
+  overflow: hidden;
+  transition: background var(--duration-base);
+  /* For the data-reveal stagger animation (see section 13) */
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.product-card:hover {
+  background: var(--color-navy-mid);
+}
+
+/* Image container — fixed aspect ratio using padding trick */
+.product-card__image-wrap {
+  position: relative;
+  /* padding-top: 120% creates a portrait aspect ratio (5:6) */
+  padding-top: 120%;
+  overflow: hidden;
+  background: var(--color-navy);
+}
+
+/* The actual product image — stretched to fill container */
+.product-card__image-wrap img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Cover = zoom and crop to fill, no distortion */
+  transition: transform var(--duration-slow) var(--ease-smooth);
+}
+
+/* Subtle zoom on hover */
+.product-card:hover .product-card__image-wrap img {
+  transform: scale(1.04);
+}
+
+/* Overlay that appears on hover with "View Product" CTA */
+.product-card__overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity var(--duration-base);
+}
+
+.product-card:hover .product-card__overlay {
+  opacity: 1;
+}
+
+.product-card__overlay-btn {
+  font-size: var(--text-xs);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: var(--color-white);
+  border: 1px solid rgba(255,255,255,0.6);
+  padding: 10px 20px;
+  background: transparent;
+  transition: background var(--duration-fast), color var(--duration-fast);
+}
+
+.product-card__overlay-btn:hover {
+  background: var(--color-white);
+  color: var(--color-black);
+}
+
+/* Text content below the image */
+.product-card__body {
+  padding: 1rem 1.25rem 1.5rem;
+}
+
+/* "New" / "Best Seller" badge */
+.product-card__badge {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: var(--color-accent);
+  margin-bottom: 6px;
+  display: block;
+}
+
+.product-card__name {
+  font-size: var(--text-base);
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.product-card__category {
+  font-size: var(--text-sm);
+  color: var(--color-grey);
+  margin-bottom: var(--space-sm);
+}
+
+.product-card__price {
+  font-size: var(--text-lg);
+  font-weight: 400;
+}
+
+/* When filtered out by JS — hidden cards */
+.product-card.is-hidden {
+  display: none;
+}
+
+
+/* ================================================================
+   9. PRODUCT MODAL
+   
+   The modal has two layers:
+   1. .modal__backdrop — the dark overlay behind the panel
+   2. .modal__panel — the actual content drawer/sheet
+   
+   aria-hidden="true" means screen readers skip it when closed.
+   JS toggles .is-open on both .modal and .modal__panel.
+================================================================ */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  pointer-events: none; /* Doesn't capture clicks when closed */
+  opacity: 0;
+  transition: opacity var(--duration-base) var(--ease-smooth);
+}
+
+/* When open: becomes visible and captures clicks */
+.modal.is-open {
+  pointer-events: all;
+  opacity: 1;
+}
+
+.modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.8);
+  backdrop-filter: blur(4px);
+}
+
+/* The panel slides in from the right */
+.modal__panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(600px, 95vw); /* Never wider than the screen */
+  background: var(--color-navy);
+  border-left: 1px solid var(--color-border);
+  overflow-y: auto; /* Scroll inside the panel if content is tall */
+  transform: translateX(100%); /* Start off-screen to the right */
+  transition: transform var(--duration-slow) var(--ease-smooth);
+}
+
+/* Slide in when modal opens */
+.modal.is-open .modal__panel {
+  transform: translateX(0);
+}
+
+/* Close button — absolute top-right of the panel */
+.modal__close {
+  position: absolute;
+  top: var(--space-md);
+  right: var(--space-md);
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255,255,255,0.6);
+  border: 1px solid var(--color-border);
+  z-index: 1;
+  transition: color var(--duration-fast), border-color var(--duration-fast);
+  cursor: none;
+}
+
+.modal__close:hover {
+  color: var(--color-white);
+  border-color: rgba(255,255,255,0.4);
+}
+
+/* Inner content layout */
+.modal__content {
+  padding: var(--space-xl) var(--space-md) var(--space-lg);
+}
+
+/* Product image inside the modal */
+.modal__image {
+  width: 100%;
+  aspect-ratio: 4/5;
+  object-fit: cover;
+  background: var(--color-navy-mid);
+  margin-bottom: var(--space-md);
+}
+
+.modal__category {
+  font-size: var(--text-xs);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  margin-bottom: 8px;
+}
+
+.modal__title {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+
+.modal__price {
+  font-size: var(--text-xl);
+  margin-bottom: var(--space-md);
+  color: rgba(255,255,255,0.8);
+}
+
+.modal__desc {
+  color: rgba(255,255,255,0.6);
+  font-size: var(--text-sm);
+  line-height: 1.7;
+  margin-bottom: var(--space-lg);
+}
+
+/* Size selector grid */
+.modal__sizes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: var(--space-md);
+}
+
+.modal__sizes-label {
+  font-size: var(--text-xs);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-grey);
+  margin-bottom: 10px;
+  display: block;
   width: 100%;
 }
 
-.product h3 {
-  margin-top: 10px;
+.size-btn {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-border);
+  font-size: var(--text-sm);
+  color: rgba(255,255,255,0.6);
+  transition: all var(--duration-fast);
+  cursor: none;
 }
 
-.product span {
-  opacity: 0.6;
+.size-btn:hover,
+.size-btn.selected {
+  border-color: var(--color-white);
+  color: var(--color-white);
+  background: rgba(255,255,255,0.08);
 }
 
-/* ========= INSTAGRAM ========= */
 
+/* ================================================================
+   10. INSTAGRAM FEED
+================================================================ */
 .instagram {
-  padding: 120px 40px;
-  text-align: center;
+  background: var(--color-navy);
+  max-width: none; /* Full-bleed background */
+  padding: var(--space-xl) var(--space-md);
 }
 
-.instagram iframe {
+.instagram .section__header {
+  max-width: var(--container-width);
+  margin: 0 auto var(--space-lg);
+}
+
+/* 
+  The feed grid — 6 columns of equal width.
+  This creates the classic Instagram-style grid.
+*/
+.instagram__grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 2px;
+  max-width: var(--container-width);
+  margin: 0 auto;
+}
+
+/* Individual Instagram post card */
+.ig-card {
+  position: relative;
+  /* 1/1 aspect ratio — square posts */
+  padding-top: 100%;
+  overflow: hidden;
+  background: var(--color-navy-mid);
+  cursor: none;
+}
+
+.ig-card img {
+  position: absolute;
+  inset: 0;
   width: 100%;
-  height: 400px;
-  border: none;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--duration-slow) var(--ease-smooth);
+  /* Placeholder gradient for missing images */
+  background: linear-gradient(135deg, var(--color-navy-mid), var(--color-black));
 }
 
-/* ========= CONTACT ========= */
-
-.contact {
-  padding: 120px 40px;
-  max-width: 600px;
-  margin: auto;
+.ig-card:hover img {
+  transform: scale(1.06);
 }
 
-.contact form {
+/* Hover overlay with like/comment counts */
+.ig-card__overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  opacity: 0;
+  transition: opacity var(--duration-base);
 }
 
-.contact input,
-.contact textarea {
+.ig-card:hover .ig-card__overlay {
+  opacity: 1;
+}
+
+.ig-card__stat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+
+
+/* ================================================================
+   11. CONTACT FORM
+================================================================ */
+.contact {
+  background: var(--color-black);
+}
+
+/* Two-column layout: text on left, form on right */
+.contact__inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-xl);
+  align-items: start;
+}
+
+.contact__desc {
+  color: rgba(255,255,255,0.5);
+  font-size: var(--text-base);
+  line-height: 1.8;
+  margin: var(--space-md) 0;
+}
+
+.contact__detail {
+  font-size: var(--text-sm);
+  letter-spacing: 0.1em;
+  color: var(--color-accent);
+}
+
+/* 
+  Floating label form field:
+  The label sits inside the input area (position: absolute).
+  When the input is focused or has content, CSS moves the label 
+  up and shrinks it using the :focus-within and .has-value class.
+*/
+.form-field {
+  position: relative;
+  margin-bottom: var(--space-md);
+}
+
+.form-field input,
+.form-field textarea {
+  width: 100%;
   background: transparent;
-  border: 1px solid rgba(255,255,255,0.3);
-  padding: 12px;
-  color: white;
+  border: none;
+  border-bottom: 1px solid var(--color-border);
+  padding: 24px 0 8px;
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  color: var(--color-white);
+  outline: none;
+  resize: none; /* Disable textarea resize handle */
+  transition: border-color var(--duration-base);
+}
+
+.form-field input:focus,
+.form-field textarea:focus {
+  border-bottom-color: rgba(255,255,255,0.4);
+}
+
+/* The floating label */
+.form-field label {
+  position: absolute;
+  left: 0;
+  top: 24px;
+  font-size: var(--text-base);
+  color: rgba(255,255,255,0.35);
+  pointer-events: none; /* Don't block clicks on the input */
+  transition: 
+    top var(--duration-base) var(--ease-smooth),
+    font-size var(--duration-base) var(--ease-smooth),
+    color var(--duration-base);
+}
+
+/* Move label up when input is focused or has a value */
+.form-field input:focus ~ label,
+.form-field input.has-value ~ label,
+.form-field textarea:focus ~ label,
+.form-field textarea.has-value ~ label {
+  top: 4px;
+  font-size: var(--text-xs);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+/* The animated underline that expands on focus */
+.form-field__line {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: var(--color-accent);
+  transition: width var(--duration-base) var(--ease-smooth);
+}
+
+.form-field input:focus ~ .form-field__line,
+.form-field textarea:focus ~ .form-field__line {
+  width: 100%;
+}
+
+/* Success confirmation message — hidden by default */
+.form-success {
+  display: none;
+  margin-top: var(--space-sm);
+  padding: 14px var(--space-sm);
+  background: rgba(200, 169, 126, 0.1);
+  border: 1px solid rgba(200, 169, 126, 0.3);
+  color: var(--color-accent);
+  font-size: var(--text-sm);
+  letter-spacing: 0.05em;
+}
+
+/* JS adds .is-visible class to show it */
+.form-success.is-visible {
+  display: block;
+}
+
+
+/* ================================================================
+   12. FOOTER
+================================================================ */
+.footer {
+  border-top: 1px solid var(--color-border);
+  padding: var(--space-md);
+  background: var(--color-black);
+}
+
+.footer__inner {
+  max-width: var(--container-width);
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.footer__brand {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  letter-spacing: 0.1em;
+}
+
+.footer__copy {
+  font-size: var(--text-xs);
+  color: var(--color-grey);
+}
+
+.footer__links {
+  display: flex;
+  gap: var(--space-md);
+  font-size: var(--text-xs);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-grey);
+}
+
+.footer__links a:hover {
+  color: var(--color-white);
+}
+
+
+/* ================================================================
+   13. SCROLL REVEAL ANIMATIONS
+   
+   Elements with [data-reveal] start invisible (opacity: 0, 
+   shifted down). When they scroll into the viewport, JS adds 
+   .is-revealed, which animates them to their final position.
+   
+   Product cards use a staggered delay based on their index,
+   set via the --delay CSS variable from JS.
+================================================================ */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(30px);
+  transition:
+    opacity var(--duration-slow) var(--ease-smooth),
+    transform var(--duration-slow) var(--ease-smooth);
+}
+
+[data-reveal].is-revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Product cards use their --delay variable for stagger */
+.product-card {
+  transition:
+    opacity var(--duration-slow) var(--ease-smooth) var(--delay, 0ms),
+    transform var(--duration-slow) var(--ease-smooth) var(--delay, 0ms),
+    background var(--duration-base);
+}
+
+.product-card.is-revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+
+/* ================================================================
+   14. RESPONSIVE — MOBILE
+   
+   Below 768px (tablet/mobile), adjust the layout:
+   - Stack contact form below text (single column)
+   - Reduce the Instagram grid to 3 columns
+   - Reduce products grid to 2 columns minimum
+   - Simplify nav (could add a hamburger menu here later)
+================================================================ */
+@media (max-width: 768px) {
+  :root {
+    --space-xl: 4rem; /* Reduce section padding on mobile */
+    --space-lg: 2rem;
+  }
+
+  .contact__inner {
+    grid-template-columns: 1fr; /* Stack vertically */
+    gap: var(--space-lg);
+  }
+
+  .instagram__grid {
+    grid-template-columns: repeat(3, 1fr); /* 3 columns on mobile */
+  }
+
+  .product-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  }
+
+  .nav__links {
+    display: none; /* Hide nav links on mobile (could add hamburger menu) */
+  }
+
+  .footer__inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-sm);
+  }
 }
