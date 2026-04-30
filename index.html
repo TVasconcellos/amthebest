@@ -4,67 +4,92 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>A&M</title>
+
+  <!-- Main styles -->
   <link rel="stylesheet" href="./style.css"/>
 </head>
+
 <body>
 
+  <!-- ================= HERO ================= -->
+  <!-- Big first impression section -->
   <section class="hero">
+
+    <!-- WebGL background -->
     <canvas id="bg"></canvas>
 
+    <!-- Content on top of WebGL -->
     <div class="hero-inner">
-      <img src="./logo.png" class="logo" alt="A&M logo"/>
+      <img src="./assets/logo.png" class="logo"/>
 
       <h1>
         Built in Silence.<br/>
         Worn Loud.
       </h1>
 
-      <button class="cta">Enter Store</button>
+      <button class="cta">Shop Now</button>
     </div>
   </section>
 
+
+  <!-- ================= PRODUCTS ================= -->
   <section class="products-section">
 
-  <div class="products-header">
-    <h2>Collection</h2>
+    <div class="products-header">
+      <h2>Collection</h2>
 
-    <div class="controls">
-      <select id="filter">
-        <option value="all">All</option>
-        <option value="tshirt">T-Shirts</option>
-        <option value="hoodie">Hoodies</option>
-        <option value="sweatshirt">Sweatshirts</option>
-        <option value="other">Other</option>
-      </select>
+      <!-- Filtering + Sorting -->
+      <div class="controls">
+        <select id="filter">
+          <option value="all">All</option>
+          <option value="tshirt">T-Shirts</option>
+          <option value="hoodie">Hoodies</option>
+          <option value="sweatshirt">Sweatshirts</option>
+          <option value="other">Other</option>
+        </select>
 
-      <select id="sort">
-        <option value="default">Sort</option>
-        <option value="price-asc">Price ↑</option>
-        <option value="price-desc">Price ↓</option>
-        <option value="name">Name</option>
-      </select>
+        <select id="sort">
+          <option value="default">Sort</option>
+          <option value="price-asc">Price ↑</option>
+          <option value="price-desc">Price ↓</option>
+          <option value="name">Name</option>
+        </select>
+      </div>
     </div>
-  </div>
 
-  <div class="products-grid" id="products"></div>
+    <!-- Where products will appear -->
+    <div class="products-grid" id="products"></div>
 
-</section>
-
-  <section class="spacer">
-    <p>First drop available now</p>
   </section>
 
-  <section class="contact">
-  <h2>Contact</h2>
 
-  <form>
-    <input type="text" placeholder="Name" required />
-    <input type="email" placeholder="Email" required />
-    <textarea placeholder="Message"></textarea>
-    <button type="submit">Send</button>
-  </form>
-</section>
-  
+  <!-- ================= INSTAGRAM ================= -->
+  <section class="instagram">
+    <h2>Instagram</h2>
+
+    <!-- Replace YOUR_WIDGET_ID -->
+    <iframe 
+      src="https://lightwidget.com/widgets/YOUR_WIDGET_ID.html"
+      scrolling="no"
+      class="lightwidget-widget">
+    </iframe>
+  </section>
+
+
+  <!-- ================= CONTACT ================= -->
+  <section class="contact">
+    <h2>Contact</h2>
+
+    <form>
+      <input type="text" placeholder="Name" required />
+      <input type="email" placeholder="Email" required />
+      <textarea placeholder="Message"></textarea>
+      <button type="submit">Send</button>
+    </form>
+  </section>
+
+  <!-- JS -->
   <script type="module" src="./main.js"></script>
+
 </body>
 </html>
