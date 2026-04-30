@@ -6,48 +6,87 @@
   <title>A&M Streetwear</title>
   <link rel="stylesheet" href="css/styles.css"/>
 </head>
-
 <body>
 
-<!-- HERO -->
-<section id="hero">
-  <canvas id="webgl"></canvas>
-
-  <div class="hero-content">
+  <!-- NAV -->
+  <nav class="nav">
     <img src="assets/logo.png" class="logo"/>
-    <h1>Built by friends.<br/>Worn with intent.</h1>
-    <button class="cta">Shop Drop</button>
-  </div>
-</section>
+    <button class="cta small">Shop</button>
+  </nav>
 
-<!-- PRODUCTS -->
-<section id="products">
-  <h2>Featured</h2>
-  <div class="product-grid" id="productGrid"></div>
-</section>
+  <!-- HERO -->
+  <section class="hero">
+    <canvas id="hero-canvas"></canvas>
 
-<!-- STORY -->
-<section id="story">
-  <div class="story-content">
-    <h2>Two friends. One vision.</h2>
-    <p>
-      A&M started with late-night ideas and turned into wearable identity.
-      No hype. Just intention.
-    </p>
-  </div>
-</section>
+    <div class="hero-content">
+      <h1>Built From Nothing</h1>
+      <p>Streetwear by two friends. No rules. No middlemen.</p>
+      <button class="cta">Shop Collection</button>
+    </div>
+  </section>
 
-<!-- CTA -->
-<section id="cta">
-  <h2>Next drop incoming</h2>
-  <button class="cta large">Get Notified</button>
-</section>
+  <!-- PRODUCTS -->
+  <section class="products">
+    <h2>Featured</h2>
 
-<!-- FOOTER -->
-<footer>
-  <p>© 2026 A&M</p>
-</footer>
+    <div class="grid">
+      <div class="card">
+        <img src="assets/product1.jpg"/>
+        <div class="info">
+          <h3>Oversized Tee</h3>
+          <span>€35</span>
+        </div>
+      </div>
 
-<script type="module" src="js/main.js"></script>
+      <div class="card">
+        <img src="assets/product2.jpg"/>
+        <div class="info">
+          <h3>Heavy Hoodie</h3>
+          <span>€80</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <img src="assets/product3.jpg"/>
+        <div class="info">
+          <h3>Signature Socks</h3>
+          <span>€15</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <img src="assets/product4.jpg"/>
+        <div class="info">
+          <h3>Cap</h3>
+          <span>€25</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STORY -->
+  <section class="story">
+    <div class="text">
+      <h2>Two Friends. One Vision.</h2>
+      <p>
+        Started with nothing but ideas and late nights.
+        A&M is about independence, identity, and creating
+        without permission.
+      </p>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <h2>Drop Live Now</h2>
+    <button class="cta large">Shop Now</button>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>© A&M Streetwear</p>
+  </footer>
+
+  <script type="module" src="js/main.js"></script>
 </body>
 </html>
