@@ -427,7 +427,7 @@ const PRODUCTS = [
     family: "Packs",
     category: "pack",
     price: "€25",
-    badge: "Value",
+    badge: "Best Value",
     image: "images/products/summerpack1.jpg",
     description: "The Summer Pack: T-Shirt + Shorts + Socks. Everything you need for the warm months, bundled at a saving.",
     sizes: ["XS", "S", "M", "L", "XL", "XXL"],
@@ -439,7 +439,7 @@ const PRODUCTS = [
     family: "Packs",
     category: "pack",
     price: "€41",
-    badge: "Value",
+    badge: "Best Value",
     image: "images/products/winterpack1.jpg",
     description: "The Winter Pack: Hoodie + Sweatshirt + Socks. Stay warm, stay fresh.",
     sizes: ["XS", "S", "M", "L", "XL", "XXL"],
@@ -451,7 +451,7 @@ const PRODUCTS = [
     family: "Packs",
     category: "pack",
     price: "€28",
-    badge: "Value",
+    badge: "Best Value",
     image: "images/products/essentialpack1.jpg",
     description: "The Essential Pack: T-Shirt + Totebag + Socks. The perfect starter kit.",
     sizes: ["XS", "S", "M", "L", "XL", "XXL"],
@@ -627,6 +627,8 @@ function renderProducts() {
         class="product-card"
         data-category="${product.category}"
         data-id="${product.id}"
+        data-name="${product.name.toLowerCase()}"
+        data-price="${parseFloat(product.price.replace(/[^0-9.]/g, ''))}"
         role="button"
         tabindex="0"
         aria-label="View ${product.name}"
@@ -851,14 +853,88 @@ function initHeroCanvas() {
 
 
 /* ================================================================
-   8. PRODUCT FILTERS
+   8. PRODUCT FILTERS + SORT
+
+   Filter buttons show/hide cards by category.
+   Sort select re-orders visible cards by name or price.
+
+   ★ GHOST CARD FIX (issue 2):
+   CSS grid always fills columns to complete rows, which creates
+   empty grey placeholder cells at the end when the count isn't
+   a clean multiple of the column count.
+   We fix this by appending invisible "filler" <div> elements —
+   as many as needed to complete the last row without showing borders.
+   These have no content and no background, so they're truly invisible.
+   They're recalculated every time filter or sort changes.
+
+   ★ SORT LOGIC:
+   We don't re-render the cards — we reorder the existing DOM nodes
+   by appending them to the grid in the new sorted order.
+   This keeps event listeners intact and avoids a full re-render.
 ================================================================ */
+
+/* Returns the number of columns in the grid at current viewport width */
+function getGridColumnCount() {
+  const grid = document.getElementById('productGrid');
+  if (!grid) return 4;
+  /* getComputedStyle gives us the actual rendered column template */
+  const cols = getComputedStyle(grid).gridTemplateColumns.split(' ').length;
+  return cols || 4;
+}
+
+/* Remove any existing ghost fillers, then add the right number of new ones */
+function fixGhostCells() {
+  const grid = document.getElementById('productGrid');
+  if (!grid) return;
+
+  /* Remove previously added fillers */
+  grid.querySelectorAll('.grid-filler').forEach(el => el.remove());
+
+  /* Count visible (non-hidden) real cards */
+  const visibleCards = grid.querySelectorAll('.product-card:not(.is-hidden)').length;
+  const cols = getGridColumnCount();
+  const remainder = visibleCards % cols;
+  if (remainder === 0) return; /* Last row is already complete */
+
+  /* Add enough invisible fillers to complete the last row */
+  const fillersNeeded = cols - remainder;
+  for (let i = 0; i < fillersNeeded; i++) {
+    const filler = document.createElement('div');
+    filler.className = 'grid-filler';
+    grid.appendChild(filler);
+  }
+}
+
+/* Sort visible cards in the DOM by the given key */
+function sortCards(value) {
+  const grid = document.getElementById('productGrid');
+  if (!grid) return;
+
+  const cards = Array.from(grid.querySelectorAll('.product-card:not(.grid-filler)'));
+
+  cards.sort((a, b) => {
+    if (value === 'name-asc')  return a.dataset.name.localeCompare(b.dataset.name);
+    if (value === 'name-desc') return b.dataset.name.localeCompare(a.dataset.name);
+    if (value === 'price-asc')  return parseFloat(a.dataset.price) - parseFloat(b.dataset.price);
+    if (value === 'price-desc') return parseFloat(b.dataset.price) - parseFloat(a.dataset.price);
+    /* 'default': sort by original id order */
+    return parseInt(a.dataset.id) - parseInt(b.dataset.id);
+  });
+
+  /* Re-append in new order (fillers come last and are re-added by fixGhostCells) */
+  cards.forEach(card => grid.appendChild(card));
+  fixGhostCells();
+}
+
 function initFilters() {
   const filterBtns = document.querySelectorAll('.filter-btn');
+  const sortSelect = document.getElementById('sortSelect');
+
   filterBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       filterBtns.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
+
       const filter = btn.dataset.filter;
       document.querySelectorAll('.product-card').forEach(card => {
         const match = filter === 'all' || card.dataset.category === filter;
@@ -868,9 +944,25 @@ function initFilters() {
           card.style.setProperty('--delay', '0ms');
         }
       });
+
+      /* Re-apply current sort after filtering */
+      if (sortSelect) sortCards(sortSelect.value);
+      else fixGhostCells();
+
       if (window.revealProductCards) window.revealProductCards();
     });
   });
+
+  /* Sort dropdown */
+  if (sortSelect) {
+    sortSelect.addEventListener('change', () => sortCards(sortSelect.value));
+  }
+
+  /* Initial ghost fix after first render */
+  fixGhostCells();
+
+  /* Recalculate on resize (column count can change) */
+  window.addEventListener('resize', fixGhostCells, { passive: true });
 }
 
 
@@ -910,10 +1002,12 @@ function openModal(product) {
   const lang = document.documentElement.dataset.lang || 'en';
   const t    = TRANSLATIONS[lang];
 
-  /* ── Build sizes HTML ── */
-  const sizesHTML = product.sizes.map(size => `
-    <button class="size-btn" data-size="${size}" aria-label="${t['modal.size'] || 'Size'} ${size}">${size}</button>
-  `).join('');
+  /* ── Build sizes HTML — wrapped in a flex row so they sit horizontally ── */
+  const sizesHTML = `<div class="modal__sizes-grid">
+    ${product.sizes.map(size => `
+      <button class="size-btn" data-size="${size}" aria-label="${t['modal.size'] || 'Size'} ${size}">${size}</button>
+    `).join('')}
+  </div>`;
 
   /* ── Build color swatches HTML ── */
   let colorsHTML = '';
@@ -1084,11 +1178,11 @@ async function renderInstagram() {
       ${post.url ? `href="${post.url}" target="_blank" rel="noopener"` : ''}
       data-reveal
     >
-      <img src="${post.image}" alt="@sofiavalequaresma" loading="lazy" onerror="this.style.display='none'" />
+      <img src="${post.image}" alt="@aem.thebest" loading="lazy" onerror="this.style.display='none'" />
       <div class="ig-card__overlay">
         ${post.likes    ? `<div class="ig-card__stat">♡ ${post.likes}</div>` : ''}
         ${post.comments ? `<div class="ig-card__stat">💬 ${post.comments}</div>` : ''}
-        <div class="ig-card__stat ig-card__handle">@sofiavalequaresma</div>
+        <div class="ig-card__stat ig-card__handle">@aem.thebest</div>
       </div>
     </a>
   `).join('');
@@ -1184,6 +1278,9 @@ const TRANSLATIONS = {
     'modal.selectSize': 'Select Size', 'modal.colour': 'Colour', 'modal.color': 'Colour',
     'modal.addToCart': 'Add to Cart', 'modal.shipping': 'Free shipping on orders over €50',
     'modal.selectSizeAlert': 'Please select a size first.', 'modal.size': 'Size',
+    'sort.label': 'Sort:', 'sort.default': 'Default',
+    'sort.nameAsc': 'Name A→Z', 'sort.nameDesc': 'Name Z→A',
+    'sort.priceAsc': 'Price ↑', 'sort.priceDesc': 'Price ↓',
     'instagram.title': 'The Feed',
     'contact.eyebrow': 'Get in Touch', 'contact.title': "Let's Talk",
     'contact.desc': 'Questions about sizing, wholesale, or collabs?<br />We usually reply within 24 hours.',
@@ -1210,6 +1307,9 @@ const TRANSLATIONS = {
     'modal.selectSize': 'Escolher Tamanho', 'modal.colour': 'Cor', 'modal.color': 'Cor',
     'modal.addToCart': 'Adicionar ao Carrinho', 'modal.shipping': 'Envio grátis acima de €50',
     'modal.selectSizeAlert': 'Por favor escolhe um tamanho.', 'modal.size': 'Tamanho',
+    'sort.label': 'Ordenar:', 'sort.default': 'Padrão',
+    'sort.nameAsc': 'Nome A→Z', 'sort.nameDesc': 'Nome Z→A',
+    'sort.priceAsc': 'Preço ↑', 'sort.priceDesc': 'Preço ↓',
     'instagram.title': 'O Feed',
     'contact.eyebrow': 'Fala Connosco', 'contact.title': 'Vamos Falar',
     'contact.desc': 'Dúvidas sobre tamanhos, grossista ou colaborações?<br />Respondemos geralmente em 24 horas.',
@@ -1228,12 +1328,25 @@ const TRANSLATIONS = {
 function setLanguage(lang) {
   if (!TRANSLATIONS[lang]) return;
   const t = TRANSLATIONS[lang];
+
+  /* Update all [data-i18n] elements */
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.dataset.i18n;
     if (!t[key]) return;
-    el.innerHTML = key === 'contact.desc' ? t[key] : '';
-    if (key !== 'contact.desc') el.textContent = t[key];
+    /* contact.desc contains a <br> tag — use innerHTML; everything else is plain text */
+    if (key === 'contact.desc') {
+      el.innerHTML = t[key];
+    } else {
+      el.textContent = t[key];
+    }
   });
+
+  /* Also update <option> elements inside the sort select (data-i18n on options) */
+  document.querySelectorAll('option[data-i18n]').forEach(opt => {
+    const key = opt.dataset.i18n;
+    if (t[key]) opt.textContent = t[key];
+  });
+
   document.querySelectorAll('.lang-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.lang === lang);
   });
