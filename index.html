@@ -1,92 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>A&M Streetwear</title>
-  <link rel="stylesheet" href="css/styles.css"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A&M</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <!-- NAV -->
-  <nav class="nav">
-    <img src="assets/logo.png" class="logo"/>
-    <button class="cta small">Shop</button>
-  </nav>
-
-  <!-- HERO -->
   <section class="hero">
-    <canvas id="hero-canvas"></canvas>
+    <canvas id="webgl"></canvas>
 
-    <div class="hero-content">
-      <h1>Built From Nothing</h1>
-      <p>Streetwear by two friends. No rules. No middlemen.</p>
-      <button class="cta">Shop Collection</button>
+    <div class="overlay">
+      <img src="logo.png" class="logo"/>
+
+      <h1>
+        Built in Silence.<br/>
+        Worn Loud.
+      </h1>
+
+      <button class="cta">Enter Store</button>
     </div>
   </section>
 
-  <!-- PRODUCTS -->
-  <section class="products">
-    <h2>Featured</h2>
-
-    <div class="grid">
-      <div class="card">
-        <img src="assets/product1.jpg"/>
-        <div class="info">
-          <h3>Oversized Tee</h3>
-          <span>€35</span>
-        </div>
-      </div>
-
-      <div class="card">
-        <img src="assets/product2.jpg"/>
-        <div class="info">
-          <h3>Heavy Hoodie</h3>
-          <span>€80</span>
-        </div>
-      </div>
-
-      <div class="card">
-        <img src="assets/product3.jpg"/>
-        <div class="info">
-          <h3>Signature Socks</h3>
-          <span>€15</span>
-        </div>
-      </div>
-
-      <div class="card">
-        <img src="assets/product4.jpg"/>
-        <div class="info">
-          <h3>Cap</h3>
-          <span>€25</span>
-        </div>
-      </div>
-    </div>
+  <section class="next">
+    <p>First drop available now</p>
   </section>
 
-  <!-- STORY -->
-  <section class="story">
-    <div class="text">
-      <h2>Two Friends. One Vision.</h2>
-      <p>
-        Started with nothing but ideas and late nights.
-        A&M is about independence, identity, and creating
-        without permission.
-      </p>
-    </div>
-  </section>
-
-  <!-- CTA -->
-  <section class="cta-section">
-    <h2>Drop Live Now</h2>
-    <button class="cta large">Shop Now</button>
-  </section>
-
-  <!-- FOOTER -->
-  <footer>
-    <p>© A&M Streetwear</p>
-  </footer>
-
-  <script type="module" src="js/main.js"></script>
+  <script type="module" src="main.js"></script>
 </body>
 </html>
