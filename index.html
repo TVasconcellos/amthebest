@@ -1,95 +1,276 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- ============================================================
+    HEAD — Meta, fonts, and stylesheet links
+    This section is invisible to the user but critical:
+    - charset: ensures special characters display correctly
+    - viewport: makes the site responsive on mobile devices
+    - title: what appears on the browser tab
+    - Google Fonts: loads our two typefaces from the web
+      · "Bebas Neue" = the bold display/headline font
+      · "DM Sans" = the clean body/paragraph font
+    - style.css: links to our own stylesheet
+  ============================================================ -->
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>A&M</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>STNDRD — Premium Merch</title>
 
-  <!-- Main styles -->
-  <link rel="stylesheet" href="./style.css"/>
+  <!-- Google Fonts: display font + body font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+
+  <!-- Our main stylesheet -->
+  <link rel="stylesheet" href="css/style.css" />
 </head>
 
 <body>
 
-  <!-- ================= HERO ================= -->
-  <!-- Big first impression section -->
-  <section class="hero">
+  <!-- ============================================================
+    CUSTOM CURSOR
+    A small dot that follows the mouse for a premium feel.
+    The actual movement logic lives in main.js.
+  ============================================================ -->
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-follower" id="cursorFollower"></div>
 
-    <!-- WebGL background -->
-    <canvas id="bg"></canvas>
+  <!-- ============================================================
+    NAVIGATION BAR
+    Fixed to the top of the screen, always visible.
+    - data-scroll: used by JS to detect when user has scrolled
+      and apply a frosted glass / solid background effect
+    - The nav uses flexbox: logo on the left, links on the right
+  ============================================================ -->
+  <nav class="nav" id="mainNav">
+    <div class="nav__logo">STNDRD</div>
+    <ul class="nav__links">
+      <li><a href="#products">Shop</a></li>
+      <li><a href="#instagram">Feed</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
 
-    <!-- Content on top of WebGL -->
-    <div class="hero-inner">
-      <img src="./assets/logo.png" class="logo"/>
+  <!-- ============================================================
+    HERO SECTION
+    The full-screen opening statement.
+    - The large headline uses "Bebas Neue" for impact
+    - The marquee (scrolling ticker) adds motion and energy
+    - data-reveal: used by JS to trigger the scroll-in animation
+  ============================================================ -->
+  <section class="hero" id="hero">
+    <!-- Grain texture overlay — creates that film/editorial feel -->
+    <div class="grain"></div>
 
-      <h1>
-        Built in Silence.<br/>
-        Worn Loud.
+    <div class="hero__content">
+      <p class="hero__eyebrow" data-reveal>New Season Drop</p>
+      <h1 class="hero__title" data-reveal>
+        <span>WEAR</span>
+        <span class="hero__title--outline">YOUR</span>
+        <span>STANDARD</span>
       </h1>
+      <p class="hero__sub" data-reveal>
+        Premium quality. Minimal design. Built to last.
+      </p>
+      <a href="#products" class="btn btn--primary" data-reveal>Shop the Collection</a>
+    </div>
 
-      <button class="cta">Shop Now</button>
+    <!-- Scroll indicator: the small animated arrow at the bottom -->
+    <div class="hero__scroll-hint">
+      <span>Scroll</span>
+      <div class="hero__scroll-line"></div>
     </div>
   </section>
 
-
-  <!-- ================= PRODUCTS ================= -->
-  <section class="products-section">
-
-    <div class="products-header">
-      <h2>Collection</h2>
-
-      <!-- Filtering + Sorting -->
-      <div class="controls">
-        <select id="filter">
-          <option value="all">All</option>
-          <option value="tshirt">T-Shirts</option>
-          <option value="hoodie">Hoodies</option>
-          <option value="sweatshirt">Sweatshirts</option>
-          <option value="other">Other</option>
-        </select>
-
-        <select id="sort">
-          <option value="default">Sort</option>
-          <option value="price-asc">Price ↑</option>
-          <option value="price-desc">Price ↓</option>
-          <option value="name">Name</option>
-        </select>
+  <!-- ============================================================
+    MARQUEE / TICKER
+    A horizontally scrolling band between sections.
+    The animation is pure CSS (see style.css @keyframes marquee).
+    Duplicating the inner content ensures it loops seamlessly.
+  ============================================================ -->
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee__track">
+      <div class="marquee__content">
+        <span>Premium Merch</span>
+        <span class="marquee__dot">·</span>
+        <span>Free Shipping Over €50</span>
+        <span class="marquee__dot">·</span>
+        <span>New Drops Weekly</span>
+        <span class="marquee__dot">·</span>
+        <span>Unisex Sizing</span>
+        <span class="marquee__dot">·</span>
+        <span>100% Organic Cotton</span>
+        <span class="marquee__dot">·</span>
+        <span>Limited Quantities</span>
+        <span class="marquee__dot">·</span>
+      </div>
+      <!-- Duplicate for seamless loop -->
+      <div class="marquee__content" aria-hidden="true">
+        <span>Premium Merch</span>
+        <span class="marquee__dot">·</span>
+        <span>Free Shipping Over €50</span>
+        <span class="marquee__dot">·</span>
+        <span>New Drops Weekly</span>
+        <span class="marquee__dot">·</span>
+        <span>Unisex Sizing</span>
+        <span class="marquee__dot">·</span>
+        <span>100% Organic Cotton</span>
+        <span class="marquee__dot">·</span>
+        <span>Limited Quantities</span>
+        <span class="marquee__dot">·</span>
       </div>
     </div>
+  </div>
 
-    <!-- Where products will appear -->
-    <div class="products-grid" id="products"></div>
+  <!-- ============================================================
+    PRODUCTS SECTION
+    The main shop grid. 
+    - id="products": used for scroll navigation from the nav links
+    - Each product card is built dynamically by JS (see main.js)
+      so you only need to edit the PRODUCTS array in main.js
+      to add/remove/update items — no HTML changes needed.
+    - The empty div#product-grid is the container JS fills in.
+  ============================================================ -->
+  <section class="section products" id="products">
+    <div class="section__header" data-reveal>
+      <p class="section__eyebrow">The Collection</p>
+      <h2 class="section__title">Shop Everything</h2>
+    </div>
 
+    <!-- Filter buttons: JS reads data-filter to show/hide cards -->
+    <div class="products__filters" data-reveal>
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="tshirt">T-Shirts</button>
+      <button class="filter-btn" data-filter="hoodie">Hoodies</button>
+      <button class="filter-btn" data-filter="sweatshirt">Sweatshirts</button>
+      <button class="filter-btn" data-filter="socks">Socks</button>
+      <button class="filter-btn" data-filter="accessories">Accessories</button>
+    </div>
+
+    <!-- JS injects product cards here -->
+    <div class="product-grid" id="productGrid"></div>
   </section>
 
+  <!-- ============================================================
+    PRODUCT MODAL
+    The overlay that appears when you click a product card.
+    - aria-hidden: starts hidden from screen readers; JS toggles this
+    - Clicking the backdrop (.modal__backdrop) closes the modal
+    - The inner content is populated dynamically by JS
+  ============================================================ -->
+  <div class="modal" id="productModal" aria-hidden="true">
+    <div class="modal__backdrop" id="modalBackdrop"></div>
+    <div class="modal__panel" id="modalPanel">
+      <button class="modal__close" id="modalClose" aria-label="Close">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M2 2L18 18M18 2L2 18" stroke="currentColor" stroke-width="1.5"/>
+        </svg>
+      </button>
+      <!-- JS fills this div with product details when opened -->
+      <div class="modal__content" id="modalContent"></div>
+    </div>
+  </div>
 
-  <!-- ================= INSTAGRAM ================= -->
-  <section class="instagram">
-    <h2>Instagram</h2>
-
-    <!-- Replace YOUR_WIDGET_ID -->
-    <iframe 
-      src="https://lightwidget.com/widgets/YOUR_WIDGET_ID.html"
-      scrolling="no"
-      class="lightwidget-widget">
-    </iframe>
+  <!-- ============================================================
+    INSTAGRAM FEED SECTION
+    Simulates a social media feed grid.
+    - In a real deployment, you'd connect this to the Instagram
+      Basic Display API or a service like Behold.so
+    - For now, JS populates this with placeholder cards
+    - Each card has a hover overlay with likes/comments
+  ============================================================ -->
+  <section class="section instagram" id="instagram">
+    <div class="section__header" data-reveal>
+      <p class="section__eyebrow">@stndrd.official</p>
+      <h2 class="section__title">The Feed</h2>
+    </div>
+    <!-- JS injects Instagram-style cards here -->
+    <div class="instagram__grid" id="instagramGrid"></div>
   </section>
 
+  <!-- ============================================================
+    CONTACT SECTION
+    Simple email contact form — no backend required.
+    - The form uses mailto: as a fallback (see JS handleFormSubmit)
+    - For real form handling, swap the JS submit handler to call
+      a service like Formspree, Netlify Forms, or EmailJS
+    - Each input uses the "floating label" pattern: the label
+      starts inside the input and moves up when you type
+  ============================================================ -->
+  <section class="section contact" id="contact">
+    <div class="contact__inner">
+      <div class="contact__text" data-reveal>
+        <p class="section__eyebrow">Get in Touch</p>
+        <h2 class="section__title">Let's Talk</h2>
+        <p class="contact__desc">
+          Questions about sizing, wholesale, or collabs?<br />
+          We usually reply within 24 hours.
+        </p>
+        <div class="contact__detail">
+          <span>hello@stndrd.com</span>
+        </div>
+      </div>
 
-  <!-- ================= CONTACT ================= -->
-  <section class="contact">
-    <h2>Contact</h2>
+      <form class="contact__form" id="contactForm" data-reveal>
+        <!-- Each .form-field wraps the input + its label together -->
+        <div class="form-field">
+          <input type="text" id="fieldName" name="name" required autocomplete="off" />
+          <label for="fieldName">Your Name</label>
+          <div class="form-field__line"></div>
+        </div>
 
-    <form>
-      <input type="text" placeholder="Name" required />
-      <input type="email" placeholder="Email" required />
-      <textarea placeholder="Message"></textarea>
-      <button type="submit">Send</button>
-    </form>
+        <div class="form-field">
+          <input type="email" id="fieldEmail" name="email" required autocomplete="off" />
+          <label for="fieldEmail">Email Address</label>
+          <div class="form-field__line"></div>
+        </div>
+
+        <div class="form-field">
+          <input type="text" id="fieldSubject" name="subject" autocomplete="off" />
+          <label for="fieldSubject">Subject</label>
+          <div class="form-field__line"></div>
+        </div>
+
+        <div class="form-field">
+          <textarea id="fieldMessage" name="message" rows="4" required></textarea>
+          <label for="fieldMessage">Your Message</label>
+          <div class="form-field__line"></div>
+        </div>
+
+        <button type="submit" class="btn btn--primary btn--full">
+          Send Message
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M2 8H14M9 3L14 8L9 13" stroke="currentColor" stroke-width="1.5"/>
+          </svg>
+        </button>
+
+        <!-- JS shows/hides this confirmation message on submit -->
+        <div class="form-success" id="formSuccess" aria-live="polite">
+          ✓ Message sent! We'll be in touch soon.
+        </div>
+      </form>
+    </div>
   </section>
 
-  <!-- JS -->
-  <script type="module" src="./main.js"></script>
+  <!-- ============================================================
+    FOOTER
+    Simple bottom strip with brand name and copyright.
+    The year is set dynamically by JS so it never goes stale.
+  ============================================================ -->
+  <footer class="footer">
+    <div class="footer__inner">
+      <div class="footer__brand">STNDRD</div>
+      <p class="footer__copy">© <span id="footerYear"></span> STNDRD. All rights reserved.</p>
+      <div class="footer__links">
+        <a href="#">Privacy</a>
+        <a href="#">Shipping</a>
+        <a href="#">Returns</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Link to our JavaScript file — placed at end of body so HTML loads first -->
+  <script src="js/main.js"></script>
 
 </body>
 </html>
