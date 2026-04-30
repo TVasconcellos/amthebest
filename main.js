@@ -1,88 +1,73 @@
 import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
 
-const canvas = document.getElementById('webgl');
-
-const scene = new THREE.Scene();
-
-const camera = new THREE.PerspectiveCamera(
-  45,
-  window.innerWidth / window.innerHeight,
-  0.1,
-  100
-);
-
-camera.position.z = 3;
+const canvas = document.getElementById('bg');
 
 const renderer = new THREE.WebGLRenderer({
   canvas,
-  antialias: true,
-  alpha: true
+  antialias: true
 });
 
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-/* GEOMETRY */
-const geometry = new THREE.PlaneGeometry(3, 3, 128, 128);
+const scene = new THREE.Scene();
 
-/* SHADER MATERIAL (this is the upgrade) */
+const camera = new THREE.OrthographicCamera(-1,1,1,-1,0,1);
+
+/* SHADER */
 const material = new THREE.ShaderMaterial({
-  wireframe: true,
   uniforms: {
     uTime: { value: 0 },
-    uMouse: { value: new THREE.Vector2(0, 0) }
+    uMouse: { value: new THREE.Vector2(0.5, 0.5) }
   },
   vertexShader: `
-    uniform float uTime;
-    uniform vec2 uMouse;
-
-    varying vec2 vUv;
-
     void main() {
-      vUv = uv;
-
-      vec3 pos = position;
-
-      float dist = distance(uv, uMouse);
-
-      pos.z += sin(pos.x * 3.0 + uTime) * 0.1;
-      pos.z += sin(pos.y * 3.0 + uTime) * 0.1;
-
-      pos.z += (0.2 / (dist + 0.1));
-
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+      gl_Position = vec4(position, 1.0);
     }
   `,
   fragmentShader: `
-    varying vec2 vUv;
+    uniform float uTime;
+    uniform vec2 uMouse;
 
     void main() {
-      gl_FragColor = vec4(0.05, 0.1, 0.2, 0.4);
+      vec2 uv = gl_FragCoord.xy / vec2(${window.innerWidth.toFixed(1)}, ${window.innerHeight.toFixed(1)});
+
+      float d = distance(uv, uMouse);
+
+      float glow = 0.12 / (d + 0.25);
+
+      vec3 base = vec3(0.02, 0.025, 0.04);
+      vec3 accent = vec3(0.05, 0.12, 0.3);
+
+      vec3 color = base + glow * accent;
+
+      // slow subtle movement
+      color += sin(uv.x * 8.0 + uTime * 0.6) * 0.01;
+
+      gl_FragColor = vec4(color, 1.0);
     }
   `
 });
 
-const mesh = new THREE.Mesh(geometry, material);
+const mesh = new THREE.Mesh(new THREE.PlaneGeometry(2,2), material);
 scene.add(mesh);
 
 /* MOUSE */
-const mouse = new THREE.Vector2();
+const target = new THREE.Vector2(0.5, 0.5);
 
 window.addEventListener('mousemove', (e) => {
-  mouse.x = e.clientX / window.innerWidth;
-  mouse.y = 1.0 - (e.clientY / window.innerHeight);
+  target.x = e.clientX / window.innerWidth;
+  target.y = 1 - (e.clientY / window.innerHeight);
 });
 
-/* ANIMATE */
+/* LOOP */
 const clock = new THREE.Clock();
 
 function animate() {
   requestAnimationFrame(animate);
 
   material.uniforms.uTime.value = clock.getElapsedTime();
-
-  // smooth interpolation (premium feel)
-  material.uniforms.uMouse.value.lerp(mouse, 0.05);
+  material.uniforms.uMouse.value.lerp(target, 0.05);
 
   renderer.render(scene, camera);
 }
@@ -92,7 +77,4 @@ animate();
 /* RESIZE */
 window.addEventListener('resize', () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
-
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
 });
