@@ -68,7 +68,7 @@ function animate() {
   requestAnimationFrame(animate);
 
   material.uniforms.uTime.value = clock.getElapsedTime();
-  material.uniforms.uMouse.value.lerp(target, 0.05);
+  material.uniforms.uMouse.value.lerp(target, 0.12);
 
   renderer.render(scene, camera);
 }
