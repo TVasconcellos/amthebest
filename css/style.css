@@ -461,11 +461,73 @@ button { cursor: none; font-family: var(--font-body); border: none; background: 
      border-radius — always 50% for circles
      The ring on hover (.color-dot:hover) uses --color-accent border.
 ================================================================ */
+/* ── Toolbar: filters row + sort dropdown ── */
+.products__toolbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+  flex-wrap: wrap;
+}
+
 .products__filters {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-xs);
-  margin-bottom: var(--space-lg);
+  flex: 1;
+}
+
+/* Sort dropdown group */
+.products__sort {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.sort-label {
+  font-size: var(--text-xs);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-grey);
+  white-space: nowrap;
+}
+
+/*
+  Sort <select> element — styled to match the dark aesthetic.
+  appearance: none removes the default OS dropdown arrow.
+  We add a custom chevron via background SVG.
+
+  ★ TWEAK:
+  Change border-color on :focus to change the focus ring colour.
+  Change the background SVG fill (%23...) to change arrow colour
+  (%23 = # in URL encoding, so %23888 = #888 = grey).
+*/
+.sort-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-color: transparent;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888888'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  border: 1px solid var(--color-border);
+  color: var(--color-white);
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  letter-spacing: 0.08em;
+  padding: 8px 32px 8px 14px;
+  cursor: none;
+  outline: none;
+  transition: border-color var(--duration-fast);
+}
+
+.sort-select:focus { border-color: rgba(255,255,255,0.4); }
+
+/* Dark option background for browsers that render the dropdown natively */
+.sort-select option {
+  background-color: var(--color-navy);
+  color: var(--color-white);
 }
 
 .filter-btn {
@@ -486,6 +548,17 @@ button { cursor: none; font-family: var(--font-body); border: none; background: 
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 1px;
   background: var(--color-border);
+}
+
+/*
+  Ghost cell fix: invisible filler divs added by JS to complete
+  the last row. They must have the same background as the page
+  so the 1px gap colour doesn't bleed through as a grey bar.
+  pointer-events: none ensures they can never intercept clicks.
+*/
+.grid-filler {
+  background: var(--color-black);
+  pointer-events: none;
 }
 
 .product-card {
@@ -718,11 +791,21 @@ button { cursor: none; font-family: var(--font-body); border: none; background: 
   margin-bottom: var(--space-md);
 }
 
-/* For sizes, the label uses the same .modal__sizes-label class */
 .modal__sizes .modal__sizes-label { margin-bottom: 10px; }
 
-.size-grid {
-  display: flex; flex-wrap: wrap; gap: 8px;
+/*
+  .modal__sizes-grid: the flex container that makes size buttons
+  sit in a horizontal row that wraps to a new line when needed.
+  This replaces the old block-level stacking.
+
+  ★ TWEAK:
+  gap: 8px = space between buttons. Increase for more breathing room.
+  flex-wrap: wrap = buttons wrap to next line if they don't all fit.
+*/
+.modal__sizes-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .size-btn {
@@ -938,6 +1021,7 @@ button { cursor: none; font-family: var(--font-body); border: none; background: 
   .nav__links           { display: none; }
   .footer__inner        { flex-direction: column; align-items: flex-start; gap: var(--space-sm); }
 
+  .products__toolbar    { flex-direction: column; gap: var(--space-sm); }
   .products__filters    { gap: 6px; }
   .filter-btn           { padding: 6px 12px; font-size: 10px; }
 
