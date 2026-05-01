@@ -15,7 +15,7 @@
   <meta property="og:image"       content="https://i.imgur.com/s4w41n0.jpeg" />
   <meta property="og:url"         content="https://tvasconcellos.github.io/amthebest/" />
   <meta property="og:type"        content="website" />
-  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>A&amp;M — Premium Merch</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -35,6 +35,7 @@
     NAVIGATION
     Logo image: put logo.png in the root folder (next to index.html).
     Language switcher buttons call setLanguage() in main.js.
+    Cart button opens the shopping cart side panel.
   ============================================================ -->
   <nav class="nav" id="mainNav">
     <a href="#hero" class="nav__logo-link">
@@ -45,21 +46,55 @@
       <li><a href="#instagram" data-i18n="nav.feed">Feed</a></li>
       <li><a href="#contact" data-i18n="nav.contact">Contact</a></li>
     </ul>
-    <div class="lang-switcher">
-      <button class="lang-btn active" data-lang="en">EN</button>
-      <span class="lang-divider">|</span>
-      <button class="lang-btn" data-lang="pt">PT</button>
+
+    <div class="nav__right">
+      <div class="lang-switcher">
+        <button class="lang-btn active" data-lang="en">EN</button>
+        <span class="lang-divider">|</span>
+        <button class="lang-btn" data-lang="pt">PT</button>
+      </div>
+
+      <!-- Cart button — shows item count badge when items are added -->
+      <button class="cart-btn" id="cartBtn" aria-label="Open cart">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <path d="M16 10a4 4 0 0 1-8 0"/>
+        </svg>
+        <span class="cart-btn__count" id="cartCount">0</span>
+      </button>
     </div>
   </nav>
 
   <!-- ============================================================
     HERO SECTION
-    Canvas: animated particle constellation, follows the mouse
-    when the cursor is inside the hero area.
-    Grain div: film-texture overlay on top of canvas.
+    
+    Background: a looping video (images/main.mp4).
+    A dark overlay sits on top to keep the text readable.
+    
+    The <video> attributes:
+      autoplay  — starts immediately
+      muted     — required for autoplay in modern browsers
+      loop      — restarts when it ends
+      playsinline — prevents fullscreen on mobile Safari
+      preload="auto" — starts loading immediately
+    
+    If the video fails to load, the fallback colour from .hero
+    background still shows underneath.
   ============================================================ -->
   <section class="hero" id="hero">
-    <canvas class="hero__canvas" id="heroCanvas"></canvas>
+    <video
+      class="hero__video"
+      id="heroVideo"
+      autoplay muted loop playsinline preload="auto"
+      poster="images/hero-poster.jpg"
+    >
+      <source src="images/main.mp4" type="video/mp4" />
+    </video>
+
+    <!-- Dark gradient overlay — keeps text legible over any video frame -->
+    <div class="hero__overlay"></div>
+    <!-- Film grain texture on top -->
     <div class="grain"></div>
     <div class="hero__content">
       <p class="hero__eyebrow" data-reveal data-i18n="hero.eyebrow">New Season Drop</p>
@@ -266,6 +301,113 @@
       </div>
     </div>
   </footer>
+
+  <!-- ============================================================
+    SHOPPING CART PANEL
+    Slides in from the right when the cart button is clicked.
+    Contents are populated by renderCart() in main.js.
+    
+    Cart state is persisted in localStorage so items survive a refresh.
+  ============================================================ -->
+  <div class="cart" id="cartPanel" aria-hidden="true">
+    <div class="cart__backdrop" id="cartBackdrop"></div>
+    <aside class="cart__panel">
+      <header class="cart__header">
+        <h3 class="cart__title" data-i18n="cart.title">Your Cart</h3>
+        <button class="cart__close" id="cartClose" aria-label="Close cart">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M2 2L18 18M18 2L2 18" stroke="currentColor" stroke-width="1.5"/>
+          </svg>
+        </button>
+      </header>
+
+      <!-- JS injects cart line items here -->
+      <div class="cart__items" id="cartItems"></div>
+
+      <!-- Footer: total + checkout button. Hidden when cart is empty. -->
+      <footer class="cart__footer" id="cartFooter">
+        <div class="cart__total">
+          <span data-i18n="cart.total">Total</span>
+          <span id="cartTotal">€0</span>
+        </div>
+        <button class="btn btn--primary btn--full" id="cartCheckoutBtn">
+          <span data-i18n="cart.orderByEmail">Order by Email</span>
+        </button>
+      </footer>
+
+      <!-- Empty state — shown when no items in cart -->
+      <div class="cart__empty" id="cartEmpty">
+        <p data-i18n="cart.empty">Your cart is empty.</p>
+      </div>
+    </aside>
+  </div>
+
+  <!-- ============================================================
+    ORDER MODAL
+    Opens from the cart "Order by Email" button.
+    User fills name, phone, email, address.
+    On submit: opens their email app pre-filled with the order details
+    sent to thebest.aem@gmail.com via mailto:
+    Then the cart is emptied.
+  ============================================================ -->
+  <div class="modal modal--order" id="orderModal" aria-hidden="true">
+    <div class="modal__backdrop" id="orderBackdrop"></div>
+    <div class="modal__panel modal__panel--center">
+      <button class="modal__close" id="orderClose" aria-label="Close">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M2 2L18 18M18 2L2 18" stroke="currentColor" stroke-width="1.5"/>
+        </svg>
+      </button>
+
+      <div class="order">
+        <p class="modal__family" data-i18n="order.eyebrow">Complete your order</p>
+        <h2 class="modal__title" data-i18n="order.title">Order by Email</h2>
+
+        <!-- Order summary: items + total — populated by JS -->
+        <div class="order__summary" id="orderSummary"></div>
+
+        <!-- Payment instructions box -->
+        <div class="order__payment">
+          <p class="order__payment-label" data-i18n="order.paymentLabel">Payment via MBWay</p>
+          <p class="order__payment-number">912 025 191</p>
+          <p class="order__payment-note" data-i18n="order.paymentNote">
+            Send the total amount via MBWay. Your order will be processed once payment is received.
+          </p>
+        </div>
+
+        <!-- Customer info form -->
+        <form class="order__form" id="orderForm">
+          <div class="form-field">
+            <input type="text" id="orderName" name="name" required autocomplete="name" />
+            <label for="orderName" data-i18n="order.name">Full Name</label>
+            <div class="form-field__line"></div>
+          </div>
+          <div class="form-field">
+            <input type="tel" id="orderPhone" name="phone" required autocomplete="tel" />
+            <label for="orderPhone" data-i18n="order.phone">Phone Number</label>
+            <div class="form-field__line"></div>
+          </div>
+          <div class="form-field">
+            <input type="email" id="orderEmail" name="email" required autocomplete="email" />
+            <label for="orderEmail" data-i18n="order.email">Email</label>
+            <div class="form-field__line"></div>
+          </div>
+          <div class="form-field">
+            <textarea id="orderAddress" name="address" rows="2" required autocomplete="street-address"></textarea>
+            <label for="orderAddress" data-i18n="order.address">Delivery Address</label>
+            <div class="form-field__line"></div>
+          </div>
+
+          <button type="submit" class="btn btn--primary btn--full">
+            <span data-i18n="order.submit">Order</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M2 8H14M9 3L14 8L9 13" stroke="currentColor" stroke-width="1.5"/>
+            </svg>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
 
   <script src="js/main.js"></script>
 </body>
