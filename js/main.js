@@ -1111,8 +1111,20 @@ function openModal(product) {
       alert(t['modal.selectSizeAlert'] || 'Please select a size first.');
       return;
     }
-    const colorNote = selectedColor ? ` — ${selectedColor.label}` : '';
-    alert(`${product.name}${colorNote} (${selectedSize || 'One Size'}) added to cart!\n\nConnect this to your checkout system.`);
+    /* Add the item to the real cart (defined in section 16) */
+    Cart.add({
+      id:       product.id,
+      name:     product.name,
+      family:   product.family,
+      price:    parseFloat(product.price.replace(/[^0-9.]/g, '')),
+      priceStr: product.price,
+      size:     selectedSize || 'One Size',
+      color:    selectedColor ? selectedColor.label : null,
+      image:    selectedColor ? selectedColor.image : product.image,
+    });
+    closeModal();
+    /* Brief delay then open the cart so the user sees what was added */
+    setTimeout(() => Cart.open(), 350);
   });
 
   modal.classList.add('is-open');
@@ -1281,6 +1293,14 @@ const TRANSLATIONS = {
     'sort.label': 'Sort:', 'sort.default': 'Default',
     'sort.nameAsc': 'Name A→Z', 'sort.nameDesc': 'Name Z→A',
     'sort.priceAsc': 'Price ↑', 'sort.priceDesc': 'Price ↓',
+    'cart.title': 'Your Cart', 'cart.total': 'Total',
+    'cart.orderByEmail': 'Order by Email', 'cart.empty': 'Your cart is empty.',
+    'order.eyebrow': 'Complete your order', 'order.title': 'Order by Email',
+    'order.paymentLabel': 'Payment via MBWay',
+    'order.paymentNote': 'Send the total amount via MBWay. Your order will be processed once payment is received.',
+    'order.name': 'Full Name', 'order.phone': 'Phone Number',
+    'order.email': 'Email', 'order.address': 'Delivery Address',
+    'order.submit': 'Order',
     'instagram.title': 'The Feed',
     'contact.eyebrow': 'Get in Touch', 'contact.title': "Let's Talk",
     'contact.desc': 'Questions about sizing, wholesale, or collabs?<br />We usually reply within 24 hours.',
@@ -1310,6 +1330,14 @@ const TRANSLATIONS = {
     'sort.label': 'Ordenar:', 'sort.default': 'Padrão',
     'sort.nameAsc': 'Nome A→Z', 'sort.nameDesc': 'Nome Z→A',
     'sort.priceAsc': 'Preço ↑', 'sort.priceDesc': 'Preço ↓',
+    'cart.title': 'O Teu Carrinho', 'cart.total': 'Total',
+    'cart.orderByEmail': 'Encomendar por Email', 'cart.empty': 'O teu carrinho está vazio.',
+    'order.eyebrow': 'Finaliza a tua encomenda', 'order.title': 'Encomendar por Email',
+    'order.paymentLabel': 'Pagamento por MBWay',
+    'order.paymentNote': 'Envia o valor total por MBWay. A tua encomenda será processada após receção do pagamento.',
+    'order.name': 'Nome Completo', 'order.phone': 'Número de Telefone',
+    'order.email': 'Email', 'order.address': 'Morada de Entrega',
+    'order.submit': 'Encomendar',
     'instagram.title': 'O Feed',
     'contact.eyebrow': 'Fala Connosco', 'contact.title': 'Vamos Falar',
     'contact.desc': 'Dúvidas sobre tamanhos, grossista ou colaborações?<br />Respondemos geralmente em 24 horas.',
@@ -1366,18 +1394,341 @@ function initLanguageSwitcher() {
 
 
 /* ================================================================
+   16. SHOPPING CART
+
+   The Cart object is a singleton that manages cart state, persists
+   to localStorage so items survive page refresh, and renders into
+   the cart panel + count badge.
+
+   ★ HOW THE CHECKOUT WORKS:
+   GitHub Pages is static — there's no backend to send emails from.
+   The "Order by Email" button opens a modal with the order summary
+   and a customer info form. On submit, it builds a mailto: link
+   pre-filled with all the details and opens the customer's email
+   client. They click "Send" once, and the email arrives at
+   ORDER_EMAIL below. After submitting, the cart is emptied.
+
+   ★ WHERE ORDERS ARE SENT:
+   Change ORDER_EMAIL to send orders elsewhere.
+
+   ★ MBWAY PAYMENT NUMBER:
+   Change MBWAY_NUMBER to update the payment number shown to customers.
+
+   ★ ITEM IDENTITY:
+   Each cart line is identified by id + size + color, so the same
+   product in different sizes/colours becomes separate cart lines.
+================================================================ */
+
+const ORDER_EMAIL  = 'thebest.aem@gmail.com';
+const MBWAY_NUMBER = '912 025 191';
+
+const Cart = {
+  items: [],
+
+  /* Load saved cart from localStorage on init */
+  init() {
+    try {
+      const saved = localStorage.getItem('am-cart');
+      if (saved) this.items = JSON.parse(saved);
+    } catch { this.items = []; }
+    this.render();
+  },
+
+  /* Persist cart to localStorage so refresh doesn't lose items */
+  save() {
+    try { localStorage.setItem('am-cart', JSON.stringify(this.items)); } catch {}
+  },
+
+  /* Add an item — if same product+size+color exists, increment quantity */
+  add(item) {
+    const existing = this.items.find(i =>
+      i.id === item.id && i.size === item.size && i.color === item.color
+    );
+    if (existing) {
+      existing.qty += 1;
+    } else {
+      this.items.push({ ...item, qty: 1 });
+    }
+    this.save();
+    this.render();
+  },
+
+  /* Change quantity by delta (+1 or -1). Removes line when qty hits 0. */
+  changeQty(idx, delta) {
+    const item = this.items[idx];
+    if (!item) return;
+    item.qty += delta;
+    if (item.qty <= 0) this.items.splice(idx, 1);
+    this.save();
+    this.render();
+  },
+
+  remove(idx) {
+    this.items.splice(idx, 1);
+    this.save();
+    this.render();
+  },
+
+  empty() {
+    this.items = [];
+    this.save();
+    this.render();
+  },
+
+  /* Total price across all line items */
+  total() {
+    return this.items.reduce((sum, i) => sum + (i.price * i.qty), 0);
+  },
+
+  /* Total number of items (sum of quantities) for the badge */
+  count() {
+    return this.items.reduce((sum, i) => sum + i.qty, 0);
+  },
+
+  /* Show the cart side panel */
+  open() {
+    const panel = document.getElementById('cartPanel');
+    if (!panel) return;
+    panel.classList.add('is-open');
+    panel.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  },
+
+  close() {
+    const panel = document.getElementById('cartPanel');
+    if (!panel) return;
+    panel.classList.remove('is-open');
+    panel.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  },
+
+  /* Re-render: cart count badge, line items, total, empty state */
+  render() {
+    const lang  = document.documentElement.dataset.lang || 'en';
+    const t     = TRANSLATIONS[lang];
+
+    /* Count badge */
+    const countEl = document.getElementById('cartCount');
+    if (countEl) {
+      const c = this.count();
+      countEl.textContent = c;
+      countEl.classList.toggle('is-active', c > 0);
+    }
+
+    const itemsEl  = document.getElementById('cartItems');
+    const footerEl = document.getElementById('cartFooter');
+    const emptyEl  = document.getElementById('cartEmpty');
+    const totalEl  = document.getElementById('cartTotal');
+
+    if (!itemsEl) return;
+
+    /* Empty state */
+    if (this.items.length === 0) {
+      itemsEl.innerHTML = '';
+      if (footerEl) footerEl.style.display = 'none';
+      if (emptyEl)  emptyEl.style.display  = 'flex';
+      return;
+    }
+
+    if (footerEl) footerEl.style.display = '';
+    if (emptyEl)  emptyEl.style.display  = 'none';
+
+    /* Render line items */
+    itemsEl.innerHTML = this.items.map((item, idx) => `
+      <div class="cart-item">
+        <img class="cart-item__image" src="${item.image}" alt="${item.name}"
+          onerror="this.style.background='var(--color-navy-mid)'; this.removeAttribute('src')" />
+        <div class="cart-item__body">
+          <p class="cart-item__name">${item.name}</p>
+          <p class="cart-item__meta">
+            ${item.color ? `${item.color} · ` : ''}${item.size}
+          </p>
+          <div class="cart-item__row">
+            <div class="cart-item__qty">
+              <button class="qty-btn" data-action="dec" data-idx="${idx}" aria-label="Decrease">−</button>
+              <span class="qty-value">${item.qty}</span>
+              <button class="qty-btn" data-action="inc" data-idx="${idx}" aria-label="Increase">+</button>
+            </div>
+            <p class="cart-item__price">€${(item.price * item.qty).toFixed(0)}</p>
+          </div>
+        </div>
+        <button class="cart-item__remove" data-idx="${idx}" aria-label="Remove">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M2 2L12 12M12 2L2 12" stroke="currentColor" stroke-width="1.5"/>
+          </svg>
+        </button>
+      </div>
+    `).join('');
+
+    /* Wire up qty buttons + remove buttons */
+    itemsEl.querySelectorAll('.qty-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx    = parseInt(btn.dataset.idx);
+        const delta  = btn.dataset.action === 'inc' ? 1 : -1;
+        this.changeQty(idx, delta);
+      });
+    });
+    itemsEl.querySelectorAll('.cart-item__remove').forEach(btn => {
+      btn.addEventListener('click', () => this.remove(parseInt(btn.dataset.idx)));
+    });
+
+    /* Update total */
+    if (totalEl) totalEl.textContent = `€${this.total().toFixed(0)}`;
+  },
+
+  /* Build the order summary HTML for the order modal */
+  summaryHTML() {
+    return `
+      <div class="order__items">
+        ${this.items.map(item => `
+          <div class="order__item">
+            <span class="order__item-name">
+              ${item.qty} × ${item.name}${item.color ? ` (${item.color})` : ''} — ${item.size}
+            </span>
+            <span class="order__item-price">€${(item.price * item.qty).toFixed(0)}</span>
+          </div>
+        `).join('')}
+      </div>
+      <div class="order__total-row">
+        <span>Total</span>
+        <span class="order__total">€${this.total().toFixed(0)}</span>
+      </div>
+    `;
+  },
+
+  /* Plain-text version of the cart for the email body */
+  emailBody(customer) {
+    const lines = this.items.map(item =>
+      `  • ${item.qty} × ${item.name}${item.color ? ` (${item.color})` : ''} — ${item.size}  —  €${(item.price * item.qty).toFixed(0)}`
+    ).join('\n');
+
+    return [
+      'New A&M order',
+      '─────────────────────',
+      '',
+      'CUSTOMER:',
+      `  Name:    ${customer.name}`,
+      `  Phone:   ${customer.phone}`,
+      `  Email:   ${customer.email}`,
+      `  Address: ${customer.address}`,
+      '',
+      'ITEMS:',
+      lines,
+      '',
+      `TOTAL: €${this.total().toFixed(0)}`,
+      '',
+      `Payment: MBWay to ${MBWAY_NUMBER}`,
+      '',
+      '─────────────────────',
+      'Awaiting payment confirmation.',
+    ].join('\n');
+  },
+};
+
+function initCart() {
+  Cart.init();
+
+  /* Open cart from nav button */
+  document.getElementById('cartBtn')?.addEventListener('click', () => Cart.open());
+  document.getElementById('cartClose')?.addEventListener('click',     () => Cart.close());
+  document.getElementById('cartBackdrop')?.addEventListener('click',  () => Cart.close());
+
+  /* Close cart on Escape */
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      Cart.close();
+      closeOrderModal();
+    }
+  });
+
+  /* Open the order modal from the cart's checkout button */
+  document.getElementById('cartCheckoutBtn')?.addEventListener('click', () => {
+    if (Cart.items.length === 0) return;
+    openOrderModal();
+  });
+
+  /* Order modal close handlers */
+  document.getElementById('orderClose')?.addEventListener('click',    closeOrderModal);
+  document.getElementById('orderBackdrop')?.addEventListener('click', closeOrderModal);
+
+  /* Floating labels for order form */
+  document.querySelectorAll('#orderForm input, #orderForm textarea').forEach(field => {
+    field.addEventListener('input', () => {
+      field.classList.toggle('has-value', field.value.trim() !== '');
+    });
+  });
+
+  /* Order form submission — builds mailto: and empties cart */
+  document.getElementById('orderForm')?.addEventListener('submit', handleOrderSubmit);
+}
+
+function openOrderModal() {
+  const modal      = document.getElementById('orderModal');
+  const summaryEl  = document.getElementById('orderSummary');
+  if (!modal || !summaryEl) return;
+
+  /* Populate summary with current cart contents */
+  summaryEl.innerHTML = Cart.summaryHTML();
+
+  modal.classList.add('is-open');
+  modal.setAttribute('aria-hidden', 'false');
+  /* Body scroll already locked (cart is open behind it) */
+}
+
+function closeOrderModal() {
+  const modal = document.getElementById('orderModal');
+  if (!modal) return;
+  modal.classList.remove('is-open');
+  modal.setAttribute('aria-hidden', 'true');
+}
+
+function handleOrderSubmit(e) {
+  e.preventDefault();
+
+  const customer = {
+    name:    document.getElementById('orderName').value.trim(),
+    phone:   document.getElementById('orderPhone').value.trim(),
+    email:   document.getElementById('orderEmail').value.trim(),
+    address: document.getElementById('orderAddress').value.trim(),
+  };
+
+  /*
+    Build a mailto: link with subject and body URL-encoded.
+    Opens the customer's default email app (Gmail, Mail.app, Outlook…)
+    with everything pre-filled. They just press Send.
+  */
+  const subject = `A&M Order — ${customer.name} — €${Cart.total().toFixed(0)}`;
+  const body    = Cart.emailBody(customer);
+  const mailto  = `mailto:${ORDER_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+  /* Trigger email client */
+  window.location.href = mailto;
+
+  /* Empty cart and reset everything */
+  Cart.empty();
+  closeOrderModal();
+  Cart.close();
+  document.getElementById('orderForm').reset();
+  document.querySelectorAll('#orderForm .has-value').forEach(el => el.classList.remove('has-value'));
+}
+
+
+/* ================================================================
    15. INIT
 ================================================================ */
 document.addEventListener('DOMContentLoaded', () => {
   initCursor();
   initNav();
-  initHeroCanvas();
+  /* Hero now uses a video background — no canvas init needed */
   renderProducts();
   renderInstagram();
   initScrollReveal();
   initFilters();
   initModal();
   initContactForm();
+  initFooterYear();
+  initLanguageSwitcher();
+  initCart();   /* Shopping cart panel + checkout flow */
   initFooterYear();
   initLanguageSwitcher();
   console.log('A&M — site loaded ✓');
