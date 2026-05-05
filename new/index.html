@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- ============================================================
+    A&M PRODUCT BUILDER (private admin tool)
+    
+    This page is NOT linked from the main site.
+    Access it manually by going to /new on your live site, e.g.
+    https://yourname.github.io/amthebest/new
+    
+    HOW IT WORKS:
+    1. Fill out the form with product details.
+    2. Click "Generate Code".
+    3. Copy the generated JS object.
+    4. Paste it at the end of the PRODUCTS array in main.js
+       (just before the closing ]).
+    5. Commit & push to GitHub. The product appears on the live site.
+    
+    This is a static, no-database approach. The form doesn't save
+    products anywhere — it only generates code for you to paste.
+    This is necessary because GitHub Pages has no backend.
+    
+    The form remembers your last entries in localStorage as a
+    convenience, so refresh doesn't lose your work.
+  ============================================================ -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>A&amp;M — Product Builder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    /* ============================================================
+       Self-contained styles (no shared style.css).
+       Kept simple — this is a private admin tool, not a brand surface.
+    ============================================================ */
+    :root {
+      --color-black: #0A0A0A;
+      --color-white: #F5F5F5;
+      --color-navy: #0D1B2A;
+      --color-navy-mid: #162232;
+      --color-accent: #C8A97E;
+      --color-grey: #888;
+      --color-border: rgba(255,255,255,0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--color-black);
+      color: var(--color-white);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    .wrap {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2.5rem;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.25rem;
+    }
+
+    .eyebrow {
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--color-accent);
+      margin-bottom: 0.5rem;
+    }
+
+    .lead {
+      color: var(--color-grey);
+      margin-bottom: 2.5rem;
+      font-size: 13px;
+    }
+
+    .lead a {
+      color: var(--color-accent);
+      text-decoration: underline;
+    }
+
+    /* Form layout */
+    .field {
+      margin-bottom: 1.25rem;
+    }
+
+    label {
+      display: block;
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--color-grey);
+      margin-bottom: 0.5rem;
+    }
+
+    .hint {
+      display: block;
+      font-size: 11px;
+      color: var(--color-grey);
+      margin-top: 0.4rem;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    select,
+    textarea {
+      width: 100%;
+      background: var(--color-navy);
+      border: 1px solid var(--color-border);
+      color: var(--color-white);
+      font-family: inherit;
+      font-size: 14px;
+      padding: 10px 12px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: rgba(255,255,255,0.3);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    select { cursor: pointer; }
+    select option { background: var(--color-navy); }
+
+    /* Two-column row for paired inputs */
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    /* Size checkbox grid */
+    .size-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+    }
+
+    .size-grid label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 0;
+      border: 1px solid var(--color-border);
+      background: var(--color-navy);
+      cursor: pointer;
+      letter-spacing: 0;
+      text-transform: none;
+      font-size: 13px;
+      color: rgba(255,255,255,0.7);
+      transition: all 0.2s;
+      margin: 0;
+    }
+
+    .size-grid input { display: none; }
+
+    .size-grid label:has(input:checked) {
+      background: var(--color-white);
+      color: var(--color-black);
+      border-color: var(--color-white);
+    }
+
+    /* Color rows (variants) */
+    .colors {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .color-row {
+      display: grid;
+      grid-template-columns: 1fr 100px 1fr 32px;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .color-row input[type="color"] {
+      height: 36px;
+      padding: 2px;
+      cursor: pointer;
+    }
+
+    .color-row .remove-color {
+      width: 32px; height: 32px;
+      background: transparent;
+      border: 1px solid var(--color-border);
+      color: rgba(255,255,255,0.5);
+      cursor: pointer;
+      font-size: 16px;
+      line-height: 1;
+    }
+
+    .color-row .remove-color:hover {
+      color: var(--color-white);
+      border-color: rgba(255,255,255,0.4);
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 18px;
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid var(--color-border);
+      background: transparent;
+      color: var(--color-white);
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+
+    .btn:hover {
+      background: rgba(255,255,255,0.05);
+      border-color: rgba(255,255,255,0.3);
+    }
+
+    .btn--primary {
+      background: var(--color-white);
+      color: var(--color-black);
+      border-color: var(--color-white);
+    }
+
+    .btn--primary:hover {
+      background: var(--color-accent);
+      border-color: var(--color-accent);
+      color: var(--color-black);
+    }
+
+    .actions {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 2rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--color-border);
+    }
+
+    /* Output box */
+    .output {
+      margin-top: 2rem;
+      display: none;
+    }
+
+    .output.is-visible { display: block; }
+
+    .output-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+
+    .output-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.5rem;
+      letter-spacing: 0.05em;
+    }
+
+    .output-instructions {
+      background: rgba(200,169,126,0.08);
+      border: 1px solid rgba(200,169,126,0.3);
+      color: var(--color-accent);
+      padding: 12px 16px;
+      font-size: 12px;
+      line-height: 1.7;
+      margin-bottom: 0.75rem;
+    }
+
+    .output-instructions strong {
+      color: var(--color-white);
+      font-weight: 600;
+    }
+
+    pre {
+      background: #000;
+      border: 1px solid var(--color-border);
+      padding: 1rem;
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      line-height: 1.6;
+      color: #e0d8c8;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .copied-toast {
+      position: fixed;
+      bottom: 2rem; left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--color-accent);
+      color: var(--color-black);
+      padding: 10px 20px;
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-weight: 500;
+      transition: transform 0.3s ease;
+    }
+
+    .copied-toast.is-visible { transform: translateX(-50%) translateY(0); }
+
+    /* Section divider */
+    .section-divider {
+      margin: 2rem 0 1rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--color-border);
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--color-grey);
+    }
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+  <p class="eyebrow">A&amp;M Admin</p>
+  <h1>Product Builder</h1>
+  <p class="lead">
+    Fill the form, generate the product code, paste it into <code>main.js</code>,
+    push to GitHub. <a href="../" target="_blank">← Back to site</a>
+  </p>
+
+  <form id="builder">
+
+    <!-- ── Basic info ── -->
+    <div class="field">
+      <label for="name">Product Name <span class="hint">(e.g. "T-Shirt Bordeaux")</span></label>
+      <input type="text" id="name" required />
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label for="family">Family</label>
+        <select id="family" required>
+          <option value="T-Shirt">T-Shirt</option>
+          <option value="T-Shirt No Logo">T-Shirt No Logo</option>
+          <option value="Hoodie">Hoodie</option>
+          <option value="Sweatshirt">Sweatshirt</option>
+          <option value="Shorts">Shorts</option>
+          <option value="Water Bottle A&amp;M">Water Bottle A&amp;M</option>
+          <option value="Caps">Caps</option>
+          <option value="Socks">Socks</option>
+          <option value="Totebag">Totebag</option>
+          <option value="Packs">Packs</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="category">Category (filter)</label>
+        <select id="category" required>
+          <option value="tshirt">T-Shirts</option>
+          <option value="tshirt-nolog">T-Shirts No Logo</option>
+          <option value="hoodie">Hoodies</option>
+          <option value="sweatshirt">Sweatshirts</option>
+          <option value="shorts">Shorts</option>
+          <option value="bottle">Water Bottles</option>
+          <option value="cap">Caps</option>
+          <option value="socks">Socks</option>
+          <option value="tote">Totebags</option>
+          <option value="pack">Packs</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label for="price">Price (€)</label>
+        <input type="number" id="price" step="0.01" min="0" required />
+      </div>
+
+      <div class="field">
+        <label for="badge">Badge</label>
+        <select id="badge">
+          <option value="">None</option>
+          <option value="Best Seller">Best Seller</option>
+          <option value="New">New</option>
+          <option value="Best Value">Best Value</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- ── Image ── -->
+    <div class="field">
+      <label for="image">Image Filename <span class="hint">(just the filename, e.g. "shirt11.jpg" — file goes in images/products/)</span></label>
+      <input type="text" id="image" placeholder="shirt11.jpg" required />
+    </div>
+
+    <!-- ── Description ── -->
+    <div class="field">
+      <label for="description">Description</label>
+      <textarea id="description" rows="3" required placeholder="Premium 200gsm organic cotton..."></textarea>
+    </div>
+
+    <!-- ── Sizes ── -->
+    <div class="field">
+      <label>Available Sizes</label>
+      <div class="size-grid">
+        <label><input type="checkbox" value="XS"/>XS</label>
+        <label><input type="checkbox" value="S"/>S</label>
+        <label><input type="checkbox" value="M"/>M</label>
+        <label><input type="checkbox" value="L"/>L</label>
+        <label><input type="checkbox" value="XL"/>XL</label>
+        <label><input type="checkbox" value="XXL"/>XXL</label>
+        <label><input type="checkbox" value="One Size"/>One Size</label>
+      </div>
+      <span class="hint">Tick "One Size" only for non-sized items (caps, bottles, totes, socks).</span>
+    </div>
+
+    <!-- ── Color variants ── -->
+    <p class="section-divider">Color Variants (optional)</p>
+    <div class="field">
+      <label>Colors <span class="hint">(leave empty if the product has only one colour)</span></label>
+      <div class="colors" id="colors"></div>
+      <button type="button" class="btn" id="addColor" style="margin-top:8px">+ Add Color</button>
+    </div>
+
+    <div class="actions">
+      <button type="submit" class="btn btn--primary">Generate Code</button>
+      <button type="button" class="btn" id="clearForm">Clear Form</button>
+    </div>
+  </form>
+
+  <!-- ── Output: generated code ── -->
+  <div class="output" id="output">
+    <div class="output-header">
+      <h2 class="output-title">Generated Code</h2>
+      <button type="button" class="btn btn--primary" id="copyBtn">Copy</button>
+    </div>
+    <div class="output-instructions">
+      <strong>Steps:</strong><br>
+      1. Click <strong>Copy</strong> above.<br>
+      2. Open <code>js/main.js</code>.<br>
+      3. Find the <code>PRODUCTS</code> array (near the top).<br>
+      4. Paste this object before the final <code>]</code>, after the last existing entry.<br>
+      5. Make sure to keep the comma separating entries.<br>
+      6. Save, commit, push to GitHub. The product is live.
+    </div>
+    <pre id="codeOutput"></pre>
+  </div>
+</div>
+
+<div class="copied-toast" id="toast">✓ Copied to clipboard</div>
+
+<script>
+  /* ============================================================
+     PRODUCT BUILDER LOGIC
+     
+     - addColorRow():  appends a color variant row to the form
+     - readForm():     reads all form values, returns a product object
+     - buildCode():    converts the object into JS code as a string
+     - localStorage:   saves draft on every change so refresh doesn't lose it
+  ============================================================ */
+
+  /* Common color presets — pre-populated when a row is added */
+  const PRESETS = [
+    { label: 'Bordeaux',     hex: '#5C1A1A' },
+    { label: 'Navy',         hex: '#1B2A4A' },
+    { label: 'Forest Green', hex: '#2D4A2D' },
+    { label: 'Black',        hex: '#111111' },
+    { label: 'White',        hex: '#F0F0F0' },
+  ];
+
+  let nextProductId = parseInt(localStorage.getItem('am-next-id') || '25');
+
+  /* ── Add color variant row ── */
+  function addColorRow(prefilled) {
+    const colors = document.getElementById('colors');
+    const idx = colors.children.length;
+    const preset = PRESETS[idx] || { label: '', hex: '#888888' };
+    const data = prefilled || preset;
+
+    const row = document.createElement('div');
+    row.className = 'color-row';
+    row.innerHTML = `
+      <input type="text"  class="c-label" placeholder="Label (e.g. Navy)" value="${data.label || ''}" />
+      <input type="color" class="c-hex"   value="${data.hex || '#888888'}" />
+      <input type="text"  class="c-image" placeholder="Image filename (shirt2.jpg)" value="${data.image || ''}" />
+      <button type="button" class="remove-color" aria-label="Remove">×</button>
+    `;
+    row.querySelector('.remove-color').addEventListener('click', () => row.remove());
+    colors.appendChild(row);
+  }
+
+  document.getElementById('addColor').addEventListener('click', () => addColorRow());
+
+  /* ── Read form values into a product object ── */
+  function readForm() {
+    const sizes = Array.from(document.querySelectorAll('.size-grid input:checked'))
+      .map(el => el.value);
+
+    const colorRows = Array.from(document.querySelectorAll('.color-row'));
+    const colors = colorRows
+      .map(row => ({
+        label: row.querySelector('.c-label').value.trim(),
+        hex:   row.querySelector('.c-hex').value,
+        image: 'images/products/' + row.querySelector('.c-image').value.trim(),
+      }))
+      .filter(c => c.label && c.image !== 'images/products/');
+
+    return {
+      id:          nextProductId,
+      name:        document.getElementById('name').value.trim(),
+      family:      document.getElementById('family').value,
+      category:    document.getElementById('category').value,
+      price:       '€' + parseFloat(document.getElementById('price').value).toFixed(0),
+      badge:       document.getElementById('badge').value || null,
+      image:       'images/products/' + document.getElementById('image').value.trim(),
+      description: document.getElementById('description').value.trim(),
+      sizes:       sizes,
+      colors:      colors.length > 0 ? colors : null,
+    };
+  }
+
+  /* ── Convert product object to copy-pasteable JS code ── */
+  function buildCode(p) {
+    const escapeStr = (s) => s.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+
+    const sizesStr = p.sizes.map(s => `"${s}"`).join(', ');
+
+    let colorsStr = 'null';
+    if (p.colors) {
+      const colorLines = p.colors.map(c =>
+        `    { label: "${escapeStr(c.label)}", hex: "${c.hex}", image: "${c.image}" }`
+      ).join(',\n');
+      colorsStr = `[\n${colorLines}\n  ]`;
+    }
+
+    const badgeStr = p.badge ? `"${escapeStr(p.badge)}"` : 'null';
+
+    return `  {
+    id: ${p.id},
+    name: "${escapeStr(p.name)}",
+    family: "${escapeStr(p.family)}",
+    category: "${p.category}",
+    price: "${p.price}",
+    badge: ${badgeStr},
+    image: "${p.image}",
+    description: "${escapeStr(p.description)}",
+    sizes: [${sizesStr}],
+    colors: ${colorsStr}
+  },`;
+  }
+
+  /* ── Form submit ── */
+  document.getElementById('builder').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const product = readForm();
+
+    if (product.sizes.length === 0) {
+      alert('Please select at least one size (use "One Size" for non-sized items).');
+      return;
+    }
+
+    const code = buildCode(product);
+    document.getElementById('codeOutput').textContent = code;
+    document.getElementById('output').classList.add('is-visible');
+    document.getElementById('output').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    /* Bump the next ID so consecutive products don't collide */
+    nextProductId += 1;
+    localStorage.setItem('am-next-id', nextProductId);
+  });
+
+  /* ── Copy button ── */
+  document.getElementById('copyBtn').addEventListener('click', async () => {
+    const code = document.getElementById('codeOutput').textContent;
+    try {
+      await navigator.clipboard.writeText(code);
+      const toast = document.getElementById('toast');
+      toast.classList.add('is-visible');
+      setTimeout(() => toast.classList.remove('is-visible'), 1800);
+    } catch {
+      /* Fallback: select the text so user can copy manually */
+      const range = document.createRange();
+      range.selectNode(document.getElementById('codeOutput'));
+      window.getSelection().removeAllRanges();
+      window.getSelection().addRange(range);
+    }
+  });
+
+  /* ── Clear form ── */
+  document.getElementById('clearForm').addEventListener('click', () => {
+    if (!confirm('Clear all fields?')) return;
+    document.getElementById('builder').reset();
+    document.getElementById('colors').innerHTML = '';
+    document.getElementById('output').classList.remove('is-visible');
+  });
+
+  /* ── Auto-save form draft to localStorage ── */
+  /* (rebinds change/input listeners after color rows are added) */
+  function saveDraft() {
+    try {
+      const draft = {
+        name: document.getElementById('name').value,
+        family: document.getElementById('family').value,
+        category: document.getElementById('category').value,
+        price: document.getElementById('price').value,
+        badge: document.getElementById('badge').value,
+        image: document.getElementById('image').value,
+        description: document.getElementById('description').value,
+        sizes: Array.from(document.querySelectorAll('.size-grid input:checked')).map(el => el.value),
+        colors: Array.from(document.querySelectorAll('.color-row')).map(row => ({
+          label: row.querySelector('.c-label').value,
+          hex:   row.querySelector('.c-hex').value,
+          image: row.querySelector('.c-image').value,
+        })),
+      };
+      localStorage.setItem('am-draft', JSON.stringify(draft));
+    } catch {}
+  }
+
+  function loadDraft() {
+    try {
+      const raw = localStorage.getItem('am-draft');
+      if (!raw) return;
+      const d = JSON.parse(raw);
+      if (d.name)        document.getElementById('name').value = d.name;
+      if (d.family)      document.getElementById('family').value = d.family;
+      if (d.category)    document.getElementById('category').value = d.category;
+      if (d.price)       document.getElementById('price').value = d.price;
+      if (d.badge)       document.getElementById('badge').value = d.badge;
+      if (d.image)       document.getElementById('image').value = d.image;
+      if (d.description) document.getElementById('description').value = d.description;
+      (d.sizes || []).forEach(size => {
+        const cb = document.querySelector(`.size-grid input[value="${size}"]`);
+        if (cb) cb.checked = true;
+      });
+      (d.colors || []).forEach(c => addColorRow(c));
+    } catch {}
+  }
+
+  document.body.addEventListener('input',  saveDraft);
+  document.body.addEventListener('change', saveDraft);
+
+  loadDraft();
+</script>
+
+</body>
+</html>
