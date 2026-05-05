@@ -698,12 +698,17 @@ button { cursor: none; font-family: var(--font-body); border: none; background: 
 
 
 /* ================================================================
-   9. PRODUCT MODAL — with Color Swatches
+   9. PRODUCT MODAL — Centered, with Color Swatches
 
    ★ TWEAK GUIDE:
 
-   .modal__panel width: min(600px, 95vw)
-     Change 600px for a wider or narrower panel.
+   .modal__panel width: min(1100px, 95vw)
+     The cap (1100px) is the max width on large screens.
+     95vw makes it shrink to fit narrow viewports.
+
+   .modal__panel max-height: 90vh
+     Caps the modal height so it never exceeds the viewport.
+     Inner content scrolls if it overflows.
 
    .modal__image transition:
      The opacity fade when switching colours is set in main.js
@@ -732,21 +737,37 @@ button { cursor: none; font-family: var(--font-body); border: none; background: 
   backdrop-filter: blur(4px);
 }
 
+/*
+  Product modal panel — centered modal, not a slideover.
+  - top/left 50% + translate centres the panel.
+  - max-height: 90vh ensures it fits any viewport with scroll inside.
+  - Initial state is scaled slightly down for the entry animation.
+  
+  ★ TWEAK GUIDE:
+  width: min(1100px, 95vw)
+    The cap (1100px) is the max width on large screens.
+    95vw makes it shrink to fit narrow viewports.
+  
+  max-height: 90vh
+    The modal can never exceed 90% of viewport height.
+    Inner content scrolls if it overflows.
+*/
 .modal__panel {
-  position: absolute; top: 0; right: 0; bottom: 0;
-  /*
-    Wider panel (1100px) so the image + details can sit side by side.
-    Falls back to 95vw on narrow viewports.
-  */
+  position: absolute;
+  top: 50%; left: 50%;
   width: min(1100px, 95vw);
+  max-height: 90vh;
   background: var(--color-navy);
-  border-left: 1px solid var(--color-border);
+  border: 1px solid var(--color-border);
   overflow-y: auto;
-  transform: translateX(100%);
-  transition: transform var(--duration-slow) var(--ease-smooth);
+  /* Start slightly smaller and offset; animate to centred + full size */
+  transform: translate(-50%, -50%) scale(0.96);
+  transition: transform var(--duration-base) var(--ease-smooth);
 }
 
-.modal.is-open .modal__panel { transform: translateX(0); }
+.modal.is-open .modal__panel {
+  transform: translate(-50%, -50%) scale(1);
+}
 
 .modal__close {
   position: absolute; top: var(--space-md); right: var(--space-md);
@@ -766,31 +787,22 @@ button { cursor: none; font-family: var(--font-body); border: none; background: 
 .modal__content { padding: var(--space-md); }
 
 /*
-  Two-column layout: image on the left (sticky so it stays visible as the 
-  details column scrolls if it's longer), details on the right.
+  Two-column layout inside the modal: image left, details right.
   At narrow widths (≤900px) it collapses to a single stacked column.
   
   ★ TWEAK GUIDE:
-  grid-template-columns 1.1fr 1fr — adjust ratio if you want the image
-  bigger or smaller relative to the details column.
+  grid-template-columns 1fr 1fr — equal columns. Change to "1.2fr 1fr"
+  for a bigger image, or "1fr 1.1fr" for more room on the details side.
 */
 .modal__layout {
   display: grid;
-  grid-template-columns: 1.1fr 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: var(--space-md);
   align-items: start;
 }
 
-.modal__media {
-  /* Sticky keeps the image visible as the right column scrolls,
-     handy for long descriptions or many sizes. */
-  position: sticky;
-  top: var(--space-md);
-}
-
 .modal__details {
-  padding-top: var(--space-md); /* Aligns with image top once close button is offset */
-  padding-right: var(--space-md);
+  padding-right: var(--space-sm);
 }
 
 /* Product image — fades when colour is switched (JS controls opacity) */
@@ -906,63 +918,6 @@ button { cursor: none; font-family: var(--font-body); border: none; background: 
   text-align: center;
   letter-spacing: 0.03em;
 }
-
-
-/* ================================================================
-   10. INSTAGRAM FEED
-
-   ★ TWEAK GUIDE:
-   .instagram__grid grid-template-columns:
-     repeat(6, 1fr) = 6 columns. Change 6 to 4 or 3 for larger tiles.
-   .ig-card padding-top: 100% = square. Change to 125% for portrait.
-================================================================ */
-.instagram {
-  background: var(--color-navy);
-  max-width: none;
-  padding: var(--space-xl) var(--space-md);
-}
-
-.instagram .section__header { max-width: var(--container-width); margin: 0 auto var(--space-lg); }
-
-.instagram__grid {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 2px;
-  max-width: var(--container-width);
-  margin: 0 auto;
-}
-
-.ig-card {
-  position: relative;
-  padding-top: 100%;
-  overflow: hidden;
-  background: var(--color-navy-mid);
-  cursor: none;
-  display: block;
-}
-
-.ig-card img {
-  position: absolute; inset: 0;
-  width: 100%; height: 100%;
-  object-fit: cover;
-  transition: transform var(--duration-slow) var(--ease-smooth);
-}
-
-.ig-card:hover img { transform: scale(1.06); }
-
-.ig-card__overlay {
-  position: absolute; inset: 0;
-  background: rgba(0,0,0,0.6);
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  gap: 6px; opacity: 0;
-  transition: opacity var(--duration-base);
-}
-
-.ig-card:hover .ig-card__overlay { opacity: 1; }
-
-.ig-card__stat { display: flex; align-items: center; gap: 6px; font-size: var(--text-sm); font-weight: 500; }
-.ig-card__handle { font-size: var(--text-xs); letter-spacing: 0.08em; color: rgba(255,255,255,0.7); }
 
 
 /* ================================================================
@@ -1117,15 +1072,15 @@ button { cursor: none; font-family: var(--font-body); border: none; background: 
   .modal__layout {
     grid-template-columns: 1fr;
   }
-  .modal__media    { position: static; }
-  .modal__details  { padding-top: 0; padding-right: 0; }
+  .modal__details  { padding-right: 0; }
+  /* On stacked layout, cap image height so it doesn't dominate the modal */
+  .modal__image    { aspect-ratio: 1; max-height: 50vh; object-fit: cover; }
 }
 
 @media (max-width: 768px) {
   :root { --space-xl: 4rem; --space-lg: 2rem; }
 
   .contact__inner       { grid-template-columns: 1fr; gap: var(--space-lg); }
-  .instagram__grid      { grid-template-columns: repeat(3, 1fr); }
   .product-grid         { grid-template-columns: repeat(2, 1fr); }
   .nav__links           { display: none; }
   .footer__inner        { flex-direction: column; align-items: flex-start; gap: var(--space-sm); }
@@ -1376,25 +1331,15 @@ button { cursor: none; font-family: var(--font-body); border: none; background: 
   letter-spacing: 0.05em;
 }
 
-/* ── Order modal (centered, not slide-in) ── */
+/* ── Order modal ── */
 
-/* Variant of .modal__panel that's centred instead of right-anchored */
+/*
+  The order modal uses .modal__panel--center as a width override.
+  It inherits centering, animation, and base styling from .modal__panel
+  (now that the product modal also uses centered layout).
+*/
 .modal__panel--center {
-  position: absolute;
-  top: 50%; left: 50%;
-  right: auto; bottom: auto;
   width: min(520px, 95vw);
-  max-height: 90vh;
-  overflow-y: auto;
-  border-left: none;
-  border: 1px solid var(--color-border);
-  /* Initial state: scaled down + offset for the entry animation */
-  transform: translate(-50%, -50%) scale(0.96);
-  transition: transform var(--duration-slow) var(--ease-smooth);
-}
-
-.modal--order.is-open .modal__panel--center {
-  transform: translate(-50%, -50%) scale(1);
 }
 
 .order { padding: var(--space-lg) var(--space-md); }
