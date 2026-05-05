@@ -473,40 +473,6 @@ const PRODUCTS = [
 
 
 /* ================================================================
-   2. INSTAGRAM / BEHOLD CONFIG
-
-   ★ HOW TO CONNECT LIVE INSTAGRAM (@sofiavalequaresma):
-
-   Step 1: Go to https://behold.so and sign up (free).
-   Step 2: Connect your Instagram account.
-   Step 3: Create a Feed widget.
-   Step 4: In the Behold dashboard, find your Feed ID (looks like:
-           "abcDEF123456" — a short alphanumeric string).
-   Step 5: Paste it into BEHOLD_FEED_ID below.
-
-   The site will then call the Behold API and display your actual
-   latest 6 Instagram posts automatically — no manual uploads needed.
-
-   If BEHOLD_FEED_ID is empty (''), the grid falls back to showing
-   placeholder squares (or ig1.jpg–ig6.jpg if those files exist).
-
-   ★ FALLBACK IMAGES (optional):
-   If you want placeholder images before Behold is set up,
-   put ig1.jpg through ig6.jpg in the images/ folder.
-================================================================ */
-const BEHOLD_FEED_ID = ''; /* ← paste your Behold Feed ID here */
-
-const IG_FALLBACK = [
-  { image: "images/ig1.jpg", likes: "1.2k", comments: "34" },
-  { image: "images/ig2.jpg", likes: "843",  comments: "21" },
-  { image: "images/ig3.jpg", likes: "2.1k", comments: "67" },
-  { image: "images/ig4.jpg", likes: "654",  comments: "18" },
-  { image: "images/ig5.jpg", likes: "1.8k", comments: "45" },
-  { image: "images/ig6.jpg", likes: "922",  comments: "29" },
-];
-
-
-/* ================================================================
    3. CUSTOM CURSOR — GPU-Accelerated
 
    Uses CSS transform (GPU composited) instead of left/top (slow).
@@ -612,6 +578,10 @@ function renderProducts() {
   if (!grid) return;
 
   grid.innerHTML = PRODUCTS.map(product => {
+    /* Resolve translated name/family for the current language */
+    const tName   = tProduct(product, 'name');
+    const tFamily = tProduct(product, 'family');
+
     /* Show up to 5 color dots on the card preview */
     const colorDotsHtml = (product.colors && product.colors.length > 0)
       ? `<div class="product-card__color-dots">
@@ -627,22 +597,22 @@ function renderProducts() {
         class="product-card"
         data-category="${product.category}"
         data-id="${product.id}"
-        data-name="${product.name.toLowerCase()}"
+        data-name="${tName.toLowerCase()}"
         data-price="${parseFloat(product.price.replace(/[^0-9.]/g, ''))}"
         role="button"
         tabindex="0"
-        aria-label="View ${product.name}"
+        aria-label="View ${tName}"
       >
         <div class="product-card__image-wrap">
-          <img src="${product.image}" alt="${product.name}" loading="lazy" onerror="this.style.display='none'" />
+          <img src="${product.image}" alt="${tName}" loading="lazy" onerror="this.style.display='none'" />
           <div class="product-card__overlay">
             <span class="product-card__overlay-btn" data-i18n="product.view">View Product</span>
           </div>
         </div>
         <div class="product-card__body">
           ${product.badge ? `<span class="product-card__badge">${product.badge}</span>` : ''}
-          <p class="product-card__name">${product.name}</p>
-          <p class="product-card__family">${product.family}</p>
+          <p class="product-card__name">${tName}</p>
+          <p class="product-card__family">${tFamily}</p>
           <div class="product-card__footer">
             <p class="product-card__price">${product.price}</p>
             ${colorDotsHtml}
@@ -1037,35 +1007,44 @@ function openModal(product) {
     `;
   }
 
-  /* ── Assemble full modal content ── */
+  /* ── Assemble full modal content ──
+       Layout: two columns on wide screens (image left, details right),
+       stacked on narrow screens. .modal__layout is the flex/grid wrapper. */
   content.innerHTML = `
-    <img
-      class="modal__image"
-      id="modalProductImage"
-      src="${product.image}"
-      alt="${product.name}"
-      onerror="this.style.background='var(--color-navy-mid)'; this.removeAttribute('src')"
-    />
-    <div class="modal__meta">
-      <p class="modal__family">${product.family}</p>
-      <h2 class="modal__title">${product.name}</h2>
-      <p class="modal__price">${product.price}</p>
+    <div class="modal__layout">
+      <div class="modal__media">
+        <img
+          class="modal__image"
+          id="modalProductImage"
+          src="${product.image}"
+          alt="${product.name}"
+          onerror="this.style.background='var(--color-navy-mid)'; this.removeAttribute('src')"
+        />
+      </div>
+
+      <div class="modal__details">
+        <div class="modal__meta">
+          <p class="modal__family">${tProduct(product, 'family')}</p>
+          <h2 class="modal__title">${tProduct(product, 'name')}</h2>
+          <p class="modal__price">${product.price}</p>
+        </div>
+        <p class="modal__desc">${tProduct(product, 'description')}</p>
+
+        ${colorsHTML}
+
+        <div class="modal__sizes">
+          <span class="modal__sizes-label">${t['modal.selectSize'] || 'Select Size'}</span>
+          ${sizesHTML}
+        </div>
+
+        <button class="btn btn--primary btn--full" id="modalAddBtn" style="margin-top:1.5rem">
+          ${t['modal.addToCart'] || 'Add to Cart'}
+        </button>
+        <p class="modal__shipping-note">
+          ${t['modal.shipping'] || 'Free shipping on orders over €50'}
+        </p>
+      </div>
     </div>
-    <p class="modal__desc">${product.description}</p>
-
-    ${colorsHTML}
-
-    <div class="modal__sizes">
-      <span class="modal__sizes-label">${t['modal.selectSize'] || 'Select Size'}</span>
-      ${sizesHTML}
-    </div>
-
-    <button class="btn btn--primary btn--full" id="modalAddBtn" style="margin-top:1.5rem">
-      ${t['modal.addToCart'] || 'Add to Cart'}
-    </button>
-    <p class="modal__shipping-note">
-      ${t['modal.shipping'] || 'Free shipping on orders over €50'}
-    </p>
   `;
 
   /* ── Color swatch interactions ── */
@@ -1150,55 +1129,8 @@ function initModal() {
 
 
 /* ================================================================
-   10. RENDER INSTAGRAM FEED
-
-   If BEHOLD_FEED_ID is set: fetches live posts from Behold API.
-   If not: uses IG_FALLBACK array (local placeholder images).
-
-   Behold API returns an array of post objects. We take the first 6.
-   Each post has: mediaSizes.medium.url (image URL), permalink, caption.
+   10. (RESERVED — was Instagram feed, removed)
 ================================================================ */
-async function renderInstagram() {
-  const grid = document.getElementById('instagramGrid');
-  if (!grid) return;
-
-  let posts = null;
-
-  /* Attempt to load from Behold if Feed ID is configured */
-  if (BEHOLD_FEED_ID) {
-    try {
-      const res  = await fetch(`https://feeds.behold.so/${BEHOLD_FEED_ID}`);
-      const data = await res.json();
-      /* Behold returns an array — take first 6 posts */
-      posts = data.slice(0, 6).map(post => ({
-        image:    post.mediaSizes?.medium?.url || post.mediaUrl,
-        likes:    null, /* Behold free tier doesn't expose like counts */
-        comments: null,
-        url:      post.permalink,
-      }));
-    } catch (err) {
-      console.warn('Behold feed failed, using fallback:', err);
-    }
-  }
-
-  /* Fall back to static placeholder data */
-  if (!posts) posts = IG_FALLBACK;
-
-  grid.innerHTML = posts.map(post => `
-    <a
-      class="ig-card"
-      ${post.url ? `href="${post.url}" target="_blank" rel="noopener"` : ''}
-      data-reveal
-    >
-      <img src="${post.image}" alt="@aem.thebest" loading="lazy" onerror="this.style.display='none'" />
-      <div class="ig-card__overlay">
-        ${post.likes    ? `<div class="ig-card__stat">♡ ${post.likes}</div>` : ''}
-        ${post.comments ? `<div class="ig-card__stat">💬 ${post.comments}</div>` : ''}
-        <div class="ig-card__stat ig-card__handle">@aem.thebest</div>
-      </div>
-    </a>
-  `).join('');
-}
 
 
 /* ================================================================
@@ -1272,6 +1204,107 @@ function initFooterYear() {
    2. Add "my.key": "English text" to en: {} below.
    3. Add "my.key": "Texto PT" to pt: {} below.
 ================================================================ */
+/* ================================================================
+   13. TRANSLATIONS — EN / PT-PT
+
+   Two parts:
+   
+   PRODUCT_TRANSLATIONS — keyed by product ID, with name/family/description
+   for each language. English values are already in the PRODUCTS array
+   as defaults, so we only need to define non-English here.
+   
+   TRANSLATIONS — UI text (buttons, labels, messages).
+
+   ★ HOW TO ADD/EDIT TRANSLATIONS:
+   
+   For PRODUCT names/descriptions:
+     Edit PRODUCT_TRANSLATIONS below. Use the product's id as the key.
+     If a key is missing for a given language, the English default 
+     from PRODUCTS is used as a fallback.
+   
+   For UI text:
+     Find the key in TRANSLATIONS that matches data-i18n in index.html
+     and update its value.
+   
+   ★ HOW TO ADD A NEW UI STRING:
+   1. Add data-i18n="my.key" to the element in index.html.
+   2. Add "my.key": "English text" to en: {}.
+   3. Add "my.key": "Texto PT" to pt: {}.
+================================================================ */
+
+/*
+  Per-product translations. English is the source of truth in PRODUCTS;
+  add Portuguese (and any future language) entries below for each product
+  you want translated.
+  
+  Fields you can translate per product:
+    name        — shown on cards, modal, cart, order summary
+    family      — shown on cards (the muted line under the name) and in modal
+    description — shown in modal only
+  
+  Any missing field falls back to the value in PRODUCTS.
+*/
+const PRODUCT_TRANSLATIONS = {
+  pt: {
+    /* T-Shirts (with logo) */
+    1:  { name: 'T-Shirt Bordeaux',      family: 'T-Shirt', description: 'T-shirt clássica com logo A&M em bordeaux. 100% algodão orgânico, 200gsm, corte unissexo descontraído. Estampado com tintas à base de água.' },
+    2:  { name: 'T-Shirt Azul Marinho',  family: 'T-Shirt', description: 'T-shirt clássica com logo A&M em azul marinho. 100% algodão orgânico, 200gsm, corte unissexo descontraído.' },
+    3:  { name: 'T-Shirt Verde Floresta', family: 'T-Shirt', description: 'T-shirt clássica com logo A&M em verde floresta suave. 100% algodão orgânico, 200gsm.' },
+    4:  { name: 'T-Shirt Preta',         family: 'T-Shirt', description: 'A t-shirt preta essencial com logo. Combina com tudo. 100% algodão orgânico, 200gsm.' },
+    5:  { name: 'T-Shirt Branca',        family: 'T-Shirt', description: 'T-shirt branca clean com logo. O básico de verão. 100% algodão orgânico, 200gsm.' },
+
+    /* T-Shirts (no logo) */
+    6:  { name: 'T-Shirt Sem Logo Bordeaux',     family: 'T-Shirt Sem Logo', description: 'A versão limpa. Sem logo, sem ruído. Apenas algodão de qualidade em bordeaux. 200gsm orgânico.' },
+    7:  { name: 'T-Shirt Sem Logo Azul Marinho', family: 'T-Shirt Sem Logo', description: 'A versão limpa em azul marinho. Sem logo, apenas algodão premium.' },
+    8:  { name: 'T-Shirt Sem Logo Verde Floresta', family: 'T-Shirt Sem Logo', description: 'A versão limpa em verde floresta. Minimalista e versátil.' },
+    9:  { name: 'T-Shirt Sem Logo Preta',        family: 'T-Shirt Sem Logo', description: 'A versão limpa em preto. Combina com tudo.' },
+    10: { name: 'T-Shirt Sem Logo Branca',       family: 'T-Shirt Sem Logo', description: 'A versão limpa em branco. Uma tela em branco intemporal.' },
+
+    /* Hoodies */
+    11: { name: 'Hoodie Branca', family: 'Hoodie', description: 'Hoodie em fleece pesado, branca. Bolso canguru, punhos canelados, ombros descaídos. 380gsm.' },
+    12: { name: 'Hoodie Preta',  family: 'Hoodie', description: 'Hoodie em fleece pesado, preta. Bolso canguru, punhos canelados. A camada essencial.' },
+
+    /* Sweatshirts */
+    13: { name: 'Sweatshirt Branca', family: 'Sweatshirt', description: 'Sweatshirt clássica de gola redonda em branco. French terry de peso médio, corte boxy. Um básico de armário.' },
+    14: { name: 'Sweatshirt Preta',  family: 'Sweatshirt', description: 'Sweatshirt clássica de gola redonda em preto. Aquela que vais usar todos os dias.' },
+
+    /* Shorts */
+    15: { name: 'Calções Pretos', family: 'Calções', description: 'Calções A&M em preto. Leves, cintura elástica, bolsos laterais. Feitos para o verão.' },
+
+    /* Bottles */
+    16: { name: 'Garrafa de Água Branca', family: 'Garrafa A&M', description: 'Garrafa de aço inox com logo A&M, branca. 500ml, parede dupla isolada, mantém frio 24h / quente 12h.' },
+    17: { name: 'Garrafa de Água Preta',  family: 'Garrafa A&M', description: 'Garrafa de aço inox com logo A&M, preta. 500ml, parede dupla isolada.' },
+
+    /* Caps */
+    18: { name: 'Coleção de Bonés', family: 'Bonés', description: 'Coleção de bonés A&M. Estrutura de 6 painéis, fecho ajustável, logo bordado. Tamanho único.' },
+
+    /* Socks */
+    19: { name: 'Pack de Meias', family: 'Meias', description: 'Meias com logo A&M num blend de algodão canelado. Altura média, logo tecido no tornozelo. Vendidas individualmente.' },
+
+    /* Tote */
+    20: { name: 'Totebag', family: 'Totebag', description: 'Totebag em lona pesada com estampado A&M. Asas reforçadas, algodão natural, leva tudo.' },
+
+    /* Packs */
+    21: { name: 'Pack Verão',     family: 'Packs', description: 'O Pack Verão: T-Shirt + Calções + Meias. Tudo o que precisas para os meses quentes, com desconto.' },
+    22: { name: 'Pack Inverno',   family: 'Packs', description: 'O Pack Inverno: Hoodie + Sweatshirt + Meias. Mantém-te quente, mantém-te fresh.' },
+    23: { name: 'Pack Essencial', family: 'Packs', description: 'O Pack Essencial: T-Shirt + Totebag + Meias. O kit inicial perfeito.' },
+    24: { name: 'Pack Completo',  family: 'Packs', description: 'O Pack Completo: T-Shirt + Hoodie + Calções + Meias + Totebag. A experiência A&M completa.' },
+  }
+};
+
+/*
+  Resolve a translated value for a product field in the current language.
+  Falls back to the value on the PRODUCTS object if no translation exists.
+  
+  Usage: tProduct(product, 'name')   → returns translated name or default
+*/
+function tProduct(product, field) {
+  const lang = document.documentElement.dataset.lang || 'en';
+  if (lang === 'en') return product[field];
+  return PRODUCT_TRANSLATIONS[lang]?.[product.id]?.[field] ?? product[field];
+}
+
+
 const TRANSLATIONS = {
   en: {
     'nav.shop': 'Shop', 'nav.feed': 'Feed', 'nav.contact': 'Contact',
@@ -1380,6 +1413,24 @@ function setLanguage(lang) {
   });
   document.documentElement.dataset.lang = lang;
   try { localStorage.setItem('am-lang', lang); } catch {}
+
+  /*
+    Re-render any UI that contains translated product names.
+    Product cards are rebuilt; cart re-renders to update line item names.
+    Guard with typeof so this can be called before init too.
+  */
+  if (typeof renderProducts === 'function' && document.getElementById('productGrid')) {
+    renderProducts();
+    /* Re-apply current sort/filter state after re-render */
+    const activeFilter = document.querySelector('.filter-btn.active');
+    if (activeFilter && activeFilter.dataset.filter !== 'all') {
+      document.querySelectorAll('.product-card').forEach(card => {
+        card.classList.toggle('is-hidden', card.dataset.category !== activeFilter.dataset.filter);
+      });
+    }
+    if (typeof fixGhostCells === 'function') fixGhostCells();
+  }
+  if (typeof Cart !== 'undefined' && Cart.render) Cart.render();
 }
 
 function initLanguageSwitcher() {
@@ -1534,12 +1585,17 @@ const Cart = {
     if (emptyEl)  emptyEl.style.display  = 'none';
 
     /* Render line items */
-    itemsEl.innerHTML = this.items.map((item, idx) => `
+    itemsEl.innerHTML = this.items.map((item, idx) => {
+      /* Resolve the current translated name from PRODUCTS at render time */
+      const product = PRODUCTS.find(p => p.id === item.id);
+      const displayName = product ? tProduct(product, 'name') : item.name;
+
+      return `
       <div class="cart-item">
-        <img class="cart-item__image" src="${item.image}" alt="${item.name}"
+        <img class="cart-item__image" src="${item.image}" alt="${displayName}"
           onerror="this.style.background='var(--color-navy-mid)'; this.removeAttribute('src')" />
         <div class="cart-item__body">
-          <p class="cart-item__name">${item.name}</p>
+          <p class="cart-item__name">${displayName}</p>
           <p class="cart-item__meta">
             ${item.color ? `${item.color} · ` : ''}${item.size}
           </p>
@@ -1558,7 +1614,7 @@ const Cart = {
           </svg>
         </button>
       </div>
-    `).join('');
+    `;}).join('');
 
     /* Wire up qty buttons + remove buttons */
     itemsEl.querySelectorAll('.qty-btn').forEach(btn => {
@@ -1580,14 +1636,17 @@ const Cart = {
   summaryHTML() {
     return `
       <div class="order__items">
-        ${this.items.map(item => `
+        ${this.items.map(item => {
+          const product = PRODUCTS.find(p => p.id === item.id);
+          const displayName = product ? tProduct(product, 'name') : item.name;
+          return `
           <div class="order__item">
             <span class="order__item-name">
-              ${item.qty} × ${item.name}${item.color ? ` (${item.color})` : ''} — ${item.size}
+              ${item.qty} × ${displayName}${item.color ? ` (${item.color})` : ''} — ${item.size}
             </span>
             <span class="order__item-price">€${(item.price * item.qty).toFixed(0)}</span>
           </div>
-        `).join('')}
+        `;}).join('')}
       </div>
       <div class="order__total-row">
         <span>Total</span>
@@ -1721,7 +1780,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initNav();
   /* Hero now uses a video background — no canvas init needed */
   renderProducts();
-  renderInstagram();
   initScrollReveal();
   initFilters();
   initModal();
