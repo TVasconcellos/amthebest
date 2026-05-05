@@ -10,11 +10,6 @@
     - style.css: our main stylesheet
   ============================================================ -->
   <meta charset="UTF-8" />
-  <meta property="og:title"       content="A&M — Premium Clothing" />
-  <meta property="og:description" content="Wear your standard" />
-  <meta property="og:image"       content="https://i.imgur.com/s4w41n0.jpeg" />
-  <meta property="og:url"         content="https://tvasconcellos.github.io/amthebest/" />
-  <meta property="og:type"        content="website" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>A&amp;M — Premium Merch</title>
 
@@ -43,7 +38,6 @@
     </a>
     <ul class="nav__links">
       <li><a href="#products" data-i18n="nav.shop">Shop</a></li>
-      <li><a href="#instagram" data-i18n="nav.feed">Feed</a></li>
       <li><a href="#contact" data-i18n="nav.contact">Contact</a></li>
     </ul>
 
@@ -216,31 +210,6 @@
     </div>
   </div>
 
-  <!-- ============================================================
-    INSTAGRAM FEED
-    
-    ★ HOW TO CONNECT YOUR LIVE INSTAGRAM (@sofiavalequaresma):
-    
-    Option A — Behold.so (recommended, free, no coding):
-      1. Go to https://behold.so and create a free account
-      2. Connect your Instagram account (@sofiavalequaresma)
-      3. Create a "Feed" widget and copy your Feed ID
-      4. In main.js, set BEHOLD_FEED_ID = 'your-feed-id-here'
-      5. The grid will automatically pull your latest 6 posts
-    
-    Option B — If you haven't set up Behold yet:
-      The site shows placeholder grid squares.
-      Put ig1.jpg–ig6.jpg in images/ for manual placeholders.
-  ============================================================ -->
-  <section class="section instagram" id="instagram">
-    <div class="section__header" data-reveal>
-      <p class="section__eyebrow">@aem.thebest</p>
-      <h2 class="section__title" data-i18n="instagram.title">The Feed</h2>
-    </div>
-    <!-- JS populates this — either from Behold API or fallback images -->
-    <div class="instagram__grid" id="instagramGrid"></div>
-  </section>
-
   <!-- Contact form — Formspree handles email delivery -->
   <section class="section contact" id="contact">
     <div class="contact__inner">
@@ -292,7 +261,9 @@
 
   <footer class="footer">
     <div class="footer__inner">
-      <div class="footer__brand">A&amp;M</div>
+      <div class="footer__brand">
+        <img src="logo.png" alt="A&amp;M" class="footer__logo" />
+      </div>
       <p class="footer__copy">© <span id="footerYear"></span> A&amp;M. <span data-i18n="footer.rights">All rights reserved.</span></p>
       <div class="footer__links">
         <a href="#" data-i18n="footer.privacy">Privacy</a>
