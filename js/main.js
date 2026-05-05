@@ -10,34 +10,31 @@
                    Each color entry: { label, hex, image }
                    Products without colors skip the swatch UI.
    
-   INSTAGRAM:     Set BEHOLD_FEED_ID (section 2) to your Behold.so Feed ID.
-                  If blank, falls back to ig1.jpg–ig6.jpg placeholder images.
+   TRANSLATIONS:  Edit PRODUCT_TRANSLATIONS for product names/descriptions
+                  in PT, or TRANSLATIONS object for UI labels (section 11).
    
-   CANVAS FX:     Edit CANVAS_CONFIG (section 7) for particle tweaks.
-                  mouseInfluence: how strongly particles are attracted to cursor.
+   FORMSPREE:     Set FORMSPREE_ID (section 9) after signing up at formspree.io
    
-   TRANSLATIONS:  Edit TRANSLATIONS object (section 13) for EN/PT text.
+   ORDER EMAIL:   Change ORDER_EMAIL in section 13 to redirect orders.
    
-   FORMSPREE:     Set FORMSPREE_ID (section 11) after signing up at formspree.io
+   MBWAY NUMBER:  Change MBWAY_NUMBER in section 13 to update payment number.
 
    ================================================================
 
    FILE STRUCTURE:
    1.  PRODUCT DATA (with color variants)
-   2.  INSTAGRAM / BEHOLD CONFIG
-   3.  CUSTOM CURSOR
-   4.  NAVIGATION
-   5.  SCROLL REVEAL
-   6.  RENDER PRODUCTS
-   7.  HERO CANVAS (constellation + mouse follow)
-   8.  PRODUCT FILTERS
-   9.  PRODUCT MODAL (with color swatches)
-   10. RENDER INSTAGRAM (Behold.so or fallback)
-   11. CONTACT FORM
-   12. FOOTER YEAR
-   13. TRANSLATIONS
-   14. LANGUAGE SWITCHER
-   15. INIT
+   2.  CUSTOM CURSOR
+   3.  NAVIGATION
+   4.  SCROLL REVEAL + INITIAL CARD REVEAL
+   5.  RENDER PRODUCTS
+   6.  PRODUCT MODAL (with color swatches)
+   7.  PRODUCT FILTERS + SORT
+   8.  CONTACT FORM
+   9.  FOOTER YEAR
+   10. TRANSLATIONS (UI + per-product)
+   11. LANGUAGE SWITCHER
+   12. SHOPPING CART + ORDER MODAL
+   13. INIT
 ================================================================ */
 
 
@@ -504,7 +501,7 @@ function initCursor() {
   }
   tick();
 
-  const hoverTargets = 'a, button, .product-card, .ig-card, .filter-btn, .size-btn, .lang-btn, .color-swatch';
+  const hoverTargets = 'a, button, .product-card, .filter-btn, .size-btn, .lang-btn, .color-swatch';
   document.addEventListener('mouseover', (e) => {
     if (e.target.closest(hoverTargets)) follower.classList.add('is-hovering');
   });
@@ -533,6 +530,11 @@ function initNav() {
    Product cards get a staggered delay based on column position.
 ================================================================ */
 function initScrollReveal() {
+  /*
+    Generic scroll-reveal observer for [data-reveal] elements.
+    These animate in as they enter the viewport.
+    Used on section headers, CTAs, and other accent content.
+  */
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
@@ -544,21 +546,24 @@ function initScrollReveal() {
 
   document.querySelectorAll('[data-reveal]').forEach(el => observer.observe(el));
 
+  /*
+    Product cards: revealed immediately on page load with a quick stagger.
+    
+    Why not scroll-triggered? The grid is a content-heavy area — making 
+    customers scroll to "load" the products feels wrong. They might think
+    the grid is broken if they land mid-page. The brief stagger still adds 
+    polish without forcing a wait.
+    
+    The stagger is small (40ms × column index) so it's perceived as elegant
+    rather than slow. Even with 24 products, the last card is revealed in
+    under 200ms.
+  */
   function revealCards() {
-    const grid = document.getElementById('productGrid');
-    if (!grid) return;
-    const cardObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.querySelectorAll('.product-card:not(.is-hidden)').forEach((card, i) => {
-            card.style.setProperty('--delay', `${(i % 4) * 80}ms`);
-            card.classList.add('is-revealed');
-          });
-          cardObserver.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.05 });
-    cardObserver.observe(grid);
+    const cards = document.querySelectorAll('.product-card:not(.is-hidden)');
+    cards.forEach((card, i) => {
+      card.style.setProperty('--delay', `${(i % 4) * 40}ms`);
+      card.classList.add('is-revealed');
+    });
   }
 
   window.revealProductCards = revealCards;
@@ -635,200 +640,12 @@ function renderProducts() {
 
 
 /* ================================================================
-   7. HERO CANVAS — Constellation + Mouse Follow
-
-   ★ CANVAS_CONFIG values you'll most likely want to tweak:
-
-   particleCount:   Number of floating dots. Default: 80.
-                    More = denser. Range: 40–150.
-
-   speed:           Drift speed of particles. Default: 0.35.
-                    Range: 0.1 (slow/calm) to 1.0 (chaotic).
-
-   lineDistance:    Max distance to draw a connecting line. Default: 160.
-                    Higher = more lines. Range: 100–250.
-
-   mouseInfluence:  How strongly particles near the cursor are attracted
-                    to it. Default: 0.018.
-                    0 = no mouse effect. 0.05 = very strong pull.
-                    Higher values make the constellation cluster around
-                    the cursor; lower values make it a gentle drift.
-
-   mouseRadius:     How far away a particle needs to be to feel the
-                    mouse attraction. Default: 220 (pixels).
-                    Increase for a wider influence zone.
-
-   dotSize:         Dot radius in pixels. Default: 1.5.
-   lineOpacity:     Max opacity of lines (fade with distance). Default: 0.15.
-   dotOpacity:      Opacity of dots. Default: 0.5.
-   dotColor / lineColor: RGB string, "255,255,255" = white.
-
-   ★ HOW MOUSE FOLLOW WORKS:
-   Each frame, if the mouse is inside the hero section, we calculate
-   the distance from each particle to the mouse. Particles within
-   mouseRadius get a gentle nudge toward the cursor position.
-   The nudge force scales with proximity: closer = stronger pull.
-   This creates the organic "constellation breathing toward the cursor"
-   effect without teleporting particles or distorting the network.
-================================================================ */
-
-const CANVAS_CONFIG = {
-  particleCount:  80,
-  speed:          0.35,
-  lineDistance:   160,
-  dotSize:        1.5,
-  lineOpacity:    0.15,
-  dotOpacity:     0.5,
-  dotColor:       '255,255,255',
-  lineColor:      '255,255,255',
-  mouseInfluence: 0.018,  /* ← 0 to disable, 0.05 for strong pull */
-  mouseRadius:    220,    /* ← pixels around cursor that feel the pull */
-};
-
-function initHeroCanvas() {
-  const canvas = document.getElementById('heroCanvas');
-  const hero   = document.getElementById('hero');
-  if (!canvas || !hero) return;
-
-  const ctx = canvas.getContext('2d');
-
-  /* Mouse position relative to the canvas, and whether cursor is in hero */
-  let mouse = { x: -9999, y: -9999, inHero: false };
-
-  /* Track mouse position when inside the hero section */
-  hero.addEventListener('mousemove', (e) => {
-    const rect = canvas.getBoundingClientRect();
-    mouse.x = e.clientX - rect.left;
-    mouse.y = e.clientY - rect.top;
-    mouse.inHero = true;
-  }, { passive: true });
-
-  hero.addEventListener('mouseleave', () => {
-    mouse.inHero = false;
-    /* Gradually move the influence point off-screen so particles drift back */
-    mouse.x = -9999;
-    mouse.y = -9999;
-  });
-
-  class Particle {
-    constructor(w, h) { this.reset(w, h); }
-
-    reset(w, h) {
-      this.x  = Math.random() * w;
-      this.y  = Math.random() * h;
-      this.vx = (Math.random() - 0.5) * CANVAS_CONFIG.speed * 2;
-      this.vy = (Math.random() - 0.5) * CANVAS_CONFIG.speed * 2;
-    }
-
-    update(w, h) {
-      /* ── Mouse attraction ── */
-      if (mouse.inHero) {
-        const dx   = mouse.x - this.x;
-        const dy   = mouse.y - this.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-
-        if (dist < CANVAS_CONFIG.mouseRadius && dist > 0) {
-          /*
-            Force scales with proximity: particles very close to cursor
-            are pulled more strongly. We normalise the direction vector
-            (dx/dist, dy/dist) and scale by the influence factor and 
-            a proximity ratio so nearby particles respond more.
-          */
-          const proximity = 1 - dist / CANVAS_CONFIG.mouseRadius;
-          const force     = CANVAS_CONFIG.mouseInfluence * proximity;
-          this.vx += (dx / dist) * force;
-          this.vy += (dy / dist) * force;
-        }
-      }
-
-      /*
-        Speed cap — prevents particles from accelerating indefinitely
-        when the mouse influence accumulates over many frames.
-        maxSpeed clamps velocity to a reasonable range.
-      */
-      const maxSpeed = CANVAS_CONFIG.speed * 3;
-      const currentSpeed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
-      if (currentSpeed > maxSpeed) {
-        this.vx = (this.vx / currentSpeed) * maxSpeed;
-        this.vy = (this.vy / currentSpeed) * maxSpeed;
-      }
-
-      this.x += this.vx;
-      this.y += this.vy;
-
-      /* Bounce off walls */
-      if (this.x < 0 || this.x > w) this.vx *= -1;
-      if (this.y < 0 || this.y > h) this.vy *= -1;
-      this.x = Math.max(0, Math.min(w, this.x));
-      this.y = Math.max(0, Math.min(h, this.y));
-    }
-  }
-
-  let particles = [];
-  let W = 0, H = 0;
-  let animFrameId;
-
-  function resize() {
-    W = canvas.offsetWidth;
-    H = canvas.offsetHeight;
-    canvas.width  = W;
-    canvas.height = H;
-    particles = Array.from({ length: CANVAS_CONFIG.particleCount }, () => new Particle(W, H));
-  }
-
-  function draw() {
-    ctx.clearRect(0, 0, W, H);
-    particles.forEach(p => p.update(W, H));
-
-    const cfg = CANVAS_CONFIG;
-
-    /* Connecting lines */
-    for (let i = 0; i < particles.length; i++) {
-      for (let j = i + 1; j < particles.length; j++) {
-        const dx   = particles[i].x - particles[j].x;
-        const dy   = particles[i].y - particles[j].y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < cfg.lineDistance) {
-          const alpha = cfg.lineOpacity * (1 - dist / cfg.lineDistance);
-          ctx.beginPath();
-          ctx.moveTo(particles[i].x, particles[i].y);
-          ctx.lineTo(particles[j].x, particles[j].y);
-          ctx.strokeStyle = `rgba(${cfg.lineColor},${alpha})`;
-          ctx.lineWidth   = 0.6;
-          ctx.stroke();
-        }
-      }
-    }
-
-    /* Dots */
-    particles.forEach(p => {
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, cfg.dotSize, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(${cfg.dotColor},${cfg.dotOpacity})`;
-      ctx.fill();
-    });
-
-    animFrameId = requestAnimationFrame(draw);
-  }
-
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden) cancelAnimationFrame(animFrameId);
-    else draw();
-  });
-
-  new ResizeObserver(resize).observe(canvas);
-  resize();
-  draw();
-}
-
-
-/* ================================================================
-   8. PRODUCT FILTERS + SORT
+   7. PRODUCT FILTERS + SORT
 
    Filter buttons show/hide cards by category.
    Sort select re-orders visible cards by name or price.
 
-   ★ GHOST CARD FIX (issue 2):
+   ★ GHOST CARD FIX:
    CSS grid always fills columns to complete rows, which creates
    empty grey placeholder cells at the end when the count isn't
    a clean multiple of the column count.
@@ -1129,11 +946,6 @@ function initModal() {
 
 
 /* ================================================================
-   10. (RESERVED — was Instagram feed, removed)
-================================================================ */
-
-
-/* ================================================================
    11. CONTACT FORM — Formspree
 
    ★ SETUP:
@@ -1307,7 +1119,7 @@ function tProduct(product, field) {
 
 const TRANSLATIONS = {
   en: {
-    'nav.shop': 'Shop', 'nav.feed': 'Feed', 'nav.contact': 'Contact',
+    'nav.shop': 'Shop', 'nav.contact': 'Contact',
     'hero.eyebrow': 'New Season Drop', 'hero.line1': 'WEAR', 'hero.line2': 'YOUR',
     'hero.line3': 'STANDARD', 'hero.sub': 'Premium quality. Minimal design. Built to last.',
     'hero.cta': 'Shop the Collection', 'hero.scroll': 'Scroll',
@@ -1334,7 +1146,6 @@ const TRANSLATIONS = {
     'order.name': 'Full Name', 'order.phone': 'Phone Number',
     'order.email': 'Email', 'order.address': 'Delivery Address',
     'order.submit': 'Order',
-    'instagram.title': 'The Feed',
     'contact.eyebrow': 'Get in Touch', 'contact.title': "Let's Talk",
     'contact.desc': 'Questions about sizing, wholesale, or collabs?<br />We usually reply within 24 hours.',
     'contact.name': 'Your Name', 'contact.email': 'Email Address',
@@ -1344,7 +1155,7 @@ const TRANSLATIONS = {
     'footer.shipping': 'Shipping', 'footer.returns': 'Returns',
   },
   pt: {
-    'nav.shop': 'Loja', 'nav.feed': 'Feed', 'nav.contact': 'Contacto',
+    'nav.shop': 'Loja', 'nav.contact': 'Contacto',
     'hero.eyebrow': 'Nova Coleção', 'hero.line1': 'VESTE', 'hero.line2': 'O TEU',
     'hero.line3': 'STANDARD', 'hero.sub': 'Qualidade premium. Design minimalista. Feito para durar.',
     'hero.cta': 'Ver Coleção', 'hero.scroll': 'Explorar',
@@ -1371,7 +1182,6 @@ const TRANSLATIONS = {
     'order.name': 'Nome Completo', 'order.phone': 'Número de Telefone',
     'order.email': 'Email', 'order.address': 'Morada de Entrega',
     'order.submit': 'Encomendar',
-    'instagram.title': 'O Feed',
     'contact.eyebrow': 'Fala Connosco', 'contact.title': 'Vamos Falar',
     'contact.desc': 'Dúvidas sobre tamanhos, grossista ou colaborações?<br />Respondemos geralmente em 24 horas.',
     'contact.name': 'O Teu Nome', 'contact.email': 'Endereço de Email',
@@ -1416,7 +1226,8 @@ function setLanguage(lang) {
 
   /*
     Re-render any UI that contains translated product names.
-    Product cards are rebuilt; cart re-renders to update line item names.
+    Product cards are rebuilt as fresh DOM nodes; the cart re-renders
+    to update line item names.
     Guard with typeof so this can be called before init too.
   */
   if (typeof renderProducts === 'function' && document.getElementById('productGrid')) {
@@ -1428,6 +1239,15 @@ function setLanguage(lang) {
         card.classList.toggle('is-hidden', card.dataset.category !== activeFilter.dataset.filter);
       });
     }
+    /*
+      The IntersectionObserver from initScrollReveal() already disconnected
+      after the initial reveal. The freshly rendered cards have opacity:0
+      from CSS, so we reveal them immediately — language switches always
+      happen with the grid in view, so the scroll-in animation isn't needed.
+    */
+    document.querySelectorAll('.product-card').forEach(card => {
+      card.classList.add('is-revealed');
+    });
     if (typeof fixGhostCells === 'function') fixGhostCells();
   }
   if (typeof Cart !== 'undefined' && Cart.render) Cart.render();
