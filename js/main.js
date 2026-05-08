@@ -79,9 +79,28 @@ const COLORS = {
   white:        { label: 'White',        hex: '#F0F0F0' },
 };
 
+/*
+  PRODUCTS array
+
+  ★ FIELDS:
+  id          → unique number, never repeat
+  name        → display name (English source of truth; PT in PRODUCT_TRANSLATIONS)
+  family      → human-readable group label
+  category    → must match a filter button data-filter in index.html
+                 valid: tshirt | tshirt-nolog | hoodie | sweatshirt | shorts |
+                        accessories | cap | socks | pack
+  price       → display string, e.g. "€15" or "€1.50"
+  badge       → null | "Best Seller" | "New" | "Best Value"
+  save        → optional savings indicator shown next to price (packs only)
+                 e.g. "€3" → renders as "Save €3"
+  image       → primary/default image path
+  description → modal body text
+  sizes       → ["XS","S","M","L","XL","XXL"] for apparel, ["One Size"] otherwise
+  colors      → array of { label, hex, image } variants, or null
+*/
 const PRODUCTS = [
 
-  /* ──────────────── T-SHIRT (logo) ──────────────── */
+  /* ──────────────── APPAREL ──────────────── */
   {
     id: 1,
     name: "T-Shirt",
@@ -89,7 +108,7 @@ const PRODUCTS = [
     category: "tshirt",
     price: "€15",
     badge: "Best Seller",
-    image: "images/products/shirt1.jpg",  /* Default = first colour */
+    image: "images/products/shirt1.jpg",
     description: "Classic A&M logo tee. 100% organic cotton, 200gsm, relaxed unisex fit. Printed with water-based inks. Available in five colours.",
     sizes: ["XS", "S", "M", "L", "XL", "XXL"],
     colors: [
@@ -100,17 +119,15 @@ const PRODUCTS = [
       { ...COLORS.white,       image: "images/products/shirt5.jpg" },
     ]
   },
-
-  /* ──────────────── T-SHIRT (no logo) ──────────────── */
   {
     id: 2,
-    name: "T-Shirt No Logo",
-    family: "T-Shirt No Logo",
+    name: 'T-Shirt "The Best." Collection',
+    family: 'T-Shirt "The Best." Collection',
     category: "tshirt-nolog",
     price: "€15",
-    badge: null,
+    badge: "New",
     image: "images/products/shirt6.jpg",
-    description: "The clean version. No logo, no noise — just premium 200gsm organic cotton. Available in five colours.",
+    description: 'The clean version. No logo, no noise — just premium 200gsm organic cotton. Available in five colours from "The Best." Collection.',
     sizes: ["XS", "S", "M", "L", "XL", "XXL"],
     colors: [
       { ...COLORS.burgundy,    image: "images/products/shirt6.jpg" },
@@ -120,8 +137,6 @@ const PRODUCTS = [
       { ...COLORS.white,       image: "images/products/shirt10.jpg" },
     ]
   },
-
-  /* ──────────────── HOODIE ──────────────── */
   {
     id: 3,
     name: "Hoodie",
@@ -137,8 +152,6 @@ const PRODUCTS = [
       { ...COLORS.black, image: "images/products/hoodie2.jpg" },
     ]
   },
-
-  /* ──────────────── SWEATSHIRT ──────────────── */
   {
     id: 4,
     name: "Sweatshirt",
@@ -154,29 +167,55 @@ const PRODUCTS = [
       { ...COLORS.black, image: "images/products/sweatshirt2.jpg" },
     ]
   },
-
-  /* ──────────────── SHORTS ──────────────── */
   {
     id: 5,
     name: "Shorts",
     family: "Shorts",
     category: "shorts",
     price: "€15",
-    badge: null,
+    badge: "New",
     image: "images/products/shorts1.jpg",
     description: "A&M shorts in black. Lightweight, elastic waistband, side pockets. Built for summer.",
     sizes: ["XS", "S", "M", "L", "XL", "XXL"],
     colors: null
   },
 
-  /* ──────────────── WATER BOTTLE ──────────────── */
+  /* ──────────────── CAPS ──────────────── */
   {
     id: 6,
+    name: "Cap",
+    family: "Cap",
+    category: "cap",
+    price: "€8",
+    badge: "Best Seller",
+    image: "images/products/cap1.jpg",
+    description: "A&M cap. Structured 6-panel, adjustable strap, embroidered logo. One size fits most.",
+    sizes: ["One Size"],
+    colors: null
+  },
+
+  /* ──────────────── SOCKS ──────────────── */
+  {
+    id: 7,
+    name: "Socks",
+    family: "Socks",
+    category: "socks",
+    price: "€5",
+    badge: "Best Seller",
+    image: "images/products/socks1.jpg",
+    description: "A&M logo socks in a ribbed cotton blend. Mid-calf height, woven logo at the ankle. Sold individually.",
+    sizes: ["One Size"],
+    colors: null
+  },
+
+  /* ──────────────── ACCESSORIES ──────────────── */
+  {
+    id: 8,
     name: "Water Bottle",
     family: "Water Bottle A&M",
-    category: "bottle",
+    category: "accessories",
     price: "€15",
-    badge: null,
+    badge: "New",
     image: "images/products/bottle1.jpg",
     description: "A&M branded stainless steel water bottle. 500ml, double-wall insulated, keeps cold 24h / hot 12h. Available in white and black.",
     sizes: ["One Size"],
@@ -185,56 +224,119 @@ const PRODUCTS = [
       { ...COLORS.black, image: "images/products/bottle2.jpg" },
     ]
   },
-
-  /* ──────────────── CAPS ──────────────── */
-  {
-    id: 7,
-    name: "Caps Collection",
-    family: "Caps",
-    category: "cap",
-    price: "€8",
-    badge: null,
-    image: "images/products/cap1.jpg",
-    description: "A&M caps collection. Structured 6-panel, adjustable strap, embroidered logo. One size fits most.",
-    sizes: ["One Size"],
-    colors: null
-  },
-
-  /* ──────────────── SOCKS ──────────────── */
-  {
-    id: 8,
-    name: "Socks Pack",
-    family: "Socks",
-    category: "socks",
-    price: "€5",
-    badge: null,
-    image: "images/products/socks1.jpg",
-    description: "A&M logo socks in a ribbed cotton blend. Mid-calf height, woven logo at the ankle. Sold individually.",
-    sizes: ["One Size"],
-    colors: null
-  },
-
-  /* ──────────────── TOTEBAG ──────────────── */
   {
     id: 9,
     name: "Totebag",
     family: "Totebag",
-    category: "tote",
+    category: "accessories",
     price: "€8",
-    badge: null,
+    badge: "New",
     image: "images/products/tote1.jpg",
     description: "Heavy canvas totebag with A&M print. Reinforced handles, natural cotton, holds everything.",
     sizes: ["One Size"],
     colors: null
   },
-
-  /* ──────────────── PACKS ──────────────── */
   {
     id: 10,
+    name: "Playing Cards",
+    family: "Playing Cards",
+    category: "accessories",
+    price: "€10",
+    badge: "New",
+    image: "images/products/baralho_cartas1.jpg",
+    description: "A&M deck of playing cards. Standard 52-card deck with custom A&M illustrated face cards and back design.",
+    sizes: ["One Size"],
+    colors: [
+      /* Two designs / variants — using the existing image pair */
+      { label: 'Design A', hex: '#222222', image: "images/products/baralho_cartas1.jpg" },
+      { label: 'Design B', hex: '#888888', image: "images/products/baralho_cartas2.jpg" },
+    ]
+  },
+  {
+    id: 11,
+    name: "Coasters",
+    family: "Coasters",
+    category: "accessories",
+    price: "€15",
+    badge: "New",
+    image: "images/products/base_copos1.jpg",
+    description: "Set of A&M coasters. Cork-backed, durable surface, two-pattern set.",
+    sizes: ["One Size"],
+    colors: [
+      { label: 'Design A', hex: '#222222', image: "images/products/base_copos1.jpg" },
+      { label: 'Design B', hex: '#888888', image: "images/products/base_copos2.jpg" },
+    ]
+  },
+  {
+    id: 12,
+    name: "Notebook",
+    family: "Notebook",
+    category: "accessories",
+    price: "€10",
+    badge: "New",
+    image: "images/products/caderno1.jpg",
+    description: "A&M softcover notebook. A5 size, 120 cream pages, dot grid, embossed logo on the cover.",
+    sizes: ["One Size"],
+    colors: null
+  },
+  {
+    id: 13,
+    name: "Pen",
+    family: "Pen",
+    category: "accessories",
+    price: "€1.50",
+    badge: "Best Seller",
+    image: "images/products/caneta1.jpg",
+    description: "A&M branded ballpoint pen. Matte finish, smooth black ink.",
+    sizes: ["One Size"],
+    colors: null
+  },
+  {
+    id: 14,
+    name: "Pack of Pens",
+    family: "Pack of Pens",
+    category: "accessories",
+    price: "€3.50",
+    badge: "Best Seller",
+    image: "images/products/pack_canetas1.jpg",
+    description: "Set of A&M branded ballpoint pens. The complete writing pack.",
+    sizes: ["One Size"],
+    colors: null
+  },
+  {
+    id: 15,
+    name: "Keychain",
+    family: "Keychain",
+    category: "accessories",
+    price: "€4",
+    badge: "New",
+    image: "images/products/porta_chaves.jpg",
+    description: "A&M metal keychain with leather tag and embossed logo.",
+    sizes: ["One Size"],
+    colors: null
+  },
+  {
+    id: 16,
+    name: "Phone Case",
+    family: "Phone Case",
+    category: "accessories",
+    price: "€5",
+    badge: "New",
+    image: "images/products/capa_telemovel.jpg",
+    description: "A&M phone case. Slim profile, soft-touch finish, printed logo.",
+    sizes: ["One Size"],
+    colors: null
+  },
+
+  /* ──────────────── PACKS ────────────────
+     Packs use the optional `save` field to display "Save €X" next to the price. */
+  {
+    id: 17,
     name: "Summer Pack",
     family: "Packs",
     category: "pack",
     price: "€25",
+    save: "€3",
     badge: "Best Value",
     image: "images/products/summerpack1.jpg",
     description: "The Summer Pack: T-Shirt + Shorts + Socks. Everything you need for the warm months, bundled at a saving.",
@@ -242,11 +344,12 @@ const PRODUCTS = [
     colors: null
   },
   {
-    id: 11,
+    id: 18,
     name: "Winter Pack",
     family: "Packs",
     category: "pack",
-    price: "€41",
+    price: "€36",
+    save: "€5",
     badge: "Best Value",
     image: "images/products/winterpack1.jpg",
     description: "The Winter Pack: Hoodie + Sweatshirt + Socks. Stay warm, stay fresh.",
@@ -254,11 +357,12 @@ const PRODUCTS = [
     colors: null
   },
   {
-    id: 12,
+    id: 19,
     name: "Essential Pack",
     family: "Packs",
     category: "pack",
     price: "€28",
+    save: "€3",
     badge: "Best Value",
     image: "images/products/essentialpack1.jpg",
     description: "The Essential Pack: T-Shirt + Totebag + Socks. The perfect starter kit.",
@@ -266,11 +370,12 @@ const PRODUCTS = [
     colors: null
   },
   {
-    id: 13,
+    id: 20,
     name: "Complete Pack",
     family: "Packs",
     category: "pack",
-    price: "€45",
+    price: "€43",
+    save: "€5",
     badge: "Best Value",
     image: "images/products/completepack1.jpg",
     description: "The Complete Pack: T-Shirt + Hoodie + Shorts + Socks + Totebag. The full A&M experience.",
@@ -431,7 +536,10 @@ function renderProducts() {
           <p class="product-card__name">${tName}</p>
           <p class="product-card__family">${tFamily}</p>
           <div class="product-card__footer">
-            <p class="product-card__price">${product.price}</p>
+            <div class="product-card__price-block">
+              <p class="product-card__price">${product.price}</p>
+              ${product.save ? `<span class="product-card__save">${tSave(product.save)}</span>` : ''}
+            </div>
             ${colorDotsHtml}
           </div>
         </div>
@@ -655,7 +763,10 @@ function openModal(product) {
         <div class="modal__meta">
           <p class="modal__family">${tProduct(product, 'family')}</p>
           <h2 class="modal__title">${tProduct(product, 'name')}</h2>
-          <p class="modal__price">${product.price}</p>
+          <div class="modal__price-row">
+            <p class="modal__price">${product.price}</p>
+            ${product.save ? `<span class="modal__save">${tSave(product.save)}</span>` : ''}
+          </div>
         </div>
         <p class="modal__desc">${tProduct(product, 'description')}</p>
 
@@ -870,15 +981,16 @@ function initFooterYear() {
 */
 const PRODUCT_TRANSLATIONS = {
   pt: {
+    /* Apparel */
     1:  {
       name: 'T-Shirt',
       family: 'T-Shirt',
       description: 'T-shirt clássica com logo A&M. 100% algodão orgânico, 200gsm, corte unissexo descontraído. Estampada com tintas à base de água. Disponível em cinco cores.'
     },
     2:  {
-      name: 'T-Shirt Sem Logo',
-      family: 'T-Shirt Sem Logo',
-      description: 'A versão limpa. Sem logo, sem ruído — apenas algodão orgânico premium de 200gsm. Disponível em cinco cores.'
+      name: 'T-Shirt Coleção "The Best."',
+      family: 'T-Shirt Coleção "The Best."',
+      description: 'A versão limpa. Sem logo, sem ruído — apenas algodão orgânico premium de 200gsm. Disponível em cinco cores da Coleção "The Best.".'
     },
     3:  {
       name: 'Hoodie',
@@ -895,20 +1007,26 @@ const PRODUCT_TRANSLATIONS = {
       family: 'Calções',
       description: 'Calções A&M em preto. Leves, cintura elástica, bolsos laterais. Feitos para o verão.'
     },
+
+    /* Caps */
     6:  {
+      name: 'Boné',
+      family: 'Boné',
+      description: 'Boné A&M. Estrutura de 6 painéis, fecho ajustável, logo bordado. Tamanho único.'
+    },
+
+    /* Socks */
+    7:  {
+      name: 'Meias',
+      family: 'Meias',
+      description: 'Meias com logo A&M num blend de algodão canelado. Altura média, logo tecido no tornozelo. Vendidas individualmente.'
+    },
+
+    /* Accessories */
+    8:  {
       name: 'Garrafa de Água',
       family: 'Garrafa A&M',
       description: 'Garrafa de aço inox com logo A&M. 500ml, parede dupla isolada, mantém frio 24h / quente 12h. Disponível em branco e preto.'
-    },
-    7:  {
-      name: 'Coleção de Bonés',
-      family: 'Bonés',
-      description: 'Coleção de bonés A&M. Estrutura de 6 painéis, fecho ajustável, logo bordado. Tamanho único.'
-    },
-    8:  {
-      name: 'Pack de Meias',
-      family: 'Meias',
-      description: 'Meias com logo A&M num blend de algodão canelado. Altura média, logo tecido no tornozelo. Vendidas individualmente.'
     },
     9:  {
       name: 'Totebag',
@@ -916,21 +1034,58 @@ const PRODUCT_TRANSLATIONS = {
       description: 'Totebag em lona pesada com estampado A&M. Asas reforçadas, algodão natural, leva tudo.'
     },
     10: {
+      name: 'Baralho de Cartas',
+      family: 'Baralho de Cartas',
+      description: 'Baralho A&M. 52 cartas com ilustrações personalizadas nas figuras e desenho exclusivo no verso.'
+    },
+    11: {
+      name: 'Bases para Copos',
+      family: 'Bases para Copos',
+      description: 'Conjunto de bases para copos A&M. Verso em cortiça, superfície resistente, conjunto com dois padrões.'
+    },
+    12: {
+      name: 'Caderno',
+      family: 'Caderno',
+      description: 'Caderno A&M de capa mole. Tamanho A5, 120 páginas creme, dot grid, logo em relevo na capa.'
+    },
+    13: {
+      name: 'Caneta',
+      family: 'Caneta',
+      description: 'Caneta esferográfica A&M. Acabamento mate, tinta preta suave.'
+    },
+    14: {
+      name: 'Pack de Canetas',
+      family: 'Pack de Canetas',
+      description: 'Conjunto de canetas esferográficas A&M. O pack de escrita completo.'
+    },
+    15: {
+      name: 'Porta-chaves',
+      family: 'Porta-chaves',
+      description: 'Porta-chaves A&M em metal com etiqueta em pele e logo gravado em relevo.'
+    },
+    16: {
+      name: 'Capa de Telemóvel',
+      family: 'Capa de Telemóvel',
+      description: 'Capa de telemóvel A&M. Perfil fino, acabamento soft-touch, logo estampado.'
+    },
+
+    /* Packs */
+    17: {
       name: 'Pack Verão',
       family: 'Packs',
       description: 'O Pack Verão: T-Shirt + Calções + Meias. Tudo o que precisas para os meses quentes, com desconto.'
     },
-    11: {
+    18: {
       name: 'Pack Inverno',
       family: 'Packs',
       description: 'O Pack Inverno: Hoodie + Sweatshirt + Meias. Mantém-te quente, mantém-te fresh.'
     },
-    12: {
+    19: {
       name: 'Pack Essencial',
       family: 'Packs',
       description: 'O Pack Essencial: T-Shirt + Totebag + Meias. O kit inicial perfeito.'
     },
-    13: {
+    20: {
       name: 'Pack Completo',
       family: 'Packs',
       description: 'O Pack Completo: T-Shirt + Hoodie + Calções + Meias + Totebag. A experiência A&M completa.'
@@ -969,6 +1124,9 @@ const COLOR_TRANSLATIONS = {
     'Forest Green': 'Verde Floresta',
     'Black':        'Preto',
     'White':        'Branco',
+    /* Design variants for non-colour products like Playing Cards / Coasters */
+    'Design A':     'Modelo A',
+    'Design B':     'Modelo B',
   }
 };
 
@@ -977,6 +1135,17 @@ function tColor(label) {
   const lang = document.documentElement.dataset.lang || 'en';
   if (lang === 'en') return label;
   return COLOR_TRANSLATIONS[lang]?.[label] ?? label;
+}
+
+/*
+  Build the localised "Save €X" string from a product's `save` field.
+  Used for the savings indicator on packs.
+  Example: tSave('€3') → "Save €3" (EN) / "Poupa €3" (PT)
+*/
+function tSave(amount) {
+  const lang = document.documentElement.dataset.lang || 'en';
+  const verb = lang === 'pt' ? 'Poupa' : 'Save';
+  return `${verb} ${amount}`;
 }
 
 
@@ -990,10 +1159,10 @@ const TRANSLATIONS = {
     'ticker.3': 'New Drops Weekly', 'ticker.4': 'Unisex Sizing',
     'ticker.5': '100% Organic Cotton', 'ticker.6': 'Limited Quantities',
     'products.eyebrow': 'The Collection', 'products.title': 'Shop Everything',
-    'filter.all': 'All', 'filter.tshirt': 'T-Shirts', 'filter.tshirt-nolog': 'No Logo',
+    'filter.all': 'All', 'filter.tshirt': 'T-Shirts', 'filter.tshirt-nolog': '"The Best." Collection',
     'filter.hoodie': 'Hoodies', 'filter.sweatshirt': 'Sweatshirts', 'filter.shorts': 'Shorts',
-    'filter.bottle': 'Water Bottles', 'filter.cap': 'Caps', 'filter.socks': 'Socks',
-    'filter.tote': 'Totebags', 'filter.pack': 'Packs',
+    'filter.cap': 'Caps', 'filter.socks': 'Socks', 'filter.accessories': 'Accessories',
+    'filter.pack': 'Packs',
     'product.view': 'View Product',
     'modal.selectSize': 'Select Size', 'modal.colour': 'Colour', 'modal.color': 'Colour',
     'modal.addToCart': 'Add to Cart', 'modal.shipping': 'Free shipping on orders over €50',
@@ -1026,10 +1195,10 @@ const TRANSLATIONS = {
     'ticker.3': 'Novidades Semanais', 'ticker.4': 'Tamanhos Unissexo',
     'ticker.5': '100% Algodão Orgânico', 'ticker.6': 'Quantidades Limitadas',
     'products.eyebrow': 'A Coleção', 'products.title': 'Ver Tudo',
-    'filter.all': 'Todos', 'filter.tshirt': 'T-Shirts', 'filter.tshirt-nolog': 'Sem Logo',
+    'filter.all': 'Todos', 'filter.tshirt': 'T-Shirts', 'filter.tshirt-nolog': 'Coleção "The Best."',
     'filter.hoodie': 'Hoodies', 'filter.sweatshirt': 'Sweatshirts', 'filter.shorts': 'Calções',
-    'filter.bottle': 'Garrafas', 'filter.cap': 'Bonés', 'filter.socks': 'Meias',
-    'filter.tote': 'Totebags', 'filter.pack': 'Packs',
+    'filter.cap': 'Bonés', 'filter.socks': 'Meias', 'filter.accessories': 'Acessórios',
+    'filter.pack': 'Packs',
     'product.view': 'Ver Produto',
     'modal.selectSize': 'Escolher Tamanho', 'modal.colour': 'Cor', 'modal.color': 'Cor',
     'modal.addToCart': 'Adicionar ao Carrinho', 'modal.shipping': 'Envio grátis acima de €50',
