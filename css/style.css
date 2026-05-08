@@ -659,7 +659,7 @@ button { cursor: none; font-family: var(--font-body); border: none; background: 
 .product-card__name   { font-size: var(--text-base); font-weight: 500; margin-bottom: 2px; }
 .product-card__family { font-size: var(--text-sm); color: var(--color-grey); margin-bottom: var(--space-sm); }
 
-/* Footer row: price left, colour dots right */
+/* Footer row: price (and optional savings indicator) left, colour dots right */
 .product-card__footer {
   display: flex;
   align-items: center;
@@ -667,7 +667,53 @@ button { cursor: none; font-family: var(--font-body); border: none; background: 
   gap: 8px;
 }
 
+/*
+  Price block — wraps the price line and optional "Save €X" tag below it.
+  Used so the price and savings label stack neatly on the left of the footer.
+*/
+.product-card__price-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
 .product-card__price { font-size: var(--text-lg); }
+
+/*
+  "Save €X" tag — small accent label that appears below the price on packs.
+  Styled with the brand accent colour so it draws the eye without dominating.
+  
+  ★ TWEAK GUIDE:
+  background / color: change to flip the savings tag to a green or red 
+  if you want it to feel more "deal-like". The current accent gold matches
+  the rest of the brand.
+*/
+.product-card__save,
+.modal__save {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: var(--color-accent);
+  background: rgba(200, 169, 126, 0.1);
+  border: 1px solid rgba(200, 169, 126, 0.3);
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+
+/* Modal version: sits inline with the price (which is bigger), so style is similar but slightly larger */
+.modal__price-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.modal__save {
+  font-size: var(--text-xs);
+  padding: 4px 10px;
+}
 
 /* Small colour preview dots on the card */
 .product-card__color-dots {
