@@ -346,7 +346,7 @@
 
     <!-- ── Basic info ── -->
     <div class="field">
-      <label for="name">Product Name <span class="hint">(e.g. "T-Shirt Bordeaux")</span></label>
+      <label for="name">Product Name <span class="hint">(e.g. "T-Shirt" or "Hoodie")</span></label>
       <input type="text" id="name" required />
     </div>
 
@@ -475,14 +475,20 @@
 
   /* Common color presets — pre-populated when a row is added */
   const PRESETS = [
-    { label: 'Bordeaux',     hex: '#5C1A1A' },
+    { label: 'Burgundy',     hex: '#5C1A1A' },
     { label: 'Navy',         hex: '#1B2A4A' },
     { label: 'Forest Green', hex: '#2D4A2D' },
     { label: 'Black',        hex: '#111111' },
     { label: 'White',        hex: '#F0F0F0' },
   ];
 
-  let nextProductId = parseInt(localStorage.getItem('am-next-id') || '25');
+  /*
+    Starting ID for new products.
+    Currently the catalog has 13 products (after consolidation), so 14 is next.
+    Once a product is generated, the ID is incremented and persisted in
+    localStorage so consecutive new products don't collide.
+  */
+  let nextProductId = parseInt(localStorage.getItem('am-next-id') || '14');
 
   /* ── Add color variant row ── */
   function addColorRow(prefilled) {
