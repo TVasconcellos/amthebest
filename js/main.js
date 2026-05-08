@@ -72,7 +72,7 @@
 
 /* Reusable colour definitions (hex values) */
 const COLORS = {
-  bordeaux:     { label: 'Bordeaux',     hex: '#5C1A1A' },
+  burgundy:     { label: 'Burgundy',     hex: '#5C1A1A' },
   navy:         { label: 'Navy',         hex: '#1B2A4A' },
   forestGreen:  { label: 'Forest Green', hex: '#2D4A2D' },
   black:        { label: 'Black',        hex: '#111111' },
@@ -81,91 +81,19 @@ const COLORS = {
 
 const PRODUCTS = [
 
-  /* ── T-SHIRTS (with logo) ── */
+  /* ──────────────── T-SHIRT (logo) ──────────────── */
   {
     id: 1,
-    name: "T-Shirt Bordeaux",
-    family: "T-Shirt",
-    category: "tshirt",
-    price: "€15",
-    badge: null,
-    image: "images/products/shirt1.jpg",
-    description: "Classic A&M logo tee in a rich bordeaux. 100% organic cotton, 200gsm, relaxed unisex fit. Printed with water-based inks.",
-    sizes: ["XS", "S", "M", "L", "XL", "XXL"],
-    colors: [
-      { ...COLORS.bordeaux,    image: "images/products/shirt1.jpg" },
-      { ...COLORS.navy,        image: "images/products/shirt2.jpg" },
-      { ...COLORS.forestGreen, image: "images/products/shirt3.jpg" },
-      { ...COLORS.black,       image: "images/products/shirt4.jpg" },
-      { ...COLORS.white,       image: "images/products/shirt5.jpg" },
-    ]
-  },
-  {
-    id: 2,
-    name: "T-Shirt Navy",
-    family: "T-Shirt",
-    category: "tshirt",
-    price: "€15",
-    badge: null,
-    image: "images/products/shirt2.jpg",
-    description: "Classic A&M logo tee in deep navy. 100% organic cotton, 200gsm, relaxed unisex fit.",
-    sizes: ["XS", "S", "M", "L", "XL", "XXL"],
-    colors: [
-      { ...COLORS.bordeaux,    image: "images/products/shirt1.jpg" },
-      { ...COLORS.navy,        image: "images/products/shirt2.jpg" },
-      { ...COLORS.forestGreen, image: "images/products/shirt3.jpg" },
-      { ...COLORS.black,       image: "images/products/shirt4.jpg" },
-      { ...COLORS.white,       image: "images/products/shirt5.jpg" },
-    ]
-  },
-  {
-    id: 3,
-    name: "T-Shirt Forest Green",
-    family: "T-Shirt",
-    category: "tshirt",
-    price: "€15",
-    badge: null,
-    image: "images/products/shirt3.jpg",
-    description: "Classic A&M logo tee in muted forest green. 100% organic cotton, 200gsm.",
-    sizes: ["XS", "S", "M", "L", "XL", "XXL"],
-    colors: [
-      { ...COLORS.bordeaux,    image: "images/products/shirt1.jpg" },
-      { ...COLORS.navy,        image: "images/products/shirt2.jpg" },
-      { ...COLORS.forestGreen, image: "images/products/shirt3.jpg" },
-      { ...COLORS.black,       image: "images/products/shirt4.jpg" },
-      { ...COLORS.white,       image: "images/products/shirt5.jpg" },
-    ]
-  },
-  {
-    id: 4,
-    name: "T-Shirt Black",
+    name: "T-Shirt",
     family: "T-Shirt",
     category: "tshirt",
     price: "€15",
     badge: "Best Seller",
-    image: "images/products/shirt4.jpg",
-    description: "The essential black logo tee. Goes with everything. 100% organic cotton, 200gsm.",
+    image: "images/products/shirt1.jpg",  /* Default = first colour */
+    description: "Classic A&M logo tee. 100% organic cotton, 200gsm, relaxed unisex fit. Printed with water-based inks. Available in five colours.",
     sizes: ["XS", "S", "M", "L", "XL", "XXL"],
     colors: [
-      { ...COLORS.bordeaux,    image: "images/products/shirt1.jpg" },
-      { ...COLORS.navy,        image: "images/products/shirt2.jpg" },
-      { ...COLORS.forestGreen, image: "images/products/shirt3.jpg" },
-      { ...COLORS.black,       image: "images/products/shirt4.jpg" },
-      { ...COLORS.white,       image: "images/products/shirt5.jpg" },
-    ]
-  },
-  {
-    id: 5,
-    name: "T-Shirt White",
-    family: "T-Shirt",
-    category: "tshirt",
-    price: "€15",
-    badge: null,
-    image: "images/products/shirt5.jpg",
-    description: "Clean white logo tee. The summer staple. 100% organic cotton, 200gsm.",
-    sizes: ["XS", "S", "M", "L", "XL", "XXL"],
-    colors: [
-      { ...COLORS.bordeaux,    image: "images/products/shirt1.jpg" },
+      { ...COLORS.burgundy,    image: "images/products/shirt1.jpg" },
       { ...COLORS.navy,        image: "images/products/shirt2.jpg" },
       { ...COLORS.forestGreen, image: "images/products/shirt3.jpg" },
       { ...COLORS.black,       image: "images/products/shirt4.jpg" },
@@ -173,91 +101,19 @@ const PRODUCTS = [
     ]
   },
 
-  /* ── T-SHIRTS (no logo) ── */
+  /* ──────────────── T-SHIRT (no logo) ──────────────── */
   {
-    id: 6,
-    name: "T-Shirt No Logo Bordeaux",
+    id: 2,
+    name: "T-Shirt No Logo",
     family: "T-Shirt No Logo",
     category: "tshirt-nolog",
     price: "€15",
     badge: null,
     image: "images/products/shirt6.jpg",
-    description: "The clean version. No logo, no noise. Just great cotton in bordeaux. 200gsm organic.",
+    description: "The clean version. No logo, no noise — just premium 200gsm organic cotton. Available in five colours.",
     sizes: ["XS", "S", "M", "L", "XL", "XXL"],
     colors: [
-      { ...COLORS.bordeaux,    image: "images/products/shirt6.jpg" },
-      { ...COLORS.navy,        image: "images/products/shirt7.jpg" },
-      { ...COLORS.forestGreen, image: "images/products/shirt8.jpg" },
-      { ...COLORS.black,       image: "images/products/shirt9.jpg" },
-      { ...COLORS.white,       image: "images/products/shirt10.jpg" },
-    ]
-  },
-  {
-    id: 7,
-    name: "T-Shirt No Logo Navy",
-    family: "T-Shirt No Logo",
-    category: "tshirt-nolog",
-    price: "€15",
-    badge: null,
-    image: "images/products/shirt7.jpg",
-    description: "The clean version in navy. No logo, just premium cotton.",
-    sizes: ["XS", "S", "M", "L", "XL", "XXL"],
-    colors: [
-      { ...COLORS.bordeaux,    image: "images/products/shirt6.jpg" },
-      { ...COLORS.navy,        image: "images/products/shirt7.jpg" },
-      { ...COLORS.forestGreen, image: "images/products/shirt8.jpg" },
-      { ...COLORS.black,       image: "images/products/shirt9.jpg" },
-      { ...COLORS.white,       image: "images/products/shirt10.jpg" },
-    ]
-  },
-  {
-    id: 8,
-    name: "T-Shirt No Logo Forest Green",
-    family: "T-Shirt No Logo",
-    category: "tshirt-nolog",
-    price: "€15",
-    badge: null,
-    image: "images/products/shirt8.jpg",
-    description: "The clean version in forest green. Minimal and wearable.",
-    sizes: ["XS", "S", "M", "L", "XL", "XXL"],
-    colors: [
-      { ...COLORS.bordeaux,    image: "images/products/shirt6.jpg" },
-      { ...COLORS.navy,        image: "images/products/shirt7.jpg" },
-      { ...COLORS.forestGreen, image: "images/products/shirt8.jpg" },
-      { ...COLORS.black,       image: "images/products/shirt9.jpg" },
-      { ...COLORS.white,       image: "images/products/shirt10.jpg" },
-    ]
-  },
-  {
-    id: 9,
-    name: "T-Shirt No Logo Black",
-    family: "T-Shirt No Logo",
-    category: "tshirt-nolog",
-    price: "€15",
-    badge: "Best Seller",
-    image: "images/products/shirt9.jpg",
-    description: "The clean version in black. Pairs with everything.",
-    sizes: ["XS", "S", "M", "L", "XL", "XXL"],
-    colors: [
-      { ...COLORS.bordeaux,    image: "images/products/shirt6.jpg" },
-      { ...COLORS.navy,        image: "images/products/shirt7.jpg" },
-      { ...COLORS.forestGreen, image: "images/products/shirt8.jpg" },
-      { ...COLORS.black,       image: "images/products/shirt9.jpg" },
-      { ...COLORS.white,       image: "images/products/shirt10.jpg" },
-    ]
-  },
-  {
-    id: 10,
-    name: "T-Shirt No Logo White",
-    family: "T-Shirt No Logo",
-    category: "tshirt-nolog",
-    price: "€15",
-    badge: null,
-    image: "images/products/shirt10.jpg",
-    description: "The clean version in white. A timeless blank canvas.",
-    sizes: ["XS", "S", "M", "L", "XL", "XXL"],
-    colors: [
-      { ...COLORS.bordeaux,    image: "images/products/shirt6.jpg" },
+      { ...COLORS.burgundy,    image: "images/products/shirt6.jpg" },
       { ...COLORS.navy,        image: "images/products/shirt7.jpg" },
       { ...COLORS.forestGreen, image: "images/products/shirt8.jpg" },
       { ...COLORS.black,       image: "images/products/shirt9.jpg" },
@@ -265,31 +121,16 @@ const PRODUCTS = [
     ]
   },
 
-  /* ── HOODIES ── */
+  /* ──────────────── HOODIE ──────────────── */
   {
-    id: 11,
-    name: "Hoodie White",
+    id: 3,
+    name: "Hoodie",
     family: "Hoodie",
     category: "hoodie",
     price: "€20",
     badge: "New",
     image: "images/products/hoodie1.jpg",
-    description: "Heavyweight fleece hoodie in white. Kangaroo pocket, ribbed cuffs, dropped shoulders. 380gsm.",
-    sizes: ["XS", "S", "M", "L", "XL", "XXL"],
-    colors: [
-      { ...COLORS.white, image: "images/products/hoodie1.jpg" },
-      { ...COLORS.black, image: "images/products/hoodie2.jpg" },
-    ]
-  },
-  {
-    id: 12,
-    name: "Hoodie Black",
-    family: "Hoodie",
-    category: "hoodie",
-    price: "€20",
-    badge: null,
-    image: "images/products/hoodie2.jpg",
-    description: "Heavyweight fleece hoodie in black. Kangaroo pocket, ribbed cuffs. The essential layer.",
+    description: "Heavyweight fleece hoodie. Kangaroo pocket, ribbed cuffs, dropped shoulders. 380gsm. Available in white and black.",
     sizes: ["XS", "S", "M", "L", "XL", "XXL"],
     colors: [
       { ...COLORS.white, image: "images/products/hoodie1.jpg" },
@@ -297,31 +138,16 @@ const PRODUCTS = [
     ]
   },
 
-  /* ── SWEATSHIRTS ── */
+  /* ──────────────── SWEATSHIRT ──────────────── */
   {
-    id: 13,
-    name: "Sweatshirt White",
+    id: 4,
+    name: "Sweatshirt",
     family: "Sweatshirt",
     category: "sweatshirt",
     price: "€16",
     badge: null,
     image: "images/products/sweatshirt1.jpg",
-    description: "Classic crewneck sweatshirt in white. Medium-weight french terry, boxy fit. A wardrobe staple.",
-    sizes: ["XS", "S", "M", "L", "XL", "XXL"],
-    colors: [
-      { ...COLORS.white, image: "images/products/sweatshirt1.jpg" },
-      { ...COLORS.black, image: "images/products/sweatshirt2.jpg" },
-    ]
-  },
-  {
-    id: 14,
-    name: "Sweatshirt Black",
-    family: "Sweatshirt",
-    category: "sweatshirt",
-    price: "€16",
-    badge: null,
-    image: "images/products/sweatshirt2.jpg",
-    description: "Classic crewneck sweatshirt in black. The one you'll reach for every morning.",
+    description: "Classic crewneck sweatshirt in medium-weight french terry. Boxy fit. The wardrobe staple. Available in white and black.",
     sizes: ["XS", "S", "M", "L", "XL", "XXL"],
     colors: [
       { ...COLORS.white, image: "images/products/sweatshirt1.jpg" },
@@ -329,10 +155,10 @@ const PRODUCTS = [
     ]
   },
 
-  /* ── SHORTS ── */
+  /* ──────────────── SHORTS ──────────────── */
   {
-    id: 15,
-    name: "Shorts Black",
+    id: 5,
+    name: "Shorts",
     family: "Shorts",
     category: "shorts",
     price: "€15",
@@ -340,34 +166,19 @@ const PRODUCTS = [
     image: "images/products/shorts1.jpg",
     description: "A&M shorts in black. Lightweight, elastic waistband, side pockets. Built for summer.",
     sizes: ["XS", "S", "M", "L", "XL", "XXL"],
-    colors: null /* Single colour — no swatch UI */
+    colors: null
   },
 
-  /* ── WATER BOTTLES ── */
+  /* ──────────────── WATER BOTTLE ──────────────── */
   {
-    id: 16,
-    name: "Water Bottle White",
+    id: 6,
+    name: "Water Bottle",
     family: "Water Bottle A&M",
     category: "bottle",
     price: "€15",
     badge: null,
     image: "images/products/bottle1.jpg",
-    description: "A&M branded stainless steel water bottle in white. 500ml, double-wall insulated, keeps cold 24h / hot 12h.",
-    sizes: ["One Size"],
-    colors: [
-      { ...COLORS.white, image: "images/products/bottle1.jpg" },
-      { ...COLORS.black, image: "images/products/bottle2.jpg" },
-    ]
-  },
-  {
-    id: 17,
-    name: "Water Bottle Black",
-    family: "Water Bottle A&M",
-    category: "bottle",
-    price: "€15",
-    badge: null,
-    image: "images/products/bottle2.jpg",
-    description: "A&M branded stainless steel water bottle in black. 500ml, double-wall insulated.",
+    description: "A&M branded stainless steel water bottle. 500ml, double-wall insulated, keeps cold 24h / hot 12h. Available in white and black.",
     sizes: ["One Size"],
     colors: [
       { ...COLORS.white, image: "images/products/bottle1.jpg" },
@@ -375,9 +186,9 @@ const PRODUCTS = [
     ]
   },
 
-  /* ── CAPS ── */
+  /* ──────────────── CAPS ──────────────── */
   {
-    id: 18,
+    id: 7,
     name: "Caps Collection",
     family: "Caps",
     category: "cap",
@@ -389,9 +200,9 @@ const PRODUCTS = [
     colors: null
   },
 
-  /* ── SOCKS ── */
+  /* ──────────────── SOCKS ──────────────── */
   {
-    id: 19,
+    id: 8,
     name: "Socks Pack",
     family: "Socks",
     category: "socks",
@@ -403,9 +214,9 @@ const PRODUCTS = [
     colors: null
   },
 
-  /* ── TOTEBAG ── */
+  /* ──────────────── TOTEBAG ──────────────── */
   {
-    id: 20,
+    id: 9,
     name: "Totebag",
     family: "Totebag",
     category: "tote",
@@ -417,9 +228,9 @@ const PRODUCTS = [
     colors: null
   },
 
-  /* ── PACKS ── */
+  /* ──────────────── PACKS ──────────────── */
   {
-    id: 21,
+    id: 10,
     name: "Summer Pack",
     family: "Packs",
     category: "pack",
@@ -431,7 +242,7 @@ const PRODUCTS = [
     colors: null
   },
   {
-    id: 22,
+    id: 11,
     name: "Winter Pack",
     family: "Packs",
     category: "pack",
@@ -443,7 +254,7 @@ const PRODUCTS = [
     colors: null
   },
   {
-    id: 23,
+    id: 12,
     name: "Essential Pack",
     family: "Packs",
     category: "pack",
@@ -455,7 +266,7 @@ const PRODUCTS = [
     colors: null
   },
   {
-    id: 24,
+    id: 13,
     name: "Complete Pack",
     family: "Packs",
     category: "pack",
@@ -467,6 +278,7 @@ const PRODUCTS = [
     colors: null
   },
 ];
+
 
 
 /* ================================================================
@@ -808,8 +620,8 @@ function openModal(product) {
         class="color-swatch${idx === (activeIdx >= 0 ? activeIdx : 0) ? ' selected' : ''}"
         data-color-idx="${idx}"
         style="background: ${color.hex}"
-        title="${color.label}"
-        aria-label="${t['modal.color'] || 'Colour'}: ${color.label}"
+        title="${tColor(color.label)}"
+        aria-label="${t['modal.color'] || 'Colour'}: ${tColor(color.label)}"
       ></button>
     `).join('');
 
@@ -817,7 +629,7 @@ function openModal(product) {
       <div class="modal__colors">
         <div class="modal__colors-header">
           <span class="modal__sizes-label">${t['modal.colour'] || 'Colour'}</span>
-          <span class="modal__color-selected" id="modalColorSelected">${selectedColor.label}</span>
+          <span class="modal__color-selected" id="modalColorSelected">${tColor(selectedColor.label)}</span>
         </div>
         <div class="modal__color-swatches">${swatchesHTML}</div>
       </div>
@@ -880,7 +692,7 @@ function openModal(product) {
         selectedColor = color;
 
         /* Update the label text */
-        if (colorSelected) colorSelected.textContent = color.label;
+        if (colorSelected) colorSelected.textContent = tColor(color.label);
 
         /* Crossfade the product image to the new colour */
         modalImage.style.opacity = '0';
@@ -1058,49 +870,71 @@ function initFooterYear() {
 */
 const PRODUCT_TRANSLATIONS = {
   pt: {
-    /* T-Shirts (with logo) */
-    1:  { name: 'T-Shirt Bordeaux',      family: 'T-Shirt', description: 'T-shirt clássica com logo A&M em bordeaux. 100% algodão orgânico, 200gsm, corte unissexo descontraído. Estampado com tintas à base de água.' },
-    2:  { name: 'T-Shirt Azul Marinho',  family: 'T-Shirt', description: 'T-shirt clássica com logo A&M em azul marinho. 100% algodão orgânico, 200gsm, corte unissexo descontraído.' },
-    3:  { name: 'T-Shirt Verde Floresta', family: 'T-Shirt', description: 'T-shirt clássica com logo A&M em verde floresta suave. 100% algodão orgânico, 200gsm.' },
-    4:  { name: 'T-Shirt Preta',         family: 'T-Shirt', description: 'A t-shirt preta essencial com logo. Combina com tudo. 100% algodão orgânico, 200gsm.' },
-    5:  { name: 'T-Shirt Branca',        family: 'T-Shirt', description: 'T-shirt branca clean com logo. O básico de verão. 100% algodão orgânico, 200gsm.' },
-
-    /* T-Shirts (no logo) */
-    6:  { name: 'T-Shirt Sem Logo Bordeaux',     family: 'T-Shirt Sem Logo', description: 'A versão limpa. Sem logo, sem ruído. Apenas algodão de qualidade em bordeaux. 200gsm orgânico.' },
-    7:  { name: 'T-Shirt Sem Logo Azul Marinho', family: 'T-Shirt Sem Logo', description: 'A versão limpa em azul marinho. Sem logo, apenas algodão premium.' },
-    8:  { name: 'T-Shirt Sem Logo Verde Floresta', family: 'T-Shirt Sem Logo', description: 'A versão limpa em verde floresta. Minimalista e versátil.' },
-    9:  { name: 'T-Shirt Sem Logo Preta',        family: 'T-Shirt Sem Logo', description: 'A versão limpa em preto. Combina com tudo.' },
-    10: { name: 'T-Shirt Sem Logo Branca',       family: 'T-Shirt Sem Logo', description: 'A versão limpa em branco. Uma tela em branco intemporal.' },
-
-    /* Hoodies */
-    11: { name: 'Hoodie Branca', family: 'Hoodie', description: 'Hoodie em fleece pesado, branca. Bolso canguru, punhos canelados, ombros descaídos. 380gsm.' },
-    12: { name: 'Hoodie Preta',  family: 'Hoodie', description: 'Hoodie em fleece pesado, preta. Bolso canguru, punhos canelados. A camada essencial.' },
-
-    /* Sweatshirts */
-    13: { name: 'Sweatshirt Branca', family: 'Sweatshirt', description: 'Sweatshirt clássica de gola redonda em branco. French terry de peso médio, corte boxy. Um básico de armário.' },
-    14: { name: 'Sweatshirt Preta',  family: 'Sweatshirt', description: 'Sweatshirt clássica de gola redonda em preto. Aquela que vais usar todos os dias.' },
-
-    /* Shorts */
-    15: { name: 'Calções Pretos', family: 'Calções', description: 'Calções A&M em preto. Leves, cintura elástica, bolsos laterais. Feitos para o verão.' },
-
-    /* Bottles */
-    16: { name: 'Garrafa de Água Branca', family: 'Garrafa A&M', description: 'Garrafa de aço inox com logo A&M, branca. 500ml, parede dupla isolada, mantém frio 24h / quente 12h.' },
-    17: { name: 'Garrafa de Água Preta',  family: 'Garrafa A&M', description: 'Garrafa de aço inox com logo A&M, preta. 500ml, parede dupla isolada.' },
-
-    /* Caps */
-    18: { name: 'Coleção de Bonés', family: 'Bonés', description: 'Coleção de bonés A&M. Estrutura de 6 painéis, fecho ajustável, logo bordado. Tamanho único.' },
-
-    /* Socks */
-    19: { name: 'Pack de Meias', family: 'Meias', description: 'Meias com logo A&M num blend de algodão canelado. Altura média, logo tecido no tornozelo. Vendidas individualmente.' },
-
-    /* Tote */
-    20: { name: 'Totebag', family: 'Totebag', description: 'Totebag em lona pesada com estampado A&M. Asas reforçadas, algodão natural, leva tudo.' },
-
-    /* Packs */
-    21: { name: 'Pack Verão',     family: 'Packs', description: 'O Pack Verão: T-Shirt + Calções + Meias. Tudo o que precisas para os meses quentes, com desconto.' },
-    22: { name: 'Pack Inverno',   family: 'Packs', description: 'O Pack Inverno: Hoodie + Sweatshirt + Meias. Mantém-te quente, mantém-te fresh.' },
-    23: { name: 'Pack Essencial', family: 'Packs', description: 'O Pack Essencial: T-Shirt + Totebag + Meias. O kit inicial perfeito.' },
-    24: { name: 'Pack Completo',  family: 'Packs', description: 'O Pack Completo: T-Shirt + Hoodie + Calções + Meias + Totebag. A experiência A&M completa.' },
+    1:  {
+      name: 'T-Shirt',
+      family: 'T-Shirt',
+      description: 'T-shirt clássica com logo A&M. 100% algodão orgânico, 200gsm, corte unissexo descontraído. Estampada com tintas à base de água. Disponível em cinco cores.'
+    },
+    2:  {
+      name: 'T-Shirt Sem Logo',
+      family: 'T-Shirt Sem Logo',
+      description: 'A versão limpa. Sem logo, sem ruído — apenas algodão orgânico premium de 200gsm. Disponível em cinco cores.'
+    },
+    3:  {
+      name: 'Hoodie',
+      family: 'Hoodie',
+      description: 'Hoodie em fleece pesado. Bolso canguru, punhos canelados, ombros descaídos. 380gsm. Disponível em branco e preto.'
+    },
+    4:  {
+      name: 'Sweatshirt',
+      family: 'Sweatshirt',
+      description: 'Sweatshirt clássica de gola redonda em french terry de peso médio. Corte boxy. Um básico de armário. Disponível em branco e preto.'
+    },
+    5:  {
+      name: 'Calções',
+      family: 'Calções',
+      description: 'Calções A&M em preto. Leves, cintura elástica, bolsos laterais. Feitos para o verão.'
+    },
+    6:  {
+      name: 'Garrafa de Água',
+      family: 'Garrafa A&M',
+      description: 'Garrafa de aço inox com logo A&M. 500ml, parede dupla isolada, mantém frio 24h / quente 12h. Disponível em branco e preto.'
+    },
+    7:  {
+      name: 'Coleção de Bonés',
+      family: 'Bonés',
+      description: 'Coleção de bonés A&M. Estrutura de 6 painéis, fecho ajustável, logo bordado. Tamanho único.'
+    },
+    8:  {
+      name: 'Pack de Meias',
+      family: 'Meias',
+      description: 'Meias com logo A&M num blend de algodão canelado. Altura média, logo tecido no tornozelo. Vendidas individualmente.'
+    },
+    9:  {
+      name: 'Totebag',
+      family: 'Totebag',
+      description: 'Totebag em lona pesada com estampado A&M. Asas reforçadas, algodão natural, leva tudo.'
+    },
+    10: {
+      name: 'Pack Verão',
+      family: 'Packs',
+      description: 'O Pack Verão: T-Shirt + Calções + Meias. Tudo o que precisas para os meses quentes, com desconto.'
+    },
+    11: {
+      name: 'Pack Inverno',
+      family: 'Packs',
+      description: 'O Pack Inverno: Hoodie + Sweatshirt + Meias. Mantém-te quente, mantém-te fresh.'
+    },
+    12: {
+      name: 'Pack Essencial',
+      family: 'Packs',
+      description: 'O Pack Essencial: T-Shirt + Totebag + Meias. O kit inicial perfeito.'
+    },
+    13: {
+      name: 'Pack Completo',
+      family: 'Packs',
+      description: 'O Pack Completo: T-Shirt + Hoodie + Calções + Meias + Totebag. A experiência A&M completa.'
+    },
   }
 };
 
@@ -1114,6 +948,35 @@ function tProduct(product, field) {
   const lang = document.documentElement.dataset.lang || 'en';
   if (lang === 'en') return product[field];
   return PRODUCT_TRANSLATIONS[lang]?.[product.id]?.[field] ?? product[field];
+}
+
+
+/*
+  Colour name translations.
+  
+  English labels live on the COLORS map in section 1 (e.g. 'Burgundy').
+  When the language is set to PT, we look up the English label here
+  and return its Portuguese equivalent.
+  
+  ★ TO ADD A COLOUR:
+  1. Add it to COLORS in section 1 with an English label.
+  2. Add the Portuguese translation here, keyed by the English label.
+*/
+const COLOR_TRANSLATIONS = {
+  pt: {
+    'Burgundy':     'Bordeaux',
+    'Navy':         'Azul Marinho',
+    'Forest Green': 'Verde Floresta',
+    'Black':        'Preto',
+    'White':        'Branco',
+  }
+};
+
+/* Look up a colour's translated label. Falls back to English. */
+function tColor(label) {
+  const lang = document.documentElement.dataset.lang || 'en';
+  if (lang === 'en') return label;
+  return COLOR_TRANSLATIONS[lang]?.[label] ?? label;
 }
 
 
@@ -1417,7 +1280,7 @@ const Cart = {
         <div class="cart-item__body">
           <p class="cart-item__name">${displayName}</p>
           <p class="cart-item__meta">
-            ${item.color ? `${item.color} · ` : ''}${item.size}
+            ${item.color ? `${tColor(item.color)} · ` : ''}${item.size}
           </p>
           <div class="cart-item__row">
             <div class="cart-item__qty">
@@ -1462,7 +1325,7 @@ const Cart = {
           return `
           <div class="order__item">
             <span class="order__item-name">
-              ${item.qty} × ${displayName}${item.color ? ` (${item.color})` : ''} — ${item.size}
+              ${item.qty} × ${displayName}${item.color ? ` (${tColor(item.color)})` : ''} — ${item.size}
             </span>
             <span class="order__item-price">€${(item.price * item.qty).toFixed(0)}</span>
           </div>
