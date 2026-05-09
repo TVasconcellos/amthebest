@@ -1,27 +1,25 @@
 # A&M — Merch Store
 
-Single-page merch website. No backend, no build tools, no dependencies.
+Single-page merch website. Static site, no backend, no build tools.
 
 ---
 
 ## Project Structure
 
 ```
-a-and-m-store/
-├── logo.png             ← YOUR LOGO GOES HERE (same level as index.html)
-├── index.html           ← The entire website
+amthebest/
+├── logo.png             ← Brand logo (root folder, next to index.html)
+├── index.html           ← The main shop page
 ├── css/
 │   └── style.css        ← All styles + design tokens
 ├── js/
-│   └── main.js          ← All logic, product data, translations
+│   └── main.js          ← All logic, products, translations, cart
+├── new/
+│   └── index.html       ← Hidden product builder page (visit /new)
 ├── images/
-│   ├── products/        ← Product photos (shirt1.jpg, hoodie1.jpg, etc.)
-│   ├── ig1.jpg          ← Instagram feed images
-│   ├── ig2.jpg
-│   ├── ig3.jpg
-│   ├── ig4.jpg
-│   ├── ig5.jpg
-│   └── ig6.jpg
+│   ├── main.mp4         ← Hero background video
+│   ├── og-preview.jpg   ← Link preview image (1200×630)
+│   └── products/        ← All product photos
 └── README.md
 ```
 
@@ -29,88 +27,120 @@ a-and-m-store/
 
 ## Logo
 
-Put `logo.png` in the **root folder** (same level as `index.html`).
-
-- Format: PNG with transparent background (recommended)
-- Size: any — CSS scales it to max 120px wide / 48px tall
-- It appears in the nav bar on the left
+Drop `logo.png` in the root folder. CSS scales it to max 48px tall in the nav and 40px tall in the footer. Transparent PNG recommended.
 
 ---
 
 ## Product Images
 
-Put images in `images/products/`. Naming convention:
+Put images in `images/products/`. The catalog uses these filenames:
 
-| Type        | Names                              |
-|-------------|------------------------------------|
-| T-Shirts    | `shirt1.jpg`, `shirt2.jpg`, ...    |
-| Hoodies     | `hoodie1.jpg`, `hoodie2.jpg`, ...  |
-| Sweatshirts | `sweatshirt1.jpg`, `sweatshirt2.jpg`, ... |
-| Socks       | `socks1.jpg`, `socks2.jpg`, ...    |
-| Accessories | `tote1.jpg`, `beanie1.jpg`, ...    |
+| Product            | Images                                          |
+|--------------------|-------------------------------------------------|
+| T-Shirt (logo)     | `shirt1.jpg` – `shirt5.jpg` (5 colours)         |
+| T-Shirt "The Best."| `shirt6.jpg` – `shirt10.jpg` (5 colours)        |
+| Hoodie             | `hoodie1.jpg`, `hoodie2.jpg` (white, black)     |
+| Sweatshirt         | `sweatshirt1.jpg`, `sweatshirt2.jpg`            |
+| Shorts             | `shorts1.jpg`                                   |
+| Cap                | `cap1.jpg`                                      |
+| Socks              | `socks1.jpg`                                    |
+| Water Bottle       | `bottle1.jpg`–`bottle4.jpg` (white/black, 600/350ml) |
+| Totebag            | `tote1.jpg`                                     |
+| Playing Cards      | `baralho_cartas1.jpg`, `baralho_cartas2.jpg`    |
+| Coasters           | `base_copos1.jpg`, `base_copos2.jpg`            |
+| Notebook           | `caderno1.jpg`                                  |
+| Pen / Pack of Pens | `caneta1.jpg`, `pack_canetas1.jpg`              |
+| Keychain           | `porta_chaves.jpg`                              |
+| Phone Case         | `capa_telemovel.jpg`                            |
+| Packs              | `summerpack1.jpg`, `winterpack1.jpg`, `essentialpack1.jpg`, `completepack1.jpg` |
 
-Recommended size: **800 × 1000px**, JPEG at 80% quality.
-
-Update the `image` field in the `PRODUCTS` array in `main.js` to match.
+Recommended size: **800 × 1000px** for apparel (portrait), **1000 × 1000px** for accessories (square). JPEG at 80% quality.
 
 ---
 
 ## Adding Products
 
-Edit the `PRODUCTS` array in `js/main.js`:
+Two ways:
+
+**Option A — Visit `/new` on your live site.** A private product builder form generates the JS object for you. Copy the output, paste it into the `PRODUCTS` array in `main.js`, commit, push.
+
+**Option B — Edit `main.js` directly.** Find the `PRODUCTS` array near the top. Each entry looks like:
 
 ```js
 {
-  id: 11,                                  // Unique number — never repeat
+  id: 21,                          // Unique — never repeat
   name: "New Item",
-  category: "tshirt",                      // tshirt | hoodie | sweatshirt | socks | accessories
-  price: "€40",
-  badge: "New",                            // or null for no badge
-  image: "images/products/shirt3.jpg",
-  description: "Product description here.",
-  sizes: ["XS", "S", "M", "L", "XL"]
+  family: "Category Family",
+  category: "accessories",         // Filter category (see below)
+  price: "€15",
+  save: null,                      // Or "€3" for "Save €3" tag (packs)
+  badge: "New",                    // null | "Best Seller" | "New" | "Best Value"
+  image: "images/products/foo.jpg",
+  description: "Item description.",
+  sizes: ["S", "M", "L", "XL"],   // Or ["One Size"] for non-sized
+  colors: null,                    // Or array of { label, hex, image }
 }
 ```
 
----
+Valid `category` values: `tshirt` · `tshirt-nolog` · `hoodie` · `sweatshirt` · `shorts` · `cap` · `socks` · `accessories` · `pack`
 
-## Instagram Feed
-
-Put 6 images in `images/` named `ig1.jpg` through `ig6.jpg`.  
-These simulate the @sofiavalequaresma feed.
-
-To connect a **live feed**, use [Behold.so](https://behold.so) — it creates an API endpoint you replace the `INSTAGRAM_POSTS` array with.
+For Portuguese translations, add an entry to `PRODUCT_TRANSLATIONS.pt` keyed by the product's id.
 
 ---
 
-## Contact Form (Formspree)
+## Hero Video
 
-1. Go to [formspree.io](https://formspree.io) and create a free account
-2. Click "New Form" → enter `thebest.aem@gmail.com`
-3. Copy the Form ID (8-character code, e.g. `xpzvwqbo`)
-4. In `js/main.js`, find: `const FORMSPREE_ID = 'YOUR_FORM_ID'`
-5. Replace `YOUR_FORM_ID` with your actual ID
-
-Free plan: 50 submissions/month.
+The hero section plays `images/main.mp4` on loop. Keep it under ~5MB. The dark gradient overlay above keeps the headline readable over any frame.
 
 ---
 
 ## Languages
 
-The site supports **English** and **Portuguese (PT-PT)**.  
-A switcher in the nav lets the visitor toggle.  
-User preference is saved in localStorage (persists across visits).
+Defaults to **Portuguese (PT-PT)** for new visitors. Returning visitors see whatever they last selected (saved in localStorage). Toggle button in the nav.
 
-To edit or add translations, find the `TRANSLATIONS` object in `js/main.js`.
+To edit translations, see two objects in `main.js`:
+- `TRANSLATIONS` — UI labels (buttons, headers, ticker text)
+- `PRODUCT_TRANSLATIONS` — product names, families, descriptions
+
+Smaller helpers also exist for badges, colours, sizes (`BADGE_TRANSLATIONS`, `COLOR_TRANSLATIONS`, `SIZE_TRANSLATIONS`).
+
+To change the default language, edit `DEFAULT_LANG` in `initLanguageSwitcher()`.
+
+---
+
+## Shopping Cart + Orders
+
+Customers add items, open the cart side panel, and click "Order by Email". The order modal collects their name/phone/email/address and opens their email client with a pre-filled message to `thebest.aem@gmail.com` containing:
+
+- Customer info
+- Item list with quantities, sizes, colours
+- Total price
+- MBWay payment instructions (number: 912 025 191)
+
+Cart contents persist in localStorage across page reloads.
+
+To change the order email or MBWay number, edit the constants in section 12 of `main.js`:
+```js
+const ORDER_EMAIL  = 'thebest.aem@gmail.com';
+const MBWAY_NUMBER = '912 025 191';
+```
+
+---
+
+## Contact Form (Formspree)
+
+The "Let's Talk" form posts to Formspree (Form ID `xpqbozoq`), which forwards messages as email. Free plan: 50 submissions/month.
+
+If Formspree is ever unavailable, the form gracefully falls back to opening the customer's email client with a pre-filled message.
 
 ---
 
 ## Hosting on GitHub Pages
 
-1. Create a repo on GitHub (e.g. `am-store`)
-2. Push all files to the `main` branch
-3. Go to **Settings → Pages → Deploy from branch → main → / (root)**
-4. Site goes live at `https://yourusername.github.io/am-store`
+1. Push all files to a GitHub repo
+2. Settings → Pages → Deploy from branch → main → `/` (root)
+3. Site goes live at `https://yourusername.github.io/repo-name`
+4. The hidden admin page is accessible at `/new` (e.g. `…/repo-name/new`)
 
 ---
 
@@ -121,10 +151,26 @@ All visual values are CSS variables at the top of `css/style.css`:
 ```css
 :root {
   --color-accent: #C8A97E;   /* Gold highlight — change to re-theme */
+  --color-navy:   #0D1B2A;   /* Section bg, modal panels */
   --font-display: 'Bebas Neue', sans-serif;
-  --font-body: 'DM Sans', sans-serif;
-  --space-xl: 8rem;          /* Section padding */
+  --font-body:    'DM Sans', sans-serif;
+  --space-xl:     8rem;       /* Section padding */
 }
 ```
 
-Each section in both `style.css` and `main.js` has a `★ TWEAK GUIDE` comment explaining what each value controls.
+Both `style.css` and `main.js` have inline `★ TWEAK GUIDE` comments throughout, explaining what every meaningful value controls.
+
+---
+
+## Open Graph (Link Previews)
+
+When the site URL is shared on WhatsApp, iMessage, Slack, etc., the preview card pulls from the meta tags in `<head>`:
+
+```html
+<meta property="og:title"       content="A&M — Premium Clothing" />
+<meta property="og:description" content="Wear your standard" />
+<meta property="og:image"       content="https://tvasconcellos.github.io/amthebest/images/og-preview.jpg" />
+<meta property="og:url"         content="https://tvasconcellos.github.io/amthebest/" />
+```
+
+The image must be 1200×630px and live at the URL in `og:image`.
