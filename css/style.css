@@ -851,10 +851,27 @@ button { cursor: none; font-family: var(--font-body); border: none; background: 
   padding-right: var(--space-sm);
 }
 
-/* Product image — fades when colour is switched (JS controls opacity) */
+/*
+  Product image in the modal.
+  
+  object-fit: contain — image scales to fit entirely within the container
+  without cropping. Maintains aspect ratio. If the image's ratio doesn't
+  match 4:5, you'll see padding around it (filled by the navy background).
+  
+  Trade-off vs. object-fit: cover:
+  - cover (was): images always fill the box but get cropped if they don't
+    match 4:5. Looked great for portrait apparel shots, bad for square or
+    landscape product shots (Phone Case, Pack composites).
+  - contain (now): no cropping ever. Slight padding on non-4:5 images, but
+    the full product is always visible.
+  
+  ★ TWEAK GUIDE:
+  background: change the colour shown around non-4:5 images.
+  aspect-ratio: change box shape if 4:5 doesn't suit your photos overall.
+*/
 .modal__image {
   width: 100%; aspect-ratio: 4/5;
-  object-fit: cover;
+  object-fit: contain;
   background: var(--color-navy-mid);
   transition: opacity 180ms var(--ease-smooth); /* Must match JS setTimeout */
 }
@@ -1120,7 +1137,7 @@ button { cursor: none; font-family: var(--font-body); border: none; background: 
   }
   .modal__details  { padding-right: 0; }
   /* On stacked layout, cap image height so it doesn't dominate the modal */
-  .modal__image    { aspect-ratio: 1; max-height: 50vh; object-fit: cover; }
+  .modal__image    { aspect-ratio: 1; max-height: 50vh; object-fit: contain; }
 }
 
 @media (max-width: 768px) {
