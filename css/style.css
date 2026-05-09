@@ -1008,14 +1008,29 @@ button { cursor: none; font-family: var(--font-body); border: none; background: 
   gap: 8px;
 }
 
+/*
+  Size buttons.
+  
+  Default shape is a 44px square — fits "S", "M", "L", "XL" perfectly.
+  For longer labels ("One Size", "350ml", "Tamanho Único"), the button
+  expands horizontally to fit the text but keeps its 44px height.
+  
+  ★ TWEAK GUIDE:
+  min-width: 44px is the smallest the button gets (square at min)
+  height: 44px is fixed so all buttons in a row align cleanly
+  padding: horizontal breathing room when text is longer than 1-2 chars
+*/
 .size-btn {
-  width: 44px; height: 44px;
+  min-width: 44px;
+  height: 44px;
+  padding: 0 12px;
   display: flex; align-items: center; justify-content: center;
   border: 1px solid var(--color-border);
   font-size: var(--text-sm);
   color: rgba(255,255,255,0.6);
   transition: all var(--duration-fast);
   cursor: none;
+  white-space: nowrap;
 }
 
 .size-btn:hover,
