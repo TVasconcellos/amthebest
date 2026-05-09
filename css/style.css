@@ -878,6 +878,51 @@ button { cursor: none; font-family: var(--font-body); border: none; background: 
   transition: opacity 180ms var(--ease-smooth); /* Must match JS setTimeout */
 }
 
+/*
+  Image gallery thumbnails — shown below the main product image when a
+  variant has multiple shots (front/back/detail/etc.). Hidden via the
+  JS when a variant only has a single image.
+  
+  ★ TWEAK GUIDE:
+  --thumb-size: change the thumbnail size (currently 64px square).
+  gap: spacing between thumbs.
+  is-active outline: the highlight on the currently visible image.
+*/
+.modal__gallery {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.modal__thumb {
+  --thumb-size: 64px;
+  width: var(--thumb-size);
+  height: var(--thumb-size);
+  padding: 0;
+  background: var(--color-navy-mid);
+  border: 1px solid var(--color-border);
+  cursor: none;
+  overflow: hidden;
+  flex-shrink: 0;
+  transition: border-color var(--duration-fast), opacity var(--duration-fast);
+}
+
+.modal__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.modal__thumb:hover {
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.modal__thumb.is-active {
+  border-color: var(--color-accent);
+}
+
 .modal__meta    { margin-bottom: var(--space-sm); }
 .modal__family  { font-size: var(--text-xs); letter-spacing: 0.2em; text-transform: uppercase; color: var(--color-accent); margin-bottom: 6px; }
 .modal__title   { font-family: var(--font-display); font-size: var(--text-2xl); letter-spacing: 0.05em; margin-bottom: 6px; }
