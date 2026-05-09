@@ -148,8 +148,22 @@ const PRODUCTS = [
     description: "Hoodie with exclusive brand design.",
     sizes: ["S", "M", "L", "XL"],
     colors: [
-      { ...COLORS.white, image: "images/products/hoodie1.jpg" },
-      { ...COLORS.black, image: "images/products/hoodie2.jpg" },
+      {
+        ...COLORS.white,
+        image: "images/products/hoodie1.jpg",  /* Default = first image */
+        images: [
+          "images/products/hoodie1.jpg",
+          "images/products/hoodie_white_2.png",
+        ]
+      },
+      {
+        ...COLORS.black,
+        image: "images/products/hoodie2.jpg",
+        images: [
+          "images/products/hoodie2.jpg",
+          "images/products/hoodie_black_2.png",
+        ]
+      },
     ]
   },
   {
@@ -163,8 +177,22 @@ const PRODUCTS = [
     description: "Sweatshirt with exclusive brand design.",
     sizes: ["S", "M", "L", "XL"],
     colors: [
-      { ...COLORS.white, image: "images/products/sweatshirt1.jpg" },
-      { ...COLORS.black, image: "images/products/sweatshirt2.jpg" },
+      {
+        ...COLORS.white,
+        image: "images/products/sweatshirt1.jpg",
+        images: [
+          "images/products/sweatshirt1.jpg",
+          "images/products/sweatshirt_white_2.png",
+        ]
+      },
+      {
+        ...COLORS.black,
+        image: "images/products/sweatshirt2.jpg",
+        images: [
+          "images/products/sweatshirt2.jpg",
+          "images/products/sweatshirt_black_2.png",
+        ]
+      },
     ]
   },
   {
@@ -175,6 +203,14 @@ const PRODUCTS = [
     price: "€15",
     badge: null,
     image: "images/products/shorts1.jpg",
+    /*
+      Multiple images for a single-variant product live in a top-level
+      `images` array. The modal's gallery shows thumbnails when this exists.
+    */
+    images: [
+      "images/products/shorts1.jpg",
+      "images/products/shorts_black_2.png",
+    ],
     description: "Shorts with exclusive brand design.",
     sizes: ["S", "M", "L", "XL"],
     colors: null
@@ -205,7 +241,23 @@ const PRODUCTS = [
     image: "images/products/socks1.jpg",
     description: "Socks with exclusive brand design.",
     sizes: ["One Size"],
-    colors: null
+    colors: [
+      {
+        ...COLORS.white,
+        image: "images/products/socks1.jpg",
+        images: [
+          "images/products/socks1.jpg",
+          "images/products/socks_white_2.png",
+        ]
+      },
+      {
+        ...COLORS.black,
+        image: "images/products/socks_black_2.png",
+        images: [
+          "images/products/socks_black_2.png",
+        ]
+      },
+    ]
   },
 
   /* ──────────────── ACCESSORIES ──────────────── */
@@ -441,7 +493,7 @@ function initCursor() {
   }
   tick();
 
-  const hoverTargets = 'a, button, .product-card, .filter-btn, .size-btn, .lang-btn, .color-swatch';
+  const hoverTargets = 'a, button, .product-card, .filter-btn, .size-btn, .lang-btn, .color-swatch, .modal__thumb';
   document.addEventListener('mouseover', (e) => {
     if (e.target.closest(hoverTargets)) follower.classList.add('is-hovering');
   });
@@ -736,25 +788,60 @@ let selectedColor = null;
 
 /*
   Resolve the right product image given the current colour and size selection.
+  Returns the SINGLE image to display as the main one.
   
-  Most products map one image per colour. Some (like the Water Bottle) need to
-  vary the image by both colour AND size — for those, the colour entry carries
-  an `imageBySize` map.
+  Most products map one image per colour. Some need richer behaviour:
+    - Water Bottle has imageBySize: image varies by both colour AND size.
+    - Hoodie / Sweatshirt have images[]: multiple shots of the same variant
+      (front/back/detail). The first is the default.
   
   Resolution order:
   1. If the colour has imageBySize and that size exists → use it.
-  2. Otherwise → fall back to the colour's default `image`.
-  3. If no colour selected at all → fall back to the product's primary image.
+  2. Else if the colour has images[] → return the first one.
+  3. Else → fall back to color.image.
+  4. If no colour selected → use product.image.
   
-  This keeps the data model simple: most products only need `colors[i].image`.
-  Products with size-specific images opt in by adding `imageBySize`.
+  This keeps the data model flexible: most products only need one image
+  field per colour. Multi-shot products opt in via `images: [...]`.
+  Size-specific products opt in via `imageBySize: {...}`.
 */
 function resolveProductImage(product, color, size) {
-  if (!color) return product.image;
+  if (!color) {
+    /* No colour variants — top-level images[] takes precedence over single image */
+    return product.images?.[0] ?? product.image;
+  }
   if (color.imageBySize && size && color.imageBySize[size]) {
     return color.imageBySize[size];
   }
+  if (color.images && color.images.length > 0) {
+    return color.images[0];
+  }
   return color.image;
+}
+
+/*
+  Resolve the FULL list of images for a colour selection. Used to build
+  the thumbnail gallery in the modal.
+  
+  Returns an array of image paths. If the variant only has one image,
+  the array has one entry — the gallery code can decide whether to
+  show thumbnails based on length > 1.
+  
+  Note: products with imageBySize (the bottle) don't currently expose
+  multiple images per (colour, size) cell — that would be a bigger
+  matrix. Returns a single-element array for consistency.
+*/
+function resolveProductImages(product, color, size) {
+  if (!color) {
+    return product.images ?? [product.image];
+  }
+  if (color.imageBySize && size && color.imageBySize[size]) {
+    return [color.imageBySize[size]];
+  }
+  if (color.images && color.images.length > 0) {
+    return color.images;
+  }
+  return [color.image];
 }
 
 function openModal(product) {
@@ -802,6 +889,32 @@ function openModal(product) {
     `;
   }
 
+  /*
+    Resolve the initial main image and the gallery for the active variant.
+    At modal open, no size is pre-selected yet (that happens after this HTML
+    is rendered), so we pass null. Both helpers handle null gracefully.
+  */
+  const initialImage  = resolveProductImage(product, selectedColor, null);
+  const initialImages = resolveProductImages(product, selectedColor, null);
+
+  /*
+    Build the thumbnail gallery if the variant has more than one image.
+    Hidden entirely when there's only one — no empty rail.
+  */
+  const galleryHTML = initialImages.length > 1
+    ? `<div class="modal__gallery" id="modalGallery">
+         ${initialImages.map((src, idx) => `
+           <button
+             class="modal__thumb${idx === 0 ? ' is-active' : ''}"
+             data-thumb-idx="${idx}"
+             aria-label="View image ${idx + 1}"
+           >
+             <img src="${src}" alt="" loading="lazy" />
+           </button>
+         `).join('')}
+       </div>`
+    : '';
+
   /* ── Assemble full modal content ──
        Layout: two columns on wide screens (image left, details right),
        stacked on narrow screens. .modal__layout is the flex/grid wrapper. */
@@ -811,10 +924,11 @@ function openModal(product) {
         <img
           class="modal__image"
           id="modalProductImage"
-          src="${product.image}"
+          src="${initialImage}"
           alt="${product.name}"
           onerror="this.style.background='var(--color-navy-mid)'; this.removeAttribute('src')"
         />
+        ${galleryHTML}
       </div>
 
       <div class="modal__details">
@@ -845,6 +959,74 @@ function openModal(product) {
     </div>
   `;
 
+  /*
+    Helper: rebuild the thumbnail gallery for the current variant.
+    Called on initial render (via wireGalleryThumbs) and whenever the
+    colour changes. Hides the gallery if the new variant has ≤1 image.
+  */
+  function rebuildGallery() {
+    const galleryEl = content.querySelector('#modalGallery');
+    const images = resolveProductImages(product, selectedColor, selectedSize);
+
+    if (images.length <= 1) {
+      /* Single image — hide the gallery if it exists, no thumbs needed */
+      if (galleryEl) galleryEl.style.display = 'none';
+      return;
+    }
+
+    /* Multi-image — make sure the gallery exists and has the right thumbs */
+    let target = galleryEl;
+    if (!target) {
+      /* Gallery wasn't in the initial HTML (this colour's first time having multiple
+         images) — create one. Rare in practice but supported. */
+      target = document.createElement('div');
+      target.className = 'modal__gallery';
+      target.id = 'modalGallery';
+      content.querySelector('.modal__media').appendChild(target);
+    }
+    target.style.display = '';
+    target.innerHTML = images.map((src, idx) => `
+      <button
+        class="modal__thumb${idx === 0 ? ' is-active' : ''}"
+        data-thumb-idx="${idx}"
+        aria-label="View image ${idx + 1}"
+      ><img src="${src}" alt="" loading="lazy" /></button>
+    `).join('');
+
+    wireGalleryThumbs();
+  }
+
+  /*
+    Wire up the click handlers on the current set of thumbnails.
+    Called once on initial render and again whenever rebuildGallery
+    rewrites the thumbs after a colour change.
+  */
+  function wireGalleryThumbs() {
+    const modalImage = content.querySelector('#modalProductImage');
+    if (!modalImage) return;
+
+    content.querySelectorAll('.modal__thumb').forEach(thumb => {
+      thumb.addEventListener('click', () => {
+        const newSrc = thumb.querySelector('img')?.src;
+        if (!newSrc) return;
+
+        /* Update active thumb */
+        content.querySelectorAll('.modal__thumb').forEach(t => t.classList.remove('is-active'));
+        thumb.classList.add('is-active');
+
+        /* Crossfade main image */
+        modalImage.style.opacity = '0';
+        setTimeout(() => {
+          modalImage.src = newSrc;
+          modalImage.style.opacity = '1';
+        }, 180);
+      });
+    });
+  }
+
+  /* Wire initial thumbs (if any) */
+  wireGalleryThumbs();
+
   /* ── Color swatch interactions ── */
   if (product.colors && product.colors.length > 0) {
     const modalImage     = content.querySelector('#modalProductImage');
@@ -869,6 +1051,9 @@ function openModal(product) {
           modalImage.src = resolveProductImage(product, color, selectedSize);
           modalImage.style.opacity = '1';
         }, 180);
+
+        /* Rebuild the thumbnail gallery for this colour's images */
+        rebuildGallery();
       });
     });
   }
