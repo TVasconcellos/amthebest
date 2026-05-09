@@ -32,16 +32,16 @@
    2.  Reset & Base
    3.  Custom Cursor
    4.  Navigation + Language Switcher
-   5.  Hero Section + Canvas
+   5.  Hero Section + Video
    6.  Marquee / Ticker
    7.  Shared Section Styles
    8.  Products Grid & Cards (incl. color dots)
    9.  Product Modal (incl. color swatches)
-   10. Instagram Feed
-   11. Contact Form
-   12. Footer
-   13. Scroll Reveal Animations
-   14. Responsive (mobile)
+   10. Contact Form
+   11. Footer
+   12. Scroll Reveal Animations
+   13. Responsive (mobile)
+   14. Shopping Cart + Order Modal
 ================================================================ */
 
 
@@ -51,7 +51,7 @@
    ★ TWEAK GUIDE:
    --color-accent     Gold highlight throughout the site. Change to re-theme.
    --color-black      Page background.
-   --color-navy       Section bg (Instagram, modal panel).
+   --color-navy       Section bg (cart panel, modal panel).
    --color-navy-mid   Card hover bg, placeholder areas.
    --color-grey       Muted text (categories, footer).
    --color-border     Subtle white dividers and outlines.
@@ -266,12 +266,14 @@ button { cursor: none; font-family: var(--font-body); border: none; background: 
 
 
 /* ================================================================
-   5. HERO SECTION + CANVAS
+   5. HERO SECTION + VIDEO
 
    ★ TWEAK GUIDE:
-   .hero__canvas opacity: lower for subtler particles (e.g. 0.3),
-     raise for more contrast (e.g. 0.9).
-   Particle/mouse behaviour controlled in main.js CANVAS_CONFIG.
+   .hero__video: the looping background video. opacity is on the overlay,
+     not the video itself — adjust .hero__overlay rgba alphas to dim more
+     or less.
+   .hero__overlay: the dark gradient over the video. Higher alpha = darker
+     and more legible text; lower alpha = video shows through more.
    .hero__title--outline: increase stroke px for bolder outline text.
 ================================================================ */
 .hero {
