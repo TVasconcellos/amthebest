@@ -54,8 +54,8 @@
    description → Text shown in modal.
    sizes       → Array of size strings. ["One Size"] for non-sized items.
    colors      → Optional array of color variant objects:
-                 { label: "Bordeaux", hex: "#5C1A1A", image: "images/products/shirt1.jpg" }
-                 label = shown as tooltip on hover
+                 { label: "Burgundy", hex: "#5C1A1A", image: "images/products/shirt1.jpg" }
+                 label = shown as tooltip on hover (translated by tColor at render time)
                  hex   = the circle colour shown as swatch
                  image = the product image to display when this colour is selected
                  If colors is absent or empty, no swatch UI is shown.
@@ -63,8 +63,8 @@
    ★ COLOR GROUPING:
    Products in the same "family" (e.g. T-Shirt Logo) share the same
    color family. The colors array on each product points to the image
-   for THAT colour — so shirt1.jpg is Bordeaux for Logo Tee,
-   and also Bordeaux for the No-Logo Tee (shirt6.jpg vs shirt1.jpg).
+   for THAT colour — so shirt1.jpg is Burgundy for Logo Tee,
+   and shirt6.jpg is Burgundy for the No-Logo Tee.
 
    ★ HOW TO ADD A PRODUCT:
    Copy an existing entry, paste before the final ], update all values.
@@ -217,18 +217,34 @@ const PRODUCTS = [
     price: "€15",
     badge: "New",
     image: "images/products/bottle1.jpg",
-    description: "Reusable water bottle with brand branding. Available in 350ml and 600ml, in white and black. The displayed image shows the 600ml; the 350ml is the same design at a smaller capacity.",
-    /*
-      Two volume options. The colour swatches still drive the displayed image
-      (white = bottle1.jpg, black = bottle2.jpg — both showing the 600ml).
-      The 350ml versions live in image files bottle3.jpg (white) / bottle4.jpg (black)
-      but aren't surfaced as image variants here — the customer's chosen size 
-      is captured in the cart/order regardless.
-    */
+    description: "Reusable water bottle with brand branding.",
     sizes: ["350ml", "600ml"],
+    /*
+      The bottle has 4 image variants: each colour × each size combo.
+      Each colour swatch carries a default image (used as the swatch's
+      thumbnail and as the fallback in the cart). The optional
+      imageBySize map provides per-size overrides.
+      
+      The modal's resolveProductImage() helper picks the right image
+      based on the user's current colour AND size selection.
+    */
     colors: [
-      { ...COLORS.white, image: "images/products/bottle1.jpg" },
-      { ...COLORS.black, image: "images/products/bottle2.jpg" },
+      {
+        ...COLORS.white,
+        image: "images/products/bottle1.jpg",  /* Default = 600ml */
+        imageBySize: {
+          "600ml": "images/products/bottle1.jpg",
+          "350ml": "images/products/bottle3.jpg",
+        }
+      },
+      {
+        ...COLORS.black,
+        image: "images/products/bottle2.jpg",  /* Default = 600ml */
+        imageBySize: {
+          "600ml": "images/products/bottle2.jpg",
+          "350ml": "images/products/bottle4.jpg",
+        }
+      },
     ]
   },
   {
@@ -718,6 +734,29 @@ function initFilters() {
 let selectedSize  = null;
 let selectedColor = null;
 
+/*
+  Resolve the right product image given the current colour and size selection.
+  
+  Most products map one image per colour. Some (like the Water Bottle) need to
+  vary the image by both colour AND size — for those, the colour entry carries
+  an `imageBySize` map.
+  
+  Resolution order:
+  1. If the colour has imageBySize and that size exists → use it.
+  2. Otherwise → fall back to the colour's default `image`.
+  3. If no colour selected at all → fall back to the product's primary image.
+  
+  This keeps the data model simple: most products only need `colors[i].image`.
+  Products with size-specific images opt in by adding `imageBySize`.
+*/
+function resolveProductImage(product, color, size) {
+  if (!color) return product.image;
+  if (color.imageBySize && size && color.imageBySize[size]) {
+    return color.imageBySize[size];
+  }
+  return color.image;
+}
+
 function openModal(product) {
   const modal   = document.getElementById('productModal');
   const content = document.getElementById('modalContent');
@@ -824,10 +863,10 @@ function openModal(product) {
         /* Update the label text */
         if (colorSelected) colorSelected.textContent = tColor(color.label);
 
-        /* Crossfade the product image to the new colour */
+        /* Crossfade to the right image for this colour + current size combo */
         modalImage.style.opacity = '0';
         setTimeout(() => {
-          modalImage.src = color.image;
+          modalImage.src = resolveProductImage(product, color, selectedSize);
           modalImage.style.opacity = '1';
         }, 180);
       });
@@ -840,8 +879,38 @@ function openModal(product) {
       content.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
       btn.classList.add('selected');
       selectedSize = btn.dataset.size;
+
+      /*
+        If this product has size-specific images for the current colour
+        (e.g. Water Bottle 350ml vs 600ml), swap the image to match.
+        For products without imageBySize, this resolves to the same image
+        and the swap is a no-op (no flicker).
+      */
+      const modalImage = content.querySelector('#modalProductImage');
+      if (modalImage && selectedColor?.imageBySize) {
+        const newSrc = resolveProductImage(product, selectedColor, selectedSize);
+        if (modalImage.src !== newSrc && !modalImage.src.endsWith(newSrc)) {
+          modalImage.style.opacity = '0';
+          setTimeout(() => {
+            modalImage.src = newSrc;
+            modalImage.style.opacity = '1';
+          }, 180);
+        }
+      }
     });
   });
+
+  /*
+    Pre-select the first size by default. This both marks the button visually
+    (so the user can see which size is currently chosen) and sets the
+    selectedSize state so a quick "Add to Cart" works without needing to click
+    a size first. The user can always click a different size to change.
+  */
+  const firstSizeBtn = content.querySelector('.size-btn');
+  if (firstSizeBtn) {
+    firstSizeBtn.classList.add('selected');
+    selectedSize = firstSizeBtn.dataset.size;
+  }
 
   /* ── Add to Cart ── */
   content.querySelector('#modalAddBtn')?.addEventListener('click', () => {
@@ -849,7 +918,7 @@ function openModal(product) {
       alert(t['modal.selectSizeAlert'] || 'Please select a size first.');
       return;
     }
-    /* Add the item to the real cart (defined in section 16) */
+    /* Add the item to the real cart (defined in section 12) */
     Cart.add({
       id:       product.id,
       name:     product.name,
@@ -858,7 +927,7 @@ function openModal(product) {
       priceStr: product.price,
       size:     selectedSize || 'One Size',
       color:    selectedColor ? selectedColor.label : null,
-      image:    selectedColor ? selectedColor.image : product.image,
+      image:    resolveProductImage(product, selectedColor, selectedSize),
     });
     closeModal();
     /* Brief delay then open the cart so the user sees what was added */
@@ -868,7 +937,6 @@ function openModal(product) {
   modal.classList.add('is-open');
   modal.setAttribute('aria-hidden', 'false');
   document.body.style.overflow = 'hidden';
-  selectedSize  = null;
   selectedColor = product.colors?.[0] ?? null;
 }
 
@@ -1088,7 +1156,7 @@ const PRODUCT_TRANSLATIONS = {
     8:  {
       name: 'Garrafa de Água',
       family: 'Garrafa A&M',
-      description: 'Garrafa de água reutilizável com branding da marca. Disponível em 350ml e 600ml, em branco e preto. A imagem mostra a versão de 600ml; a de 350ml tem o mesmo design em capacidade mais pequena.'
+      description: 'Garrafa de água reutilizável com branding da marca.'
     },
     9:  {
       name: 'Totebag',
