@@ -1262,10 +1262,23 @@ function initContactForm() {
     window.location.href = mailto;
   }
 
+  /*
+    Show the success state. We fully hide the form fields so the success
+    message stands alone, instead of dimming the form and leaving both
+    visible (which made the success feel less prominent). The form is
+    kept in the DOM so that if you later wanted to re-enable submission
+    it could be re-shown without rebuilding.
+  */
   function showSuccess() {
-    form.style.opacity = '0.5';
-    form.style.pointerEvents = 'none';
-    if (success) success.classList.add('is-visible');
+    /* Hide every direct child of the form except the success element */
+    Array.from(form.children).forEach(child => {
+      if (child.id !== 'formSuccess') child.style.display = 'none';
+    });
+    if (success) {
+      success.classList.add('is-visible');
+      /* Make sure the success isn't inheriting any dimmed state */
+      success.style.opacity = '1';
+    }
   }
 }
 
