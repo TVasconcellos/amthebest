@@ -143,7 +143,7 @@ const PRODUCTS = [
     family: "Hoodie",
     category: "hoodie",
     price: "€20",
-    badge: "New",
+    badge: null,
     image: "images/products/hoodie1.jpg",
     description: "Hoodie with exclusive brand design.",
     sizes: ["S", "M", "L", "XL"],
@@ -173,7 +173,7 @@ const PRODUCTS = [
     family: "Shorts",
     category: "shorts",
     price: "€15",
-    badge: "New",
+    badge: null,
     image: "images/products/shorts1.jpg",
     description: "Shorts with exclusive brand design.",
     sizes: ["S", "M", "L", "XL"],
@@ -726,10 +726,12 @@ function openModal(product) {
   const lang = document.documentElement.dataset.lang || 'en';
   const t    = TRANSLATIONS[lang];
 
-  /* ── Build sizes HTML — wrapped in a flex row so they sit horizontally ── */
+  /* ── Build sizes HTML — wrapped in a flex row so they sit horizontally ──
+       data-size keeps the RAW (English) value so cart logic + email body
+       stay consistent across languages. The visible label is translated. */
   const sizesHTML = `<div class="modal__sizes-grid">
     ${product.sizes.map(size => `
-      <button class="size-btn" data-size="${size}" aria-label="${t['modal.size'] || 'Size'} ${size}">${size}</button>
+      <button class="size-btn" data-size="${size}" aria-label="${t['modal.size'] || 'Size'} ${tSize(size)}">${tSize(size)}</button>
     `).join('')}
   </div>`;
 
@@ -886,22 +888,36 @@ function initModal() {
 
 
 /* ================================================================
-   11. CONTACT FORM — Formspree
-
-   ★ SETUP:
-   1. Go to https://formspree.io → New Form → enter thebest.aem@gmail.com
-   2. Copy the 8-character Form ID (e.g. "xpzvwqbo")
-   3. Replace YOUR_FORM_ID below with your actual ID
-
+   11. CONTACT FORM
+   
+   The form uses two strategies depending on whether Formspree is set up:
+   
+   1. If FORMSPREE_ID is configured → posts to Formspree, which forwards
+      the message as an email to thebest.aem@gmail.com. Seamless: the
+      customer sees a success message, never leaves the page.
+   
+   2. If FORMSPREE_ID is left as 'YOUR_FORM_ID' → falls back to mailto:
+      Opens the customer's default email client with the message
+      pre-filled, addressed to thebest.aem@gmail.com. The customer
+      clicks Send themselves. Works without any backend setup.
+   
+   ★ TO UPGRADE TO FORMSPREE (recommended):
+   1. Go to https://formspree.io → sign up → create a form
+   2. Set the form's recipient to thebest.aem@gmail.com
+   3. Copy the 8-character Form ID (e.g. "xpzvwqbo")
+   4. Replace 'YOUR_FORM_ID' below with your actual ID
+   
    Free tier: 50 submissions/month.
 ================================================================ */
 const FORMSPREE_ID = 'YOUR_FORM_ID'; /* ← replace with your Formspree Form ID */
+const CONTACT_EMAIL = 'thebest.aem@gmail.com';
 
 function initContactForm() {
   const form    = document.getElementById('contactForm');
   const success = document.getElementById('formSuccess');
   if (!form) return;
 
+  /* Floating label support — adds .has-value when input has text */
   form.querySelectorAll('input, textarea').forEach(field => {
     field.addEventListener('input', () => {
       field.classList.toggle('has-value', field.value.trim() !== '');
@@ -910,22 +926,63 @@ function initContactForm() {
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
+
+    /* Pull the values once, used by both submission paths */
+    const name    = form.querySelector('#fieldName').value.trim();
+    const email   = form.querySelector('#fieldEmail').value.trim();
+    const subject = form.querySelector('#fieldSubject').value.trim() || 'New message from A&M website';
+    const message = form.querySelector('#fieldMessage').value.trim();
+
+    /* Path 1: Formspree configured — submit via fetch, no page leave */
     if (FORMSPREE_ID && FORMSPREE_ID !== 'YOUR_FORM_ID') {
       try {
         const res = await fetch(`https://formspree.io/f/${FORMSPREE_ID}`, {
-          method: 'POST',
-          body: new FormData(form),
+          method:  'POST',
+          body:    new FormData(form),
           headers: { 'Accept': 'application/json' }
         });
-        if (res.ok) showSuccess();
-        else alert('Something went wrong. Please email thebest.aem@gmail.com directly.');
+        if (res.ok) {
+          showSuccess();
+        } else {
+          /* Formspree returned an error — fall back to mailto */
+          openMailto(name, email, subject, message);
+        }
       } catch {
-        alert('Could not send. Please email thebest.aem@gmail.com directly.');
+        /* Network error — fall back to mailto */
+        openMailto(name, email, subject, message);
       }
-    } else {
-      showSuccess(); /* Preview mode — no Formspree ID yet */
+      return;
     }
+
+    /* Path 2: No Formspree ID — open the user's email client directly */
+    openMailto(name, email, subject, message);
+    showSuccess();
   });
+
+  /*
+    Build a mailto: link with the message body and open the customer's
+    email client. Works offline, no backend needed.
+    
+    The email body includes the customer's name, email, and message —
+    everything you'd need to reply to them directly.
+  */
+  function openMailto(name, email, subject, message) {
+    const body = [
+      `From: ${name}`,
+      `Email: ${email}`,
+      '',
+      'Message:',
+      message,
+      '',
+      '— Sent from the A&M website'
+    ].join('\n');
+
+    const mailto = `mailto:${CONTACT_EMAIL}` +
+      `?subject=${encodeURIComponent(subject)}` +
+      `&body=${encodeURIComponent(body)}`;
+
+    window.location.href = mailto;
+  }
 
   function showSuccess() {
     form.style.opacity = '0.5';
@@ -1185,6 +1242,25 @@ function tBadge(label) {
   return BADGE_TRANSLATIONS[lang]?.[label] ?? label;
 }
 
+/*
+  Translate size labels. Most sizes (S, M, L, XL) are universal abbreviations
+  and don't need translating. The exceptions: "One Size" needs a PT version,
+  and bottle volumes ("350ml", "600ml") are language-neutral but listed here
+  for completeness so any future locale-specific size labels have a home.
+  Falls back to the raw label if no translation found.
+*/
+const SIZE_TRANSLATIONS = {
+  pt: {
+    'One Size': 'Tamanho Único',
+  }
+};
+
+function tSize(label) {
+  const lang = document.documentElement.dataset.lang || 'en';
+  if (lang === 'en') return label;
+  return SIZE_TRANSLATIONS[lang]?.[label] ?? label;
+}
+
 
 const TRANSLATIONS = {
   en: {
@@ -1202,7 +1278,7 @@ const TRANSLATIONS = {
     'filter.pack': 'Packs',
     'product.view': 'View Product',
     'modal.selectSize': 'Select Size', 'modal.colour': 'Colour', 'modal.color': 'Colour',
-    'modal.addToCart': 'Add to Cart', 'modal.shipping': 'Free shipping on orders over €50',
+    'modal.addToCart': 'Add to Cart', 'modal.shipping': 'Free shipping over €50 • Free pen with orders over €25',
     'modal.selectSizeAlert': 'Please select a size first.', 'modal.size': 'Size',
     'sort.label': 'Sort:', 'sort.default': 'Default',
     'sort.nameAsc': 'Name A→Z', 'sort.nameDesc': 'Name Z→A',
@@ -1238,7 +1314,7 @@ const TRANSLATIONS = {
     'filter.pack': 'Packs',
     'product.view': 'Ver Produto',
     'modal.selectSize': 'Escolher Tamanho', 'modal.colour': 'Cor', 'modal.color': 'Cor',
-    'modal.addToCart': 'Adicionar ao Carrinho', 'modal.shipping': 'Envio grátis acima de €50',
+    'modal.addToCart': 'Adicionar ao Carrinho', 'modal.shipping': 'Envio grátis acima de €50 • Oferta de caneta acima de €25',
     'modal.selectSizeAlert': 'Por favor escolhe um tamanho.', 'modal.size': 'Tamanho',
     'sort.label': 'Ordenar:', 'sort.default': 'Padrão',
     'sort.nameAsc': 'Nome A→Z', 'sort.nameDesc': 'Nome Z→A',
@@ -1503,7 +1579,7 @@ const Cart = {
         <div class="cart-item__body">
           <p class="cart-item__name">${displayName}</p>
           <p class="cart-item__meta">
-            ${item.color ? `${tColor(item.color)} · ` : ''}${item.size}
+            ${item.color ? `${tColor(item.color)} · ` : ''}${tSize(item.size)}
           </p>
           <div class="cart-item__row">
             <div class="cart-item__qty">
@@ -1548,7 +1624,7 @@ const Cart = {
           return `
           <div class="order__item">
             <span class="order__item-name">
-              ${item.qty} × ${displayName}${item.color ? ` (${tColor(item.color)})` : ''} — ${item.size}
+              ${item.qty} × ${displayName}${item.color ? ` (${tColor(item.color)})` : ''} — ${tSize(item.size)}
             </span>
             <span class="order__item-price">€${(item.price * item.qty).toFixed(0)}</span>
           </div>
