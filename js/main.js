@@ -112,11 +112,32 @@ const PRODUCTS = [
     description: "T-shirt with exclusive brand design.",
     sizes: ["S", "M", "L", "XL"],
     colors: [
-      { ...COLORS.burgundy,    image: "images/products/shirt1.jpg" },
-      { ...COLORS.navy,        image: "images/products/shirt2.jpg" },
-      { ...COLORS.forestGreen, image: "images/products/shirt3.jpg" },
-      { ...COLORS.black,       image: "images/products/shirt4.jpg" },
-      { ...COLORS.white,       image: "images/products/shirt5.jpg" },
+      {
+        ...COLORS.burgundy,
+        image: "images/products/shirt1.jpg",
+        images: [
+          "images/products/shirt1.jpg",
+          "images/products/tshirt_red_2.png",
+        ]
+      },
+      {
+        ...COLORS.navy,
+        image: "images/products/shirt2.jpg",
+        images: [
+          "images/products/shirt2.jpg",
+          "images/products/tshirt_navy_2.png",
+        ]
+      },
+      {
+        ...COLORS.forestGreen,
+        image: "images/products/shirt3.jpg",
+        images: [
+          "images/products/shirt3.jpg",
+          "images/products/tshirt_green_2.png",
+        ]
+      },
+      { ...COLORS.black, image: "images/products/shirt4.jpg" },
+      { ...COLORS.white, image: "images/products/shirt5.jpg" },
     ]
   },
   {
@@ -891,11 +912,15 @@ function openModal(product) {
 
   /*
     Resolve the initial main image and the gallery for the active variant.
-    At modal open, no size is pre-selected yet (that happens after this HTML
-    is rendered), so we pass null. Both helpers handle null gracefully.
+    Use product.sizes[0] as the size — that's the one that will be
+    pre-selected after this HTML renders. This keeps the image consistent
+    with the visible size selection, e.g. for the Water Bottle: if 350ml is
+    the first size in the array, the modal opens showing the 350ml image,
+    not the 600ml one.
   */
-  const initialImage  = resolveProductImage(product, selectedColor, null);
-  const initialImages = resolveProductImages(product, selectedColor, null);
+  const initialSize   = product.sizes?.[0] ?? null;
+  const initialImage  = resolveProductImage(product, selectedColor, initialSize);
+  const initialImages = resolveProductImages(product, selectedColor, initialSize);
 
   /*
     Build the thumbnail gallery if the variant has more than one image.
