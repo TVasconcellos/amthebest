@@ -109,7 +109,7 @@ const PRODUCTS = [
     price: "€15",
     badge: "Best Seller",
     image: "images/products/shirt1.jpg",
-    description: "Classic A&M logo tee. 100% organic cotton, 200gsm, relaxed unisex fit. Printed with water-based inks. Available in five colours.",
+    description: "T-shirt with exclusive brand design.",
     sizes: ["S", "M", "L", "XL"],
     colors: [
       { ...COLORS.burgundy,    image: "images/products/shirt1.jpg" },
@@ -127,7 +127,7 @@ const PRODUCTS = [
     price: "€15",
     badge: "New",
     image: "images/products/shirt6.jpg",
-    description: 'The clean version. No logo, no noise — just premium 200gsm organic cotton. Available in five colours from "The Best." Collection.',
+    description: 'T-shirt with exclusive brand design.',
     sizes: ["S", "M", "L", "XL"],
     colors: [
       { ...COLORS.burgundy,    image: "images/products/shirt6.jpg" },
@@ -145,7 +145,7 @@ const PRODUCTS = [
     price: "€20",
     badge: "New",
     image: "images/products/hoodie1.jpg",
-    description: "Heavyweight fleece hoodie. Kangaroo pocket, ribbed cuffs, dropped shoulders. 380gsm. Available in white and black.",
+    description: "Hoodie with exclusive brand design.",
     sizes: ["S", "M", "L", "XL"],
     colors: [
       { ...COLORS.white, image: "images/products/hoodie1.jpg" },
@@ -160,7 +160,7 @@ const PRODUCTS = [
     price: "€16",
     badge: null,
     image: "images/products/sweatshirt1.jpg",
-    description: "Classic crewneck sweatshirt in medium-weight french terry. Boxy fit. The wardrobe staple. Available in white and black.",
+    description: "Sweatshirt with exclusive brand design.",
     sizes: ["S", "M", "L", "XL"],
     colors: [
       { ...COLORS.white, image: "images/products/sweatshirt1.jpg" },
@@ -175,7 +175,7 @@ const PRODUCTS = [
     price: "€15",
     badge: "New",
     image: "images/products/shorts1.jpg",
-    description: "A&M shorts in black. Lightweight, elastic waistband, side pockets. Built for summer.",
+    description: "Shorts with exclusive brand design.",
     sizes: ["S", "M", "L", "XL"],
     colors: null
   },
@@ -189,7 +189,7 @@ const PRODUCTS = [
     price: "€8",
     badge: "Best Seller",
     image: "images/products/cap1.jpg",
-    description: "A&M cap. Structured 6-panel, adjustable strap, embroidered logo. One size fits most.",
+    description: "Cap with brand detail.",
     sizes: ["One Size"],
     colors: null
   },
@@ -203,7 +203,7 @@ const PRODUCTS = [
     price: "€5",
     badge: "Best Seller",
     image: "images/products/socks1.jpg",
-    description: "A&M logo socks in a ribbed cotton blend. Mid-calf height, woven logo at the ankle. Sold individually.",
+    description: "Socks with exclusive brand design.",
     sizes: ["One Size"],
     colors: null
   },
@@ -217,7 +217,7 @@ const PRODUCTS = [
     price: "€15",
     badge: "New",
     image: "images/products/bottle1.jpg",
-    description: "A&M branded stainless steel water bottle. Double-wall insulated, keeps cold 24h / hot 12h. Available in 350ml and 600ml, in white and black. The displayed image shows the 600ml; the 350ml is the same design at a smaller capacity.",
+    description: "Reusable water bottle with brand branding. Available in 350ml and 600ml, in white and black. The displayed image shows the 600ml; the 350ml is the same design at a smaller capacity.",
     /*
       Two volume options. The colour swatches still drive the displayed image
       (white = bottle1.jpg, black = bottle2.jpg — both showing the 600ml).
@@ -239,7 +239,7 @@ const PRODUCTS = [
     price: "€8",
     badge: "New",
     image: "images/products/tote1.jpg",
-    description: "Heavy canvas totebag with A&M print. Reinforced handles, natural cotton, holds everything.",
+    description: "Totebag with brand branding.",
     sizes: ["One Size"],
     colors: null
   },
@@ -251,7 +251,7 @@ const PRODUCTS = [
     price: "€10",
     badge: "New",
     image: "images/products/baralho_cartas1.jpg",
-    description: "A&M deck of playing cards. Standard 52-card deck with custom A&M illustrated face cards and back design.",
+    description: "Plastic-coated playing cards with custom design.",
     sizes: ["One Size"],
     colors: [
       /* Two designs / variants — using the existing image pair */
@@ -267,7 +267,7 @@ const PRODUCTS = [
     price: "€15",
     badge: "New",
     image: "images/products/base_copos1.jpg",
-    description: "Set of A&M coasters. Cork-backed, durable surface, two-pattern set.",
+    description: "Leather coasters with brand detail.",
     sizes: ["One Size"],
     colors: [
       { label: 'Design A', hex: '#222222', image: "images/products/base_copos1.jpg" },
@@ -282,7 +282,7 @@ const PRODUCTS = [
     price: "€10",
     badge: "New",
     image: "images/products/caderno1.jpg",
-    description: "A&M softcover notebook. A5 size, 120 cream pages, dot grid, embossed logo on the cover.",
+    description: "A5 lined notebook with brand detail.",
     sizes: ["One Size"],
     colors: null
   },
@@ -294,7 +294,7 @@ const PRODUCTS = [
     price: "€1.50",
     badge: "Best Seller",
     image: "images/products/caneta1.jpg",
-    description: "A&M branded ballpoint pen. Matte finish, smooth black ink.",
+    description: "Pen with brand detail.",
     sizes: ["One Size"],
     colors: null
   },
@@ -306,7 +306,7 @@ const PRODUCTS = [
     price: "€3.50",
     badge: "Best Seller",
     image: "images/products/pack_canetas1.jpg",
-    description: "Set of A&M branded ballpoint pens. The complete writing pack.",
+    description: "Pens with brand detail. The complete writing pack.",
     sizes: ["One Size"],
     colors: null
   },
@@ -318,7 +318,7 @@ const PRODUCTS = [
     price: "€4",
     badge: "New",
     image: "images/products/porta_chaves.jpg",
-    description: "A&M metal keychain with leather tag and embossed logo.",
+    description: "Metal keychain with brand branding.",
     sizes: ["One Size"],
     colors: null
   },
@@ -330,7 +330,7 @@ const PRODUCTS = [
     price: "€5",
     badge: "New",
     image: "images/products/capa_telemovel.jpg",
-    description: "A&M phone case. Slim profile, soft-touch finish, printed logo.",
+    description: "Black phone case with brand branding.",
     sizes: ["One Size"],
     colors: null
   },
@@ -992,88 +992,88 @@ const PRODUCT_TRANSLATIONS = {
     1:  {
       name: 'T-Shirt',
       family: 'T-Shirt',
-      description: 'T-shirt clássica com logo A&M. 100% algodão orgânico, 200gsm, corte unissexo descontraído. Estampada com tintas à base de água. Disponível em cinco cores.'
+      description: 'T-shirt com design exclusivo da marca.'
     },
     2:  {
       name: 'T-Shirt Coleção "The Best."',
       family: 'T-Shirt Coleção "The Best."',
-      description: 'A versão limpa. Sem logo, sem ruído — apenas algodão orgânico premium de 200gsm. Disponível em cinco cores da Coleção "The Best.".'
+      description: 'T-shirt com design exclusivo da marca.'
     },
     3:  {
       name: 'Hoodie',
       family: 'Hoodie',
-      description: 'Hoodie em fleece pesado. Bolso canguru, punhos canelados, ombros descaídos. 380gsm. Disponível em branco e preto.'
+      description: 'Hoodie com design exclusivo da marca.'
     },
     4:  {
       name: 'Sweatshirt',
       family: 'Sweatshirt',
-      description: 'Sweatshirt clássica de gola redonda em french terry de peso médio. Corte boxy. Um básico de armário. Disponível em branco e preto.'
+      description: 'Sweatshirt com design exclusivo da marca.'
     },
     5:  {
       name: 'Calções',
       family: 'Calções',
-      description: 'Calções A&M em preto. Leves, cintura elástica, bolsos laterais. Feitos para o verão.'
+      description: 'Calções com design exclusivo da marca.'
     },
 
     /* Caps */
     6:  {
       name: 'Boné',
       family: 'Boné',
-      description: 'Boné A&M. Estrutura de 6 painéis, fecho ajustável, logo bordado. Tamanho único.'
+      description: 'Boné com detalhe da marca.'
     },
 
     /* Socks */
     7:  {
       name: 'Meias',
       family: 'Meias',
-      description: 'Meias com logo A&M num blend de algodão canelado. Altura média, logo tecido no tornozelo. Vendidas individualmente.'
+      description: 'Meias com design exclusivo da marca.'
     },
 
     /* Accessories */
     8:  {
       name: 'Garrafa de Água',
       family: 'Garrafa A&M',
-      description: 'Garrafa de aço inox com logo A&M. Parede dupla isolada, mantém frio 24h / quente 12h. Disponível em 350ml e 600ml, em branco e preto. A imagem mostra a versão de 600ml; a de 350ml tem o mesmo design em capacidade mais pequena.'
+      description: 'Garrafa de água reutilizável com branding da marca. Disponível em 350ml e 600ml, em branco e preto. A imagem mostra a versão de 600ml; a de 350ml tem o mesmo design em capacidade mais pequena.'
     },
     9:  {
       name: 'Totebag',
       family: 'Totebag',
-      description: 'Totebag em lona pesada com estampado A&M. Asas reforçadas, algodão natural, leva tudo.'
+      description: 'Totebag com branding da marca.'
     },
     10: {
       name: 'Baralho de Cartas',
       family: 'Baralho de Cartas',
-      description: 'Baralho A&M. 52 cartas com ilustrações personalizadas nas figuras e desenho exclusivo no verso.'
+      description: 'Baralho de cartas plastificadas com design personalizado.'
     },
     11: {
       name: 'Bases para Copos',
       family: 'Bases para Copos',
-      description: 'Conjunto de bases para copos A&M. Verso em cortiça, superfície resistente, conjunto com dois padrões.'
+      description: 'Bases para copos em cabedal com detalhe da marca.'
     },
     12: {
       name: 'Caderno',
       family: 'Caderno',
-      description: 'Caderno A&M de capa mole. Tamanho A5, 120 páginas creme, dot grid, logo em relevo na capa.'
+      description: 'Caderno A5 de linhas com detalhe da marca.'
     },
     13: {
       name: 'Caneta',
       family: 'Caneta',
-      description: 'Caneta esferográfica A&M. Acabamento mate, tinta preta suave.'
+      description: 'Caneta com detalhe da marca.'
     },
     14: {
       name: 'Pack de Canetas',
       family: 'Pack de Canetas',
-      description: 'Conjunto de canetas esferográficas A&M. O pack de escrita completo.'
+      description: 'Canetas com detalhe da marca. O pack de escrita completo.'
     },
     15: {
       name: 'Porta-chaves',
       family: 'Porta-chaves',
-      description: 'Porta-chaves A&M em metal com etiqueta em pele e logo gravado em relevo.'
+      description: 'Porta-chaves metálico com branding da marca.'
     },
     16: {
       name: 'Capa de Telemóvel',
       family: 'Capa de Telemóvel',
-      description: 'Capa de telemóvel A&M. Perfil fino, acabamento soft-touch, logo estampado.'
+      description: 'Capa de telemóvel preta com branding da marca.'
     },
 
     /* Packs */
@@ -1296,10 +1296,27 @@ function initLanguageSwitcher() {
   document.querySelectorAll('.lang-btn').forEach(btn => {
     btn.addEventListener('click', () => setLanguage(btn.dataset.lang));
   });
+
+  /*
+    Language priority on page load:
+    1. The user's saved preference (set by clicking EN/PT before).
+    2. Otherwise: default to Portuguese (the brand's primary market).
+    
+    To change the default language, edit DEFAULT_LANG below.
+  */
+  const DEFAULT_LANG = 'pt';
+
   try {
     const saved = localStorage.getItem('am-lang');
-    if (saved && TRANSLATIONS[saved]) setLanguage(saved);
-  } catch {}
+    if (saved && TRANSLATIONS[saved]) {
+      setLanguage(saved);
+    } else {
+      setLanguage(DEFAULT_LANG);
+    }
+  } catch {
+    /* localStorage unavailable (private mode) — still apply the default */
+    setLanguage(DEFAULT_LANG);
+  }
 }
 
 
@@ -1646,7 +1663,5 @@ document.addEventListener('DOMContentLoaded', () => {
   initFooterYear();
   initLanguageSwitcher();
   initCart();   /* Shopping cart panel + checkout flow */
-  initFooterYear();
-  initLanguageSwitcher();
   console.log('A&M — site loaded ✓');
 });
