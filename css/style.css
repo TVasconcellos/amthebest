@@ -1104,13 +1104,25 @@ button { cursor: none; font-family: var(--font-body); border: none; background: 
 .form-field input:focus ~ .form-field__line,
 .form-field textarea:focus ~ .form-field__line { width: 100%; }
 
+/*
+  Form success state — replaces the form once a message is sent.
+  
+  Now that the form is hidden entirely on success (rather than dimmed),
+  the message stands alone in the contact card. Slightly more padding
+  and a bit larger text so it doesn't feel cramped in an otherwise
+  empty space.
+*/
 .form-success {
   display: none;
-  margin-top: var(--space-sm); padding: 14px var(--space-sm);
+  margin-top: 0;
+  padding: var(--space-md) var(--space-md);
   background: rgba(200,169,126,0.1);
   border: 1px solid rgba(200,169,126,0.3);
   color: var(--color-accent);
-  font-size: var(--text-sm); letter-spacing: 0.05em;
+  font-size: var(--text-base);
+  letter-spacing: 0.03em;
+  text-align: center;
+  line-height: 1.5;
 }
 
 .form-success.is-visible { display: block; }
