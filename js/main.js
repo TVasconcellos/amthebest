@@ -95,7 +95,7 @@ const COLORS = {
                  e.g. "€3" → renders as "Save €3"
   image       → primary/default image path
   description → modal body text
-  sizes       → ["XS","S","M","L","XL","XXL"] for apparel, ["One Size"] otherwise
+  sizes       → ["S","M","L","XL"] for apparel, ["One Size"] otherwise
   colors      → array of { label, hex, image } variants, or null
 */
 const PRODUCTS = [
@@ -110,7 +110,7 @@ const PRODUCTS = [
     badge: "Best Seller",
     image: "images/products/shirt1.jpg",
     description: "Classic A&M logo tee. 100% organic cotton, 200gsm, relaxed unisex fit. Printed with water-based inks. Available in five colours.",
-    sizes: ["XS", "S", "M", "L", "XL", "XXL"],
+    sizes: ["S", "M", "L", "XL"],
     colors: [
       { ...COLORS.burgundy,    image: "images/products/shirt1.jpg" },
       { ...COLORS.navy,        image: "images/products/shirt2.jpg" },
@@ -128,7 +128,7 @@ const PRODUCTS = [
     badge: "New",
     image: "images/products/shirt6.jpg",
     description: 'The clean version. No logo, no noise — just premium 200gsm organic cotton. Available in five colours from "The Best." Collection.',
-    sizes: ["XS", "S", "M", "L", "XL", "XXL"],
+    sizes: ["S", "M", "L", "XL"],
     colors: [
       { ...COLORS.burgundy,    image: "images/products/shirt6.jpg" },
       { ...COLORS.navy,        image: "images/products/shirt7.jpg" },
@@ -146,7 +146,7 @@ const PRODUCTS = [
     badge: "New",
     image: "images/products/hoodie1.jpg",
     description: "Heavyweight fleece hoodie. Kangaroo pocket, ribbed cuffs, dropped shoulders. 380gsm. Available in white and black.",
-    sizes: ["XS", "S", "M", "L", "XL", "XXL"],
+    sizes: ["S", "M", "L", "XL"],
     colors: [
       { ...COLORS.white, image: "images/products/hoodie1.jpg" },
       { ...COLORS.black, image: "images/products/hoodie2.jpg" },
@@ -161,7 +161,7 @@ const PRODUCTS = [
     badge: null,
     image: "images/products/sweatshirt1.jpg",
     description: "Classic crewneck sweatshirt in medium-weight french terry. Boxy fit. The wardrobe staple. Available in white and black.",
-    sizes: ["XS", "S", "M", "L", "XL", "XXL"],
+    sizes: ["S", "M", "L", "XL"],
     colors: [
       { ...COLORS.white, image: "images/products/sweatshirt1.jpg" },
       { ...COLORS.black, image: "images/products/sweatshirt2.jpg" },
@@ -176,7 +176,7 @@ const PRODUCTS = [
     badge: "New",
     image: "images/products/shorts1.jpg",
     description: "A&M shorts in black. Lightweight, elastic waistband, side pockets. Built for summer.",
-    sizes: ["XS", "S", "M", "L", "XL", "XXL"],
+    sizes: ["S", "M", "L", "XL"],
     colors: null
   },
 
@@ -217,8 +217,15 @@ const PRODUCTS = [
     price: "€15",
     badge: "New",
     image: "images/products/bottle1.jpg",
-    description: "A&M branded stainless steel water bottle. 500ml, double-wall insulated, keeps cold 24h / hot 12h. Available in white and black.",
-    sizes: ["One Size"],
+    description: "A&M branded stainless steel water bottle. Double-wall insulated, keeps cold 24h / hot 12h. Available in 350ml and 600ml, in white and black. The displayed image shows the 600ml; the 350ml is the same design at a smaller capacity.",
+    /*
+      Two volume options. The colour swatches still drive the displayed image
+      (white = bottle1.jpg, black = bottle2.jpg — both showing the 600ml).
+      The 350ml versions live in image files bottle3.jpg (white) / bottle4.jpg (black)
+      but aren't surfaced as image variants here — the customer's chosen size 
+      is captured in the cart/order regardless.
+    */
+    sizes: ["350ml", "600ml"],
     colors: [
       { ...COLORS.white, image: "images/products/bottle1.jpg" },
       { ...COLORS.black, image: "images/products/bottle2.jpg" },
@@ -340,7 +347,7 @@ const PRODUCTS = [
     badge: "Best Value",
     image: "images/products/summerpack1.jpg",
     description: "The Summer Pack: T-Shirt + Shorts + Socks. Everything you need for the warm months, bundled at a saving.",
-    sizes: ["XS", "S", "M", "L", "XL", "XXL"],
+    sizes: ["S", "M", "L", "XL"],
     colors: null
   },
   {
@@ -353,7 +360,7 @@ const PRODUCTS = [
     badge: "Best Value",
     image: "images/products/winterpack1.jpg",
     description: "The Winter Pack: Hoodie + Sweatshirt + Socks. Stay warm, stay fresh.",
-    sizes: ["XS", "S", "M", "L", "XL", "XXL"],
+    sizes: ["S", "M", "L", "XL"],
     colors: null
   },
   {
@@ -366,7 +373,7 @@ const PRODUCTS = [
     badge: "Best Value",
     image: "images/products/essentialpack1.jpg",
     description: "The Essential Pack: T-Shirt + Totebag + Socks. The perfect starter kit.",
-    sizes: ["XS", "S", "M", "L", "XL", "XXL"],
+    sizes: ["S", "M", "L", "XL"],
     colors: null
   },
   {
@@ -379,7 +386,7 @@ const PRODUCTS = [
     badge: "Best Value",
     image: "images/products/completepack1.jpg",
     description: "The Complete Pack: T-Shirt + Hoodie + Shorts + Socks + Totebag. The full A&M experience.",
-    sizes: ["XS", "S", "M", "L", "XL", "XXL"],
+    sizes: ["S", "M", "L", "XL"],
     colors: null
   },
 ];
@@ -1026,7 +1033,7 @@ const PRODUCT_TRANSLATIONS = {
     8:  {
       name: 'Garrafa de Água',
       family: 'Garrafa A&M',
-      description: 'Garrafa de aço inox com logo A&M. 500ml, parede dupla isolada, mantém frio 24h / quente 12h. Disponível em branco e preto.'
+      description: 'Garrafa de aço inox com logo A&M. Parede dupla isolada, mantém frio 24h / quente 12h. Disponível em 350ml e 600ml, em branco e preto. A imagem mostra a versão de 600ml; a de 350ml tem o mesmo design em capacidade mais pequena.'
     },
     9:  {
       name: 'Totebag',
