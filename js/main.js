@@ -506,16 +506,26 @@ function renderProducts() {
   const grid = document.getElementById('productGrid');
   if (!grid) return;
 
+  /*
+    Resolve UI translations once per render. Card overlays and badges
+    are built fresh on every render, so they read the current language
+    at this moment — no data-i18n attribute needed.
+  */
+  const lang = document.documentElement.dataset.lang || 'en';
+  const t    = TRANSLATIONS[lang];
+  const viewLabel = t['product.view'] || 'View Product';
+
   grid.innerHTML = PRODUCTS.map(product => {
     /* Resolve translated name/family for the current language */
     const tName   = tProduct(product, 'name');
     const tFamily = tProduct(product, 'family');
+    const tBadgeLabel = product.badge ? tBadge(product.badge) : null;
 
     /* Show up to 5 color dots on the card preview */
     const colorDotsHtml = (product.colors && product.colors.length > 0)
       ? `<div class="product-card__color-dots">
            ${product.colors.slice(0, 5).map(c =>
-             `<span class="color-dot" style="background:${c.hex}" title="${c.label}"></span>`
+             `<span class="color-dot" style="background:${c.hex}" title="${tColor(c.label)}"></span>`
            ).join('')}
            ${product.colors.length > 5 ? `<span class="color-dot-more">+${product.colors.length - 5}</span>` : ''}
          </div>`
@@ -530,16 +540,16 @@ function renderProducts() {
         data-price="${parseFloat(product.price.replace(/[^0-9.]/g, ''))}"
         role="button"
         tabindex="0"
-        aria-label="View ${tName}"
+        aria-label="${viewLabel}: ${tName}"
       >
         <div class="product-card__image-wrap">
           <img src="${product.image}" alt="${tName}" loading="lazy" onerror="this.style.display='none'" />
           <div class="product-card__overlay">
-            <span class="product-card__overlay-btn" data-i18n="product.view">View Product</span>
+            <span class="product-card__overlay-btn">${viewLabel}</span>
           </div>
         </div>
         <div class="product-card__body">
-          ${product.badge ? `<span class="product-card__badge">${product.badge}</span>` : ''}
+          ${tBadgeLabel ? `<span class="product-card__badge">${tBadgeLabel}</span>` : ''}
           <p class="product-card__name">${tName}</p>
           <p class="product-card__family">${tFamily}</p>
           <div class="product-card__footer">
@@ -1153,6 +1163,26 @@ function tSave(amount) {
   const lang = document.documentElement.dataset.lang || 'en';
   const verb = lang === 'pt' ? 'Poupa' : 'Save';
   return `${verb} ${amount}`;
+}
+
+/*
+  Translate a product badge label.
+  Three valid badges: "Best Seller", "New", "Best Value".
+  Stored on each product as the English string, so we look up the PT equivalent.
+  Falls back to the original label if no translation found (e.g. custom badges).
+*/
+const BADGE_TRANSLATIONS = {
+  pt: {
+    'Best Seller': 'Mais Vendido',
+    'New':         'Novo',
+    'Best Value':  'Melhor Valor',
+  }
+};
+
+function tBadge(label) {
+  const lang = document.documentElement.dataset.lang || 'en';
+  if (lang === 'en') return label;
+  return BADGE_TRANSLATIONS[lang]?.[label] ?? label;
 }
 
 
