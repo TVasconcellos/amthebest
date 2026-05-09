@@ -11,13 +11,13 @@
                    Products without colors skip the swatch UI.
    
    TRANSLATIONS:  Edit PRODUCT_TRANSLATIONS for product names/descriptions
-                  in PT, or TRANSLATIONS object for UI labels (section 11).
+                  in PT, or TRANSLATIONS object for UI labels (section 10).
    
-   FORMSPREE:     Set FORMSPREE_ID (section 9) after signing up at formspree.io
+   FORMSPREE:     Set FORMSPREE_ID (section 8) after signing up at formspree.io
    
-   ORDER EMAIL:   Change ORDER_EMAIL in section 13 to redirect orders.
+   ORDER EMAIL:   Change ORDER_EMAIL in section 12 to redirect orders.
    
-   MBWAY NUMBER:  Change MBWAY_NUMBER in section 13 to update payment number.
+   MBWAY NUMBER:  Change MBWAY_NUMBER in section 12 to update payment number.
 
    ================================================================
 
@@ -27,8 +27,8 @@
    3.  NAVIGATION
    4.  SCROLL REVEAL + INITIAL CARD REVEAL
    5.  RENDER PRODUCTS
-   6.  PRODUCT MODAL (with color swatches)
-   7.  PRODUCT FILTERS + SORT
+   6.  PRODUCT FILTERS + SORT
+   7.  PRODUCT MODAL (with color swatches)
    8.  CONTACT FORM
    9.  FOOTER YEAR
    10. TRANSLATIONS (UI + per-product)
@@ -394,7 +394,7 @@ const PRODUCTS = [
 
 
 /* ================================================================
-   3. CUSTOM CURSOR — GPU-Accelerated
+   2. CUSTOM CURSOR — GPU-Accelerated
 
    Uses CSS transform (GPU composited) instead of left/top (slow).
    The dot follows the mouse instantly.
@@ -436,7 +436,7 @@ function initCursor() {
 
 
 /* ================================================================
-   4. NAVIGATION — Scroll Detection
+   3. NAVIGATION — Scroll Detection
 ================================================================ */
 function initNav() {
   const nav = document.getElementById('mainNav');
@@ -448,7 +448,7 @@ function initNav() {
 
 
 /* ================================================================
-   5. SCROLL REVEAL
+   4. SCROLL REVEAL
    
    IntersectionObserver fires when elements enter the viewport.
    Product cards get a staggered delay based on column position.
@@ -496,7 +496,7 @@ function initScrollReveal() {
 
 
 /* ================================================================
-   6. RENDER PRODUCTS
+   5. RENDER PRODUCTS
 
    Builds product cards from the PRODUCTS array.
    Cards show a small row of color dots if the product has colors.
@@ -577,7 +577,7 @@ function renderProducts() {
 
 
 /* ================================================================
-   7. PRODUCT FILTERS + SORT
+   6. PRODUCT FILTERS + SORT
 
    Filter buttons show/hide cards by category.
    Sort select re-orders visible cards by name or price.
@@ -691,7 +691,7 @@ function initFilters() {
 
 
 /* ================================================================
-   9. PRODUCT MODAL — with Color Swatches
+   7. PRODUCT MODAL — with Color Swatches
 
    openModal(product) builds the panel HTML dynamically.
 
@@ -748,7 +748,7 @@ function openModal(product) {
         data-color-idx="${idx}"
         style="background: ${color.hex}"
         title="${tColor(color.label)}"
-        aria-label="${t['modal.color'] || 'Colour'}: ${tColor(color.label)}"
+        aria-label="${t['modal.colour'] || 'Colour'}: ${tColor(color.label)}"
       ></button>
     `).join('');
 
@@ -888,7 +888,7 @@ function initModal() {
 
 
 /* ================================================================
-   11. CONTACT FORM
+   8. CONTACT FORM
    
    The form uses two strategies depending on whether Formspree is set up:
    
@@ -909,7 +909,7 @@ function initModal() {
    
    Free tier: 50 submissions/month.
 ================================================================ */
-const FORMSPREE_ID = 'YOUR_FORM_ID'; /* ← replace with your Formspree Form ID */
+const FORMSPREE_ID = 'xpqbozoq'; /* Configured — submissions go to thebest.aem@gmail.com via Formspree */
 const CONTACT_EMAIL = 'thebest.aem@gmail.com';
 
 function initContactForm() {
@@ -993,7 +993,7 @@ function initContactForm() {
 
 
 /* ================================================================
-   12. FOOTER YEAR
+   9. FOOTER YEAR
 ================================================================ */
 function initFooterYear() {
   const el = document.getElementById('footerYear');
@@ -1002,19 +1002,7 @@ function initFooterYear() {
 
 
 /* ================================================================
-   13. TRANSLATIONS — EN / PT-PT
-
-   ★ HOW TO EDIT:
-   Find the key you want to change (matches data-i18n in index.html).
-   Update the text in en and/or pt.
-
-   ★ HOW TO ADD A NEW STRING:
-   1. Add data-i18n="my.key" to the element in index.html.
-   2. Add "my.key": "English text" to en: {} below.
-   3. Add "my.key": "Texto PT" to pt: {} below.
-================================================================ */
-/* ================================================================
-   13. TRANSLATIONS — EN / PT-PT
+   10. TRANSLATIONS — EN / PT-PT
 
    Two parts:
    
@@ -1277,7 +1265,7 @@ const TRANSLATIONS = {
     'filter.cap': 'Caps', 'filter.socks': 'Socks', 'filter.accessories': 'Accessories',
     'filter.pack': 'Packs',
     'product.view': 'View Product',
-    'modal.selectSize': 'Select Size', 'modal.colour': 'Colour', 'modal.color': 'Colour',
+    'modal.selectSize': 'Select Size', 'modal.colour': 'Colour',
     'modal.addToCart': 'Add to Cart', 'modal.shipping': 'Free shipping over €50 • Free pen with orders over €25',
     'modal.selectSizeAlert': 'Please select a size first.', 'modal.size': 'Size',
     'sort.label': 'Sort:', 'sort.default': 'Default',
@@ -1313,7 +1301,7 @@ const TRANSLATIONS = {
     'filter.cap': 'Bonés', 'filter.socks': 'Meias', 'filter.accessories': 'Acessórios',
     'filter.pack': 'Packs',
     'product.view': 'Ver Produto',
-    'modal.selectSize': 'Escolher Tamanho', 'modal.colour': 'Cor', 'modal.color': 'Cor',
+    'modal.selectSize': 'Escolher Tamanho', 'modal.colour': 'Cor',
     'modal.addToCart': 'Adicionar ao Carrinho', 'modal.shipping': 'Envio grátis acima de €50 • Oferta de caneta acima de €25',
     'modal.selectSizeAlert': 'Por favor escolhe um tamanho.', 'modal.size': 'Tamanho',
     'sort.label': 'Ordenar:', 'sort.default': 'Padrão',
@@ -1339,7 +1327,7 @@ const TRANSLATIONS = {
 
 
 /* ================================================================
-   14. LANGUAGE SWITCHER
+   11. LANGUAGE SWITCHER
 ================================================================ */
 function setLanguage(lang) {
   if (!TRANSLATIONS[lang]) return;
@@ -1427,7 +1415,7 @@ function initLanguageSwitcher() {
 
 
 /* ================================================================
-   16. SHOPPING CART
+   12. SHOPPING CART
 
    The Cart object is a singleton that manages cart state, persists
    to localStorage so items survive page refresh, and renders into
@@ -1755,7 +1743,7 @@ function handleOrderSubmit(e) {
 
 
 /* ================================================================
-   15. INIT
+   13. INIT
 ================================================================ */
 document.addEventListener('DOMContentLoaded', () => {
   initCursor();
