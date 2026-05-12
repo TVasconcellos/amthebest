@@ -1208,8 +1208,10 @@ function initContactForm() {
     /* Pull the values once, used by both submission paths */
     const name    = form.querySelector('#fieldName').value.trim();
     const email   = form.querySelector('#fieldEmail').value.trim();
-    const subject = form.querySelector('#fieldSubject').value.trim() || 'New message from A&M website';
     const message = form.querySelector('#fieldMessage').value.trim();
+    /* Subject is no longer a form field — always use a generic line so you can
+       still distinguish website messages in your inbox. */
+    const subject = 'New message from A&M website';
 
     /* Path 1: Formspree configured — submit via fetch, no page leave */
     if (FORMSPREE_ID && FORMSPREE_ID !== 'YOUR_FORM_ID') {
@@ -1565,15 +1567,13 @@ const TRANSLATIONS = {
     'cart.title': 'Your Cart', 'cart.total': 'Total',
     'cart.orderByEmail': 'Order by Email', 'cart.empty': 'Your cart is empty.',
     'order.eyebrow': 'Complete your order', 'order.title': 'Order by Email',
-    'order.paymentLabel': 'Payment via MBWay',
-    'order.paymentNote': 'Send the total amount via MBWay. Your order will be processed once payment is received.',
-    'order.name': 'Full Name', 'order.phone': 'Phone Number',
+    'order.name': 'Name', 'order.phone': 'Phone Number',
     'order.email': 'Email', 'order.address': 'Delivery Address',
     'order.submit': 'Order',
     'contact.eyebrow': 'Get in Touch', 'contact.title': "Let's Talk",
     'contact.desc': 'Questions about sizing, wholesale, or collabs?<br />We usually reply within 24 hours.',
     'contact.name': 'Your Name', 'contact.email': 'Email Address',
-    'contact.subject': 'Subject', 'contact.message': 'Your Message',
+    'contact.message': 'Your Message',
     'contact.send': 'Send Message', 'contact.success': "✓ Message sent! We'll be in touch soon.",
     'footer.rights': 'All rights reserved.', 'footer.privacy': 'Privacy',
     'footer.shipping': 'Shipping', 'footer.returns': 'Returns',
@@ -1601,15 +1601,13 @@ const TRANSLATIONS = {
     'cart.title': 'O Teu Carrinho', 'cart.total': 'Total',
     'cart.orderByEmail': 'Encomendar por Email', 'cart.empty': 'O teu carrinho está vazio.',
     'order.eyebrow': 'Finaliza a tua encomenda', 'order.title': 'Encomendar por Email',
-    'order.paymentLabel': 'Pagamento por MBWay',
-    'order.paymentNote': 'Envia o valor total por MBWay. A tua encomenda será processada após receção do pagamento.',
-    'order.name': 'Nome Completo', 'order.phone': 'Número de Telefone',
+    'order.name': 'Nome', 'order.phone': 'Número de Telefone',
     'order.email': 'Email', 'order.address': 'Morada de Entrega',
     'order.submit': 'Encomendar',
     'contact.eyebrow': 'Fala Connosco', 'contact.title': 'Vamos Falar',
     'contact.desc': 'Dúvidas sobre tamanhos, grossista ou colaborações?<br />Respondemos geralmente em 24 horas.',
     'contact.name': 'O Teu Nome', 'contact.email': 'Endereço de Email',
-    'contact.subject': 'Assunto', 'contact.message': 'A Tua Mensagem',
+    'contact.message': 'A Tua Mensagem',
     'contact.send': 'Enviar Mensagem', 'contact.success': '✓ Mensagem enviada! Estamos em contacto.',
     'footer.rights': 'Todos os direitos reservados.', 'footer.privacy': 'Privacidade',
     'footer.shipping': 'Envios', 'footer.returns': 'Devoluções',
