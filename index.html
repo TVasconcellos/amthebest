@@ -63,8 +63,20 @@
   <!-- ============================================================
     HERO SECTION
     
-    Background: a looping video (images/main.mp4).
-    A dark overlay sits on top to keep the text readable.
+    Background: a looping video. Different source files for mobile vs desktop
+    so the mobile crop/aspect is right.
+    
+    File mapping:
+      images/main.mp4         — desktop (loaded above 768px)
+      images/main_mobile.mp4  — mobile portrait (loaded at or below 768px)
+    
+    Note: the browser picks the source at INITIAL load based on viewport.
+    Rotating or resizing won't swap them — that's fine for our use case
+    since users don't typically resize between phone and desktop.
+    
+    If main_mobile.mp4 doesn't exist, the browser falls back to main.mp4
+    (the second <source> below). Both must be MP4; modern formats like
+    WebM could be added as additional sources for further optimisation.
     
     The <video> attributes:
       autoplay  — starts immediately
@@ -73,7 +85,7 @@
       playsinline — prevents fullscreen on mobile Safari
       preload="auto" — starts loading immediately
     
-    If the video fails to load, the fallback colour from .hero
+    If both videos fail to load, the fallback colour from .hero
     background still shows underneath.
   ============================================================ -->
   <section class="hero" id="hero">
@@ -83,7 +95,9 @@
       autoplay muted loop playsinline preload="auto"
       poster="images/hero-poster.jpg"
     >
-      <source src="images/main.mp4" type="video/mp4" />
+      <!-- Order matters: more-specific media query first, fallback last -->
+      <source src="images/main_mobile.mp4" type="video/mp4" media="(max-width: 768px)" />
+      <source src="images/main.mp4"        type="video/mp4" />
     </video>
 
     <!-- Dark gradient overlay — keeps text legible over any video frame -->
@@ -236,11 +250,6 @@
           <div class="form-field__line"></div>
         </div>
         <div class="form-field">
-          <input type="text" id="fieldSubject" name="subject" autocomplete="off" />
-          <label for="fieldSubject" data-i18n="contact.subject">Subject</label>
-          <div class="form-field__line"></div>
-        </div>
-        <div class="form-field">
           <textarea id="fieldMessage" name="message" rows="4" required autocomplete="off"></textarea>
           <label for="fieldMessage" data-i18n="contact.message">Your Message</label>
           <div class="form-field__line"></div>
@@ -336,20 +345,11 @@
         <!-- Order summary: items + total — populated by JS -->
         <div class="order__summary" id="orderSummary"></div>
 
-        <!-- Payment instructions box -->
-        <div class="order__payment">
-          <p class="order__payment-label" data-i18n="order.paymentLabel">Payment via MBWay</p>
-          <p class="order__payment-number">912 025 191</p>
-          <p class="order__payment-note" data-i18n="order.paymentNote">
-            Send the total amount via MBWay. Your order will be processed once payment is received.
-          </p>
-        </div>
-
         <!-- Customer info form -->
         <form class="order__form" id="orderForm">
           <div class="form-field">
             <input type="text" id="orderName" name="name" required autocomplete="name" />
-            <label for="orderName" data-i18n="order.name">Full Name</label>
+            <label for="orderName" data-i18n="order.name">Name</label>
             <div class="form-field__line"></div>
           </div>
           <div class="form-field">
