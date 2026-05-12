@@ -1502,13 +1502,22 @@ button { cursor: none; font-family: var(--font-body); border: none; background: 
 .order__item-name  { color: rgba(255,255,255,0.8); }
 .order__item-price { color: var(--color-white); font-weight: 500; flex-shrink: 0; }
 
+/*
+  Order total row.
+  
+  Uses the body font (DM Sans) rather than the display font (Bebas Neue) —
+  the display font is condensed and editorial, great for hero titles but
+  hard to scan at small sizes for precise info like prices. Body font + 
+  bold weight keeps the row feeling weighty without sacrificing legibility.
+*/
 .order__total-row {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  font-family: var(--font-display);
-  font-size: var(--text-xl);
-  letter-spacing: 0.05em;
+  font-family: var(--font-body);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  letter-spacing: 0.02em;
 }
 
 .order__total { color: var(--color-white); }
