@@ -287,7 +287,7 @@ const PRODUCTS = [
     name: "Water Bottle",
     family: "Water Bottle A&M",
     category: "accessories",
-    price: "€15",
+    price: "€12",
     badge: "New",
     image: "images/products/bottle1.jpg",
     description: "Reusable water bottle with brand branding.",
