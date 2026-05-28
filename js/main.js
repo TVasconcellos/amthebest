@@ -291,32 +291,20 @@ const PRODUCTS = [
     badge: "New",
     image: "images/products/bottle1.jpg",
     description: "Reusable water bottle with brand branding.",
-    sizes: ["350ml", "600ml"],
-    /*
-      The bottle has 4 image variants: each colour × each size combo.
-      Each colour swatch carries a default image (used as the swatch's
-      thumbnail and as the fallback in the cart). The optional
-      imageBySize map provides per-size overrides.
-      
-      The modal's resolveProductImage() helper picks the right image
-      based on the user's current colour AND size selection.
-    */
+    sizes: ["One Size"],
     colors: [
       {
-        ...COLORS.white,
-        image: "images/products/bottle1.jpg",  /* Default = 600ml */
-        imageBySize: {
-          "600ml": "images/products/bottle1.jpg",
-          "350ml": "images/products/bottle3.jpg",
-        }
+        ...COLORS.navy,
+        image: "images/products/bottle1.jpg",  /* Default — also shown as the swatch's primary */
+        images: [
+          "images/products/bottle1.jpg",
+          "images/products/bottle1-1.jpg",
+          "images/products/bottle1-2.jpg",
+        ]
       },
       {
         ...COLORS.black,
-        image: "images/products/bottle2.jpg",  /* Default = 600ml */
-        imageBySize: {
-          "600ml": "images/products/bottle2.jpg",
-          "350ml": "images/products/bottle4.jpg",
-        }
+        image: "images/products/bottle2.jpg"
       },
     ]
   },
@@ -811,16 +799,18 @@ let selectedColor = null;
   Resolve the right product image given the current colour and size selection.
   Returns the SINGLE image to display as the main one.
   
-  Most products map one image per colour. Some need richer behaviour:
-    - Water Bottle has imageBySize: image varies by both colour AND size.
-    - Hoodie / Sweatshirt have images[]: multiple shots of the same variant
-      (front/back/detail). The first is the default.
+  The data model supports three levels of image richness, in priority order:
+    1. imageBySize: { "size": "path" } — image varies by size for this colour.
+       Available if you re-introduce sized variants with different photos.
+    2. images: [...] — multiple shots of the same variant (front/back/detail).
+       Used by Hoodie, Sweatshirt, Socks (white), T-Shirt (3 colours), Bottle (navy).
+    3. image — single fallback when none of the above apply.
   
   Resolution order:
   1. If the colour has imageBySize and that size exists → use it.
   2. Else if the colour has images[] → return the first one.
   3. Else → fall back to color.image.
-  4. If no colour selected → use product.image.
+  4. If no colour selected → use product.images[0] (top-level) or product.image.
   
   This keeps the data model flexible: most products only need one image
   field per colour. Multi-shot products opt in via `images: [...]`.
@@ -848,9 +838,10 @@ function resolveProductImage(product, color, size) {
   the array has one entry — the gallery code can decide whether to
   show thumbnails based on length > 1.
   
-  Note: products with imageBySize (the bottle) don't currently expose
-  multiple images per (colour, size) cell — that would be a bigger
-  matrix. Returns a single-element array for consistency.
+  Note: when imageBySize is in play for a (colour, size) cell, this returns
+  just that single image — sized-variants don't currently expose multi-shot
+  galleries within a cell. That's a more complex matrix we can build later
+  if needed.
 */
 function resolveProductImages(product, color, size) {
   if (!color) {
