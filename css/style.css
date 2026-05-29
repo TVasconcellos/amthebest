@@ -1036,6 +1036,39 @@ button { cursor: none; font-family: var(--font-body); border: none; background: 
 .size-btn:hover,
 .size-btn.selected { border-color: var(--color-white); color: var(--color-white); background: rgba(255,255,255,0.08); }
 
+/*
+  Two-step size picker (phone case): a row of generation buttons, then a
+  revealed row of model variants below it.
+  
+  - .modal__size-groups: the generation buttons (iPhone 16, 15, …)
+  - .modal__sizes-variants: the variant row, revealed after a generation
+    is picked. Separated visually with a top border + padding so it reads
+    as a distinct second step.
+  - A selected generation button uses the accent colour to distinguish it
+    from a selected model (white), so it's clear which is the "category"
+    and which is the final pick.
+*/
+.modal__size-groups {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.size-btn--group.selected {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  background: rgba(200,169,126,0.1);
+}
+
+.modal__sizes-variants {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border);
+}
+
+/* The variant row starts hidden; this ensures [hidden] beats the flex display */
+.modal__sizes-variants[hidden] { display: none; }
+
 .modal__shipping-note {
   font-size: var(--text-xs);
   color: var(--color-grey);
