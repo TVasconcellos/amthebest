@@ -417,7 +417,30 @@ const PRODUCTS = [
       "images/products/capa-telmovel-2.jpg",
     ],
     description: "Black phone case with brand branding.",
-    sizes: ["One Size"],
+    /*
+      Phone case uses a TWO-STEP model picker instead of a flat size list.
+      
+      `sizeGroups` maps a generation label → its specific models. The modal
+      shows generation buttons first (iPhone 16, 15, …); picking one reveals
+      a second row with that generation's variants. The final selected model
+      (e.g. "iPhone 11 Pro Max") is what goes in the cart.
+      
+      Names follow Apple's convention: lowercase-i "iPhone", "Max" (no accent
+      or period). Generations ordered newest → oldest.
+      
+      Note: when a product has sizeGroups, the modal renders the two-step UI
+      and ignores `sizes`. Products with a normal `sizes` array are unaffected.
+    */
+    sizeGroups: {
+      "iPhone 16": ["iPhone 16", "iPhone 16 Plus", "iPhone 16 Pro", "iPhone 16 Pro Max"],
+      "iPhone 15": ["iPhone 15", "iPhone 15 Plus", "iPhone 15 Pro", "iPhone 15 Pro Max"],
+      "iPhone 14": ["iPhone 14", "iPhone 14 Plus", "iPhone 14 Pro", "iPhone 14 Pro Max"],
+      "iPhone 13": ["iPhone 13", "iPhone 13 Pro", "iPhone 13 Pro Max"],
+      "iPhone 12": ["iPhone 12", "iPhone 12 Pro", "iPhone 12 Pro Max"],
+      "iPhone 11": ["iPhone 11", "iPhone 11 Pro", "iPhone 11 Pro Max"],
+      "iPhone X/XS": ["iPhone X/XS", "iPhone XS Max"],
+      "iPhone 7/8/SE": ["iPhone 7/8/SE2/SE3", "iPhone 7 Plus/8 Plus"],
+    },
     colors: null
   },
 
@@ -942,14 +965,33 @@ function openModal(product) {
   const lang = document.documentElement.dataset.lang || 'en';
   const t    = TRANSLATIONS[lang];
 
-  /* ── Build sizes HTML — wrapped in a flex row so they sit horizontally ──
+  /* ── Build sizes HTML ──
+       Two modes:
+       1. sizeGroups present → two-step picker: generation buttons on top,
+          a (initially empty) variant row below that JS fills when a
+          generation is clicked.
+       2. plain sizes array → flat row of size buttons.
+       
        data-size keeps the RAW (English) value so cart logic + email body
        stay consistent across languages. The visible label is translated. */
-  const sizesHTML = `<div class="modal__sizes-grid">
-    ${product.sizes.map(size => `
-      <button class="size-btn" data-size="${size}" aria-label="${t['modal.size'] || 'Size'} ${tSize(size)}">${tSize(size)}</button>
-    `).join('')}
-  </div>`;
+  let sizesHTML;
+  if (product.sizeGroups) {
+    const generations = Object.keys(product.sizeGroups);
+    sizesHTML = `
+      <div class="modal__size-groups" id="modalSizeGroups">
+        ${generations.map(gen => `
+          <button class="size-btn size-btn--group" data-group="${gen}">${gen}</button>
+        `).join('')}
+      </div>
+      <div class="modal__sizes-grid modal__sizes-variants" id="modalSizeVariants" hidden></div>
+    `;
+  } else {
+    sizesHTML = `<div class="modal__sizes-grid">
+      ${product.sizes.map(size => `
+        <button class="size-btn" data-size="${size}" aria-label="${t['modal.size'] || 'Size'} ${tSize(size)}">${tSize(size)}</button>
+      `).join('')}
+    </div>`;
+  }
 
   /* ── Build color swatches HTML ── */
   let colorsHTML = '';
@@ -1152,49 +1194,103 @@ function openModal(product) {
     });
   }
 
-  /* ── Size button interactions ── */
-  content.querySelectorAll('.size-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      content.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
-      btn.classList.add('selected');
-      selectedSize = btn.dataset.size;
-
-      /*
-        If this product has size-specific images for the current colour
-        (e.g. Water Bottle 350ml vs 600ml), swap the image to match.
-        For products without imageBySize, this resolves to the same image
-        and the swap is a no-op (no flicker).
-      */
-      const modalImage = content.querySelector('#modalProductImage');
-      if (modalImage && selectedColor?.imageBySize) {
-        const newSrc = resolveProductImage(product, selectedColor, selectedSize);
-        if (modalImage.src !== newSrc && !modalImage.src.endsWith(newSrc)) {
-          modalImage.style.opacity = '0';
-          setTimeout(() => {
-            modalImage.src = newSrc;
-            modalImage.style.opacity = '1';
-          }, 180);
-        }
-      }
-    });
-  });
-
   /*
-    Pre-select the first size by default. This both marks the button visually
-    (so the user can see which size is currently chosen) and sets the
-    selectedSize state so a quick "Add to Cart" works without needing to click
-    a size first. The user can always click a different size to change.
+    Size interactions. Two paths depending on the product:
+    
+    A) Grouped (sizeGroups, e.g. phone case): clicking a generation button
+       reveals that generation's variant buttons in the second row. Clicking
+       a variant sets selectedSize. No pre-selection — the customer must
+       choose a generation then a model deliberately.
+    
+    B) Flat (sizes): the usual single row of size buttons. The first is
+       pre-selected for short lists (apparel).
   */
-  const firstSizeBtn = content.querySelector('.size-btn');
-  if (firstSizeBtn) {
-    firstSizeBtn.classList.add('selected');
-    selectedSize = firstSizeBtn.dataset.size;
+  if (product.sizeGroups) {
+    const groupsEl   = content.querySelector('#modalSizeGroups');
+    const variantsEl = content.querySelector('#modalSizeVariants');
+
+    /* Helper: render the variant buttons for a chosen generation */
+    function showVariants(generation) {
+      const variants = product.sizeGroups[generation] || [];
+      variantsEl.innerHTML = variants.map(model => `
+        <button class="size-btn" data-size="${model}">${model}</button>
+      `).join('');
+      variantsEl.hidden = false;
+
+      /* Wire each variant button */
+      variantsEl.querySelectorAll('.size-btn').forEach(vBtn => {
+        vBtn.addEventListener('click', () => {
+          variantsEl.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
+          vBtn.classList.add('selected');
+          selectedSize = vBtn.dataset.size;
+        });
+      });
+    }
+
+    /* Generation buttons */
+    groupsEl.querySelectorAll('.size-btn--group').forEach(gBtn => {
+      gBtn.addEventListener('click', () => {
+        groupsEl.querySelectorAll('.size-btn--group').forEach(b => b.classList.remove('selected'));
+        gBtn.classList.add('selected');
+        /* Switching generation clears any previously selected model */
+        selectedSize = null;
+        showVariants(gBtn.dataset.group);
+      });
+    });
+
+  } else {
+    /* Flat size list */
+    content.querySelectorAll('.size-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        content.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedSize = btn.dataset.size;
+
+        /*
+          If this product has size-specific images for the current colour
+          (a future sized product with imageBySize), swap the image.
+          No-op for products without imageBySize.
+        */
+        const modalImage = content.querySelector('#modalProductImage');
+        if (modalImage && selectedColor?.imageBySize) {
+          const newSrc = resolveProductImage(product, selectedColor, selectedSize);
+          if (modalImage.src !== newSrc && !modalImage.src.endsWith(newSrc)) {
+            modalImage.style.opacity = '0';
+            setTimeout(() => {
+              modalImage.src = newSrc;
+              modalImage.style.opacity = '1';
+            }, 180);
+          }
+        }
+      });
+    });
+
+    /*
+      Pre-select the first size for short flat lists (apparel S/M/L/XL or a
+      single "One Size"). Skipped for longer lists so the customer chooses
+      deliberately.
+    */
+    const PRESELECT_MAX = 6;
+    if (product.sizes && product.sizes.length <= PRESELECT_MAX) {
+      const firstSizeBtn = content.querySelector('.size-btn');
+      if (firstSizeBtn) {
+        firstSizeBtn.classList.add('selected');
+        selectedSize = firstSizeBtn.dataset.size;
+      }
+    }
   }
 
   /* ── Add to Cart ── */
   content.querySelector('#modalAddBtn')?.addEventListener('click', () => {
-    if (!selectedSize && product.sizes.length > 1) {
-      alert(t['modal.selectSizeAlert'] || 'Please select a size first.');
+    /*
+      Require a selection when the product offers a real choice.
+      - Grouped products (sizeGroups): always require a model pick.
+      - Flat products with >1 size: require a size pick.
+      Single-size products ("One Size") need no selection.
+    */
+    const needsSelection = !!product.sizeGroups || (product.sizes && product.sizes.length > 1);
+    if (!selectedSize && needsSelection) {
+      alert(t['modal.selectSizeAlert'] || 'Please select an option first.');
       return;
     }
     /* Add the item to the real cart (defined in section 12) */
@@ -1639,7 +1735,7 @@ const TRANSLATIONS = {
     'product.view': 'View Product',
     'modal.selectSize': 'Select Size', 'modal.colour': 'Colour',
     'modal.addToCart': 'Add to Cart', 'modal.shipping': 'Free shipping over €50 • Free pen with orders over €25',
-    'modal.selectSizeAlert': 'Please select a size first.', 'modal.size': 'Size',
+    'modal.selectSizeAlert': 'Please select an option first.', 'modal.size': 'Size',
     'sort.label': 'Sort:', 'sort.default': 'Default',
     'sort.nameAsc': 'Name A→Z', 'sort.nameDesc': 'Name Z→A',
     'sort.priceAsc': 'Price ↑', 'sort.priceDesc': 'Price ↓',
@@ -1673,7 +1769,7 @@ const TRANSLATIONS = {
     'product.view': 'Ver Produto',
     'modal.selectSize': 'Escolher Tamanho', 'modal.colour': 'Cor',
     'modal.addToCart': 'Adicionar ao Carrinho', 'modal.shipping': 'Envio grátis acima de €50 • Oferta de caneta acima de €25',
-    'modal.selectSizeAlert': 'Por favor escolhe um tamanho.', 'modal.size': 'Tamanho',
+    'modal.selectSizeAlert': 'Por favor escolhe uma opção.', 'modal.size': 'Tamanho',
     'sort.label': 'Ordenar:', 'sort.default': 'Padrão',
     'sort.nameAsc': 'Nome A→Z', 'sort.nameDesc': 'Nome Z→A',
     'sort.priceAsc': 'Preço ↑', 'sort.priceDesc': 'Preço ↓',
