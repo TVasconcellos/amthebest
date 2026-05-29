@@ -67,16 +67,13 @@
     so the mobile crop/aspect is right.
     
     File mapping:
-      images/main.mp4         — desktop (loaded above 768px)
-      images/main_mobile.mp4  — mobile portrait (loaded at or below 768px)
+      images/main.mp4         — desktop
+      images/main_mobile.mp4  — mobile portrait
     
-    Note: the browser picks the source at INITIAL load based on viewport.
-    Rotating or resizing won't swap them — that's fine for our use case
-    since users don't typically resize between phone and desktop.
-    
-    If main_mobile.mp4 doesn't exist, the browser falls back to main.mp4
-    (the second <source> below). Both must be MP4; modern formats like
-    WebM could be added as additional sources for further optimisation.
+    The right source is chosen by JS (initHeroVideo in main.js) based on
+    viewport width, because the <source media="..."> attribute is poorly
+    and inconsistently supported on <video> elements across browsers.
+    JS sets the source reliably before the video loads.
     
     The <video> attributes:
       autoplay  — starts immediately
@@ -85,7 +82,7 @@
       playsinline — prevents fullscreen on mobile Safari
       preload="auto" — starts loading immediately
     
-    If both videos fail to load, the fallback colour from .hero
+    If the video fails to load, the fallback colour from .hero
     background still shows underneath.
   ============================================================ -->
   <section class="hero" id="hero">
@@ -95,9 +92,9 @@
       autoplay muted loop playsinline preload="auto"
       poster="images/hero-poster.jpg"
     >
-      <!-- Order matters: more-specific media query first, fallback last -->
-      <source src="images/main_mobile.mp4" type="video/mp4" media="(max-width: 768px)" />
-      <source src="images/main.mp4"        type="video/mp4" />
+      <!-- src is set by initHeroVideo() in main.js based on viewport width.
+           This default points to desktop so the video still works if JS fails. -->
+      <source id="heroVideoSource" src="images/main.mp4" type="video/mp4" />
     </video>
 
     <!-- Dark gradient overlay — keeps text legible over any video frame -->
