@@ -466,6 +466,41 @@ const PRODUCTS = [
     sizes: ["S", "M", "L", "XL"],
     colors: null
   },
+  {
+    id: 21,
+    name: "Office Pack",
+    family: "Packs",
+    category: "pack",
+    price: "€25.50",
+    save: "€3",
+    badge: "Best Value",
+    image: "images/products/officepack1.jpg",
+    images: [
+      "images/products/officepack1.jpg",
+      "images/products/officepack2.jpg",
+    ],
+    description: "The Office Pack. Everything you need for the desk, bundled at a saving.",
+    sizes: ["One Size"],
+    colors: null
+  },
+  {
+    id: 22,
+    name: "Street Pack",
+    family: "Packs",
+    category: "pack",
+    price: "€15",
+    save: "€2",
+    badge: "Best Value",
+    image: "images/products/streetpack1.jpg",
+    images: [
+      "images/products/streetpack1.jpg",
+      "images/products/streetpack2.jpg",
+      "images/products/streetpack3.jpg",
+    ],
+    description: "The Street Pack. Everyday essentials, bundled at a saving.",
+    sizes: ["One Size"],
+    colors: null
+  },
 ];
 
 
@@ -521,6 +556,40 @@ function initNav() {
   const onScroll = () => nav.classList.toggle('is-scrolled', window.scrollY > 50);
   window.addEventListener('scroll', onScroll, { passive: true });
   onScroll();
+}
+
+/*
+  Pick the right hero video source for the viewport.
+  
+  Mobile (≤768px wide) gets images/main_mobile.mp4 — a portrait-friendly cut.
+  Desktop gets images/main.mp4.
+  
+  We do this in JS rather than via <source media="..."> because that attribute
+  is unreliable on <video> across browsers (Chrome/Safari support is partial
+  and largely deprecated). Setting .src directly and calling .load() is the
+  robust way to choose a source.
+  
+  Runs once on load. We intentionally don't swap on resize — switching the
+  video mid-session (e.g. desktop devtools resizing to mobile) would restart
+  playback, which is jarring and pointless for real users who don't change
+  device class mid-visit.
+*/
+function initHeroVideo() {
+  const video  = document.getElementById('heroVideo');
+  const source = document.getElementById('heroVideoSource');
+  if (!video || !source) return;
+
+  const isMobile = window.matchMedia('(max-width: 768px)').matches;
+  const desired  = isMobile ? 'images/main_mobile.mp4' : 'images/main.mp4';
+
+  /* Only change + reload if the desired source differs from what's set */
+  if (!source.src.endsWith(desired)) {
+    source.src = desired;
+    video.load();           /* Required for the <video> to pick up the new source */
+    video.play().catch(() => {
+      /* Autoplay can be blocked; that's fine — poster image shows instead */
+    });
+  }
 }
 
 
@@ -1436,6 +1505,16 @@ const PRODUCT_TRANSLATIONS = {
       family: 'Packs',
       description: 'O Pack Completo: T-Shirt + Hoodie + Calções + Meias + Totebag. A experiência A&M completa.'
     },
+    21: {
+      name: 'Pack Office',
+      family: 'Packs',
+      description: 'O Pack Office. Tudo o que precisas para a secretária, com desconto.'
+    },
+    22: {
+      name: 'Pack Street',
+      family: 'Packs',
+      description: 'O Pack Street. Essenciais do dia a dia, com desconto.'
+    },
   }
 };
 
@@ -2028,7 +2107,7 @@ function handleOrderSubmit(e) {
 document.addEventListener('DOMContentLoaded', () => {
   initCursor();
   initNav();
-  /* Hero now uses a video background — no canvas init needed */
+  initHeroVideo();   /* Pick mobile vs desktop hero video source */
   renderProducts();
   initScrollReveal();
   initFilters();
