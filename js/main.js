@@ -273,8 +273,9 @@ const PRODUCTS = [
       },
       {
         ...COLORS.black,
-        image: "images/products/socks_black_2.png",
+        image: "images/products/socks_black_1.jpg",
         images: [
+          "images/products/socks_black_1.jpg",
           "images/products/socks_black_2.png",
         ]
       },
