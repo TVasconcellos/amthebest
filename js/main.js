@@ -259,16 +259,16 @@ const PRODUCTS = [
     category: "socks",
     price: "€5",
     badge: "Best Seller",
-    image: "images/products/socks1.jpg",
+    image: "images/products/socks-white-1.jpg",
     description: "Socks with exclusive brand design.",
     sizes: ["One Size"],
     colors: [
       {
         ...COLORS.white,
-        image: "images/products/socks1.jpg",
+        image: "images/products/socks-white-1.jpg",
         images: [
-          "images/products/socks1.jpg",
-          "images/products/socks_white_2.png",
+          "images/products/socks-white-1.jpg",
+          "images/products/socks-white-2.png",
         ]
       },
       {
@@ -305,7 +305,11 @@ const PRODUCTS = [
       },
       {
         ...COLORS.black,
-        image: "images/products/bottle2.jpg"
+        image: "images/products/bottle2.jpg",
+        images: [
+          "images/products/bottle2.jpg",
+          "images/products/bottle2-1.jpg",
+        ]
       },
     ]
   },
@@ -408,6 +412,10 @@ const PRODUCTS = [
     price: "€5",
     badge: "New",
     image: "images/products/capa_telemovel.jpg",
+    images: [
+      "images/products/capa_telemovel.jpg",
+      "images/products/capa-telmovel-2.jpg",
+    ],
     description: "Black phone case with brand branding.",
     sizes: ["One Size"],
     colors: null
