@@ -414,7 +414,7 @@ const PRODUCTS = [
     image: "images/products/capa_telemovel.jpg",
     images: [
       "images/products/capa_telemovel.jpg",
-      "images/products/capa-telmovel-2.jpg",
+      "images/products/capa-telemovel-2.jpg",
     ],
     description: "Black phone case with brand branding.",
     /*
