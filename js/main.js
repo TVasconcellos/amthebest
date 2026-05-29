@@ -333,13 +333,13 @@ const PRODUCTS = [
     price: "€10",
     badge: "New",
     image: "images/products/baralho_cartas1.jpg",
+    images: [
+      "images/products/baralho_cartas1.jpg",
+      "images/products/baralho_cartas2.jpg",
+    ],
     description: "Plastic-coated playing cards with custom design.",
     sizes: ["One Size"],
-    colors: [
-      /* Two designs / variants — using the existing image pair */
-      { label: 'Design A', hex: '#222222', image: "images/products/baralho_cartas1.jpg" },
-      { label: 'Design B', hex: '#888888', image: "images/products/baralho_cartas2.jpg" },
-    ]
+    colors: null
   },
   {
     id: 11,
@@ -349,12 +349,13 @@ const PRODUCTS = [
     price: "€15",
     badge: "New",
     image: "images/products/base_copos1.jpg",
+    images: [
+      "images/products/base_copos1.jpg",
+      "images/products/base_copos2.jpg",
+    ],
     description: "Leather coasters with brand detail.",
     sizes: ["One Size"],
-    colors: [
-      { label: 'Design A', hex: '#222222', image: "images/products/base_copos1.jpg" },
-      { label: 'Design B', hex: '#888888', image: "images/products/base_copos2.jpg" },
-    ]
+    colors: null
   },
   {
     id: 12,
@@ -1654,9 +1655,6 @@ const COLOR_TRANSLATIONS = {
     'Forest Green': 'Verde Floresta',
     'Black':        'Preto',
     'White':        'Branco',
-    /* Design variants for non-colour products like Playing Cards / Coasters */
-    'Design A':     'Modelo A',
-    'Design B':     'Modelo B',
   }
 };
 
