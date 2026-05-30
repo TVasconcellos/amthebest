@@ -1228,6 +1228,55 @@ button { cursor: none; font-family: var(--font-body); border: none; background: 
 
 .footer__links a:hover { color: var(--color-white); }
 
+/*
+  Footer link rendered as a <button> (opens the Shipping & Returns modal).
+  Styled to look identical to the anchor links — no button chrome.
+*/
+.footer__link-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  color: var(--color-grey);
+  cursor: none;
+  transition: color var(--duration-fast);
+}
+
+.footer__link-btn:hover { color: var(--color-white); }
+
+/*
+  Shipping & Returns info modal content.
+  Sits inside the shared .modal__panel--center container, so it inherits
+  the centered panel, padding via .order spacing isn't applied here — we
+  add our own padding to match.
+*/
+.info-modal {
+  padding: var(--space-lg) var(--space-md);
+}
+
+.info-modal__section {
+  margin-top: var(--space-md);
+}
+
+.info-modal__heading {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  margin-bottom: 6px;
+}
+
+.info-modal__text {
+  font-size: var(--text-sm);
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.7);
+}
+
 
 /* ================================================================
    13. SCROLL REVEAL ANIMATIONS
