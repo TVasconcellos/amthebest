@@ -898,6 +898,26 @@ let selectedSize  = null;
 let selectedColor = null;
 
 /*
+  Handle for the in-flight image crossfade timer.
+  
+  Colour/thumbnail/size switches fade the image out, then after 180ms swap
+  the src and fade back in. If the user closes the modal and opens a
+  different product within that 180ms, the old timer would otherwise fire
+  and write the PREVIOUS product's image onto the NEW modal (which reuses
+  the same #modalProductImage element). We track the timer here so
+  openModal() and closeModal() can cancel any pending fade.
+*/
+let imageFadeTimer = null;
+
+/* Cancel any pending image crossfade. Safe to call when none is scheduled. */
+function cancelImageFade() {
+  if (imageFadeTimer !== null) {
+    clearTimeout(imageFadeTimer);
+    imageFadeTimer = null;
+  }
+}
+
+/*
   Resolve the right product image given the current colour and size selection.
   Returns the SINGLE image to display as the main one.
   
@@ -962,6 +982,16 @@ function openModal(product) {
   const modal   = document.getElementById('productModal');
   const content = document.getElementById('modalContent');
   if (!modal || !content) return;
+
+  /*
+    Cancel any image crossfade still pending from the previously-opened
+    product. Without this, a fade scheduled in the last modal could fire
+    after this new modal renders and overwrite its image with the old one.
+    We also reset selection state here so nothing leaks between products.
+  */
+  cancelImageFade();
+  selectedSize  = null;
+  selectedColor = null;
 
   const lang = document.documentElement.dataset.lang || 'en';
   const t    = TRANSLATIONS[lang];
@@ -1089,9 +1119,12 @@ function openModal(product) {
         <button class="btn btn--primary btn--full" id="modalAddBtn" style="margin-top:1.5rem">
           ${t['modal.addToCart'] || 'Add to Cart'}
         </button>
-        <p class="modal__shipping-note">
-          ${t['modal.shipping'] || 'Free shipping on orders over €50'}
-        </p>
+        <div class="modal__shipping-note">
+          ${(t['modal.shipping'] || 'Free shipping over €50')
+              .split('•')
+              .map(perk => `<span class="perk">${perk.trim()}</span>`)
+              .join('')}
+        </div>
       </div>
     </div>
   `;
@@ -1151,11 +1184,13 @@ function openModal(product) {
         content.querySelectorAll('.modal__thumb').forEach(t => t.classList.remove('is-active'));
         thumb.classList.add('is-active');
 
-        /* Crossfade main image */
+        /* Crossfade main image (tracked so it can be cancelled on modal switch) */
+        cancelImageFade();
         modalImage.style.opacity = '0';
-        setTimeout(() => {
+        imageFadeTimer = setTimeout(() => {
           modalImage.src = newSrc;
           modalImage.style.opacity = '1';
+          imageFadeTimer = null;
         }, 180);
       });
     });
@@ -1183,10 +1218,12 @@ function openModal(product) {
         if (colorSelected) colorSelected.textContent = tColor(color.label);
 
         /* Crossfade to the right image for this colour + current size combo */
+        cancelImageFade();
         modalImage.style.opacity = '0';
-        setTimeout(() => {
+        imageFadeTimer = setTimeout(() => {
           modalImage.src = resolveProductImage(product, color, selectedSize);
           modalImage.style.opacity = '1';
+          imageFadeTimer = null;
         }, 180);
 
         /* Rebuild the thumbnail gallery for this colour's images */
@@ -1256,10 +1293,12 @@ function openModal(product) {
         if (modalImage && selectedColor?.imageBySize) {
           const newSrc = resolveProductImage(product, selectedColor, selectedSize);
           if (modalImage.src !== newSrc && !modalImage.src.endsWith(newSrc)) {
+            cancelImageFade();
             modalImage.style.opacity = '0';
-            setTimeout(() => {
+            imageFadeTimer = setTimeout(() => {
               modalImage.src = newSrc;
               modalImage.style.opacity = '1';
+              imageFadeTimer = null;
             }, 180);
           }
         }
@@ -1319,6 +1358,8 @@ function openModal(product) {
 function closeModal() {
   const modal = document.getElementById('productModal');
   if (!modal) return;
+  /* Cancel any pending image crossfade so it can't fire after close */
+  cancelImageFade();
   modal.classList.remove('is-open');
   modal.setAttribute('aria-hidden', 'true');
   document.body.style.overflow = '';
@@ -1895,7 +1936,9 @@ function initLanguageSwitcher() {
    Change ORDER_EMAIL to send orders elsewhere.
 
    ★ MBWAY PAYMENT NUMBER:
-   Change MBWAY_NUMBER to update the payment number shown to customers.
+   MBWAY_NUMBER is kept for reference but is NOT currently shown anywhere
+   (payment details are handled separately when you reply to the customer).
+   Left here so the number lives in one known place if you want to reuse it.
 
    ★ ITEM IDENTITY:
    Each cart line is identified by id + size + color, so the same
@@ -2107,8 +2150,6 @@ const Cart = {
       lines,
       '',
       `TOTAL: €${this.total().toFixed(0)}`,
-      '',
-      `Payment: MBWay to ${MBWAY_NUMBER}`,
       '',
       '─────────────────────',
       'Awaiting payment confirmation.',
