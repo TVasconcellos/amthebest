@@ -1371,6 +1371,35 @@ function initModal() {
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
 }
 
+/*
+  Shipping & Returns info modal.
+  Opened from the footer button, closed via its X, backdrop, or Escape.
+  Reuses the same centered-modal styling as the order modal.
+*/
+function initInfoModal() {
+  const modal   = document.getElementById('infoModal');
+  const openBtn = document.getElementById('shippingReturnsBtn');
+  if (!modal || !openBtn) return;
+
+  const open = () => {
+    modal.classList.add('is-open');
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  };
+  const close = () => {
+    modal.classList.remove('is-open');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  };
+
+  openBtn.addEventListener('click', open);
+  document.getElementById('infoClose')?.addEventListener('click', close);
+  document.getElementById('infoBackdrop')?.addEventListener('click', close);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.classList.contains('is-open')) close();
+  });
+}
+
 
 /* ================================================================
    8. CONTACT FORM
@@ -1789,8 +1818,16 @@ const TRANSLATIONS = {
     'contact.name': 'Your Name', 'contact.email': 'Email Address',
     'contact.message': 'Your Message',
     'contact.send': 'Send Message', 'contact.success': "✓ Message sent! We'll be in touch soon.",
-    'footer.rights': 'All rights reserved.', 'footer.privacy': 'Privacy',
-    'footer.shipping': 'Shipping', 'footer.returns': 'Returns',
+    'footer.rights': 'All rights reserved.',
+    'footer.shippingReturns': 'Shipping & Returns',
+    'info.eyebrow': 'Good to know',
+    'info.title': 'Shipping & Returns',
+    'info.shippingHeading': 'Shipping',
+    'info.shippingBody': "We ship across Portugal. Orders are prepared and sent once payment is confirmed, and we'll keep you updated by email along the way. Shipping is free on orders over €50.",
+    'info.returnsHeading': 'Returns',
+    'info.returnsBody': "If something isn't right with your order, get in touch within a reasonable time of receiving it and we'll do our best to sort it out. Items should be unused and in their original condition.",
+    'info.contactHeading': 'Questions?',
+    'info.contactBody': 'For anything about your order, reach us through the contact form or by email and we\'ll get back to you.',
   },
   pt: {
     'nav.shop': 'Loja', 'nav.contact': 'Contacto',
@@ -1823,8 +1860,16 @@ const TRANSLATIONS = {
     'contact.name': 'O Teu Nome', 'contact.email': 'Endereço de Email',
     'contact.message': 'A Tua Mensagem',
     'contact.send': 'Enviar Mensagem', 'contact.success': '✓ Mensagem enviada! Estamos em contacto.',
-    'footer.rights': 'Todos os direitos reservados.', 'footer.privacy': 'Privacidade',
-    'footer.shipping': 'Envios', 'footer.returns': 'Devoluções',
+    'footer.rights': 'Todos os direitos reservados.',
+    'footer.shippingReturns': 'Envios e Devoluções',
+    'info.eyebrow': 'Bom saber',
+    'info.title': 'Envios e Devoluções',
+    'info.shippingHeading': 'Envios',
+    'info.shippingBody': 'Enviamos para todo o Portugal. As encomendas são preparadas e enviadas após confirmação do pagamento, e mantemos-te a par por email ao longo do processo. Envio grátis em encomendas acima de €50.',
+    'info.returnsHeading': 'Devoluções',
+    'info.returnsBody': 'Se algo não estiver bem com a tua encomenda, contacta-nos num prazo razoável após a receção e faremos o nosso melhor para resolver. Os artigos devem estar por usar e na condição original.',
+    'info.contactHeading': 'Dúvidas?',
+    'info.contactBody': 'Para qualquer questão sobre a tua encomenda, fala connosco através do formulário de contacto ou por email e respondemos assim que possível.',
   }
 };
 
@@ -2256,6 +2301,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initScrollReveal();
   initFilters();
   initModal();
+  initInfoModal();   /* Shipping & Returns footer modal */
   initContactForm();
   initFooterYear();
   initLanguageSwitcher();
