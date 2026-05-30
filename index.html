@@ -271,9 +271,7 @@
       </div>
       <p class="footer__copy">© <span id="footerYear"></span> A&amp;M. <span data-i18n="footer.rights">All rights reserved.</span></p>
       <div class="footer__links">
-        <a href="#" data-i18n="footer.privacy">Privacy</a>
-        <a href="#" data-i18n="footer.shipping">Shipping</a>
-        <a href="#" data-i18n="footer.returns">Returns</a>
+        <button class="footer__link-btn" id="shippingReturnsBtn" data-i18n="footer.shippingReturns">Shipping &amp; Returns</button>
       </div>
     </div>
   </footer>
@@ -372,6 +370,49 @@
             </svg>
           </button>
         </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+    SHIPPING & RETURNS INFO MODAL
+    Opened from the footer link. Centered modal, same pattern as the
+    order modal. Content is informational and intentionally
+    non-committal (no fixed delivery days or guarantees).
+  ============================================================ -->
+  <div class="modal modal--order" id="infoModal" aria-hidden="true">
+    <div class="modal__backdrop" id="infoBackdrop"></div>
+    <div class="modal__panel modal__panel--center">
+      <button class="modal__close" id="infoClose" aria-label="Close">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M2 2L18 18M18 2L2 18" stroke="currentColor" stroke-width="1.5"/>
+        </svg>
+      </button>
+
+      <div class="info-modal">
+        <p class="modal__family" data-i18n="info.eyebrow">Good to know</p>
+        <h2 class="modal__title" data-i18n="info.title">Shipping &amp; Returns</h2>
+
+        <div class="info-modal__section">
+          <h3 class="info-modal__heading" data-i18n="info.shippingHeading">Shipping</h3>
+          <p class="info-modal__text" data-i18n="info.shippingBody">
+            We ship across Portugal. Orders are prepared and sent once payment is confirmed, and we'll keep you updated by email along the way. Shipping is free on orders over €50.
+          </p>
+        </div>
+
+        <div class="info-modal__section">
+          <h3 class="info-modal__heading" data-i18n="info.returnsHeading">Returns</h3>
+          <p class="info-modal__text" data-i18n="info.returnsBody">
+            If something isn't right with your order, get in touch within a reasonable time of receiving it and we'll do our best to sort it out. Items should be unused and in their original condition.
+          </p>
+        </div>
+
+        <div class="info-modal__section">
+          <h3 class="info-modal__heading" data-i18n="info.contactHeading">Questions?</h3>
+          <p class="info-modal__text" data-i18n="info.contactBody">
+            For anything about your order, reach us through the contact form or by email and we'll get back to you.
+          </p>
+        </div>
       </div>
     </div>
   </div>
