@@ -1857,6 +1857,16 @@ const TRANSLATIONS = {
     'order.name': 'Name', 'order.phone': 'Phone Number',
     'order.email': 'Email', 'order.address': 'Delivery Address',
     'order.submit': 'Order',
+    'email.subject': 'A&M Order',
+    'email.heading': 'New A&M order',
+    'email.customer': 'CUSTOMER:',
+    'email.name': 'Name',
+    'email.phone': 'Phone',
+    'email.email': 'Email',
+    'email.address': 'Address',
+    'email.items': 'ITEMS:',
+    'email.total': 'TOTAL',
+    'email.footer': 'Awaiting payment confirmation.',
     'contact.eyebrow': 'Get in Touch', 'contact.title': "Let's Talk",
     'contact.desc': 'Questions about sizing, wholesale, or collabs?<br />We usually reply within 24 hours.',
     'contact.name': 'Your Name', 'contact.email': 'Email Address',
@@ -1899,6 +1909,16 @@ const TRANSLATIONS = {
     'order.name': 'Nome', 'order.phone': 'Número de Telefone',
     'order.email': 'Email', 'order.address': 'Morada de Entrega',
     'order.submit': 'Encomendar',
+    'email.subject': 'Encomenda A&M',
+    'email.heading': 'Nova encomenda A&M',
+    'email.customer': 'CLIENTE:',
+    'email.name': 'Nome',
+    'email.phone': 'Telefone',
+    'email.email': 'Email',
+    'email.address': 'Morada',
+    'email.items': 'ARTIGOS:',
+    'email.total': 'TOTAL',
+    'email.footer': 'A aguardar confirmação de pagamento.',
     'contact.eyebrow': 'Fala Connosco', 'contact.title': 'Vamos Falar',
     'contact.desc': 'Dúvidas sobre tamanhos, grossista ou colaborações?<br />Respondemos geralmente em 24 horas.',
     'contact.name': 'O Teu Nome', 'contact.email': 'Endereço de Email',
@@ -2250,27 +2270,40 @@ const Cart = {
 
   /* Plain-text version of the cart for the email body */
   emailBody(customer) {
-    const lines = this.items.map(item =>
-      `  • ${item.qty} × ${item.name}${item.color ? ` (${item.color})` : ''} — ${item.size}  —  €${(item.price * item.qty).toFixed(0)}`
-    ).join('\n');
+    /*
+      Build the order email in whichever language the customer is browsing
+      in. The email is sent TO the shop owner, so a PT customer's order
+      arrives with PT labels. Item names, colours and sizes are translated
+      too, so the whole email is coherent in one language.
+    */
+    const lang = document.documentElement.dataset.lang || 'en';
+    const t    = TRANSLATIONS[lang];
+
+    const lines = this.items.map(item => {
+      const product     = PRODUCTS.find(p => p.id === item.id);
+      const displayName  = product ? tProduct(product, 'name') : item.name;
+      const displayColor = item.color ? ` (${tColor(item.color)})` : '';
+      const displaySize  = tSize(item.size);
+      return `  • ${item.qty} × ${displayName}${displayColor} — ${displaySize}  —  €${(item.price * item.qty).toFixed(0)}`;
+    }).join('\n');
 
     return [
-      'New A&M order',
+      t['email.heading'] || 'New A&M order',
       '─────────────────────',
       '',
-      'CUSTOMER:',
-      `  Name:    ${customer.name}`,
-      `  Phone:   ${customer.phone}`,
-      `  Email:   ${customer.email}`,
-      `  Address: ${customer.address}`,
+      t['email.customer'] || 'CUSTOMER:',
+      `  ${t['email.name']    || 'Name'}:    ${customer.name}`,
+      `  ${t['email.phone']   || 'Phone'}:   ${customer.phone}`,
+      `  ${t['email.email']   || 'Email'}:   ${customer.email}`,
+      `  ${t['email.address'] || 'Address'}: ${customer.address}`,
       '',
-      'ITEMS:',
+      t['email.items'] || 'ITEMS:',
       lines,
       '',
-      `TOTAL: €${this.total().toFixed(0)}`,
+      `${t['email.total'] || 'TOTAL'}: €${this.total().toFixed(0)}`,
       '',
       '─────────────────────',
-      'Awaiting payment confirmation.',
+      t['email.footer'] || 'Awaiting payment confirmation.',
     ].join('\n');
   },
 };
@@ -2346,10 +2379,13 @@ function handleOrderSubmit(e) {
     Build a mailto: link with subject and body URL-encoded.
     Opens the customer's default email app (Gmail, Mail.app, Outlook…)
     with everything pre-filled. They just press Send.
+    Subject + body follow the currently selected language.
   */
-  const subject = `A&M Order — ${customer.name} — €${Cart.total().toFixed(0)}`;
-  const body    = Cart.emailBody(customer);
-  const mailto  = `mailto:${ORDER_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  const lang     = document.documentElement.dataset.lang || 'en';
+  const tt       = TRANSLATIONS[lang];
+  const subject  = `${tt['email.subject'] || 'A&M Order'} — ${customer.name} — €${Cart.total().toFixed(0)}`;
+  const body     = Cart.emailBody(customer);
+  const mailto   = `mailto:${ORDER_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
   /* Trigger email client */
   window.location.href = mailto;
