@@ -1,580 +1,378 @@
-/* ================================================================
-   A&M — Main JavaScript  (main.js)
-
-   ★ QUICK TWEAK GUIDE:
-
-   PRODUCTS:      Edit PRODUCTS array (section 1).
-                  Images go in images/products/
-   
-   COLOR VARIANTS: Each product can have a `colors` array (section 1).
-                   Each color entry: { label, hex, image }
-                   Products without colors skip the swatch UI.
-   
-   TRANSLATIONS:  Edit PRODUCT_TRANSLATIONS for product names/descriptions
-                  in PT, or TRANSLATIONS object for UI labels (section 10).
-   
-   FORMSPREE:     Set FORMSPREE_ID (section 8) after signing up at formspree.io
-   
-   ORDER EMAIL:   Change ORDER_EMAIL in section 12 to redirect orders.
-   
-   MBWAY NUMBER:  Change MBWAY_NUMBER in section 12 to update payment number.
-
-   ================================================================
-
-   FILE STRUCTURE:
-   1.  PRODUCT DATA (with color variants)
-   2.  CUSTOM CURSOR
-   3.  NAVIGATION
-   4.  SCROLL REVEAL + INITIAL CARD REVEAL
-   5.  RENDER PRODUCTS
-   6.  PRODUCT FILTERS + SORT
-   7.  PRODUCT MODAL (with color swatches)
-   8.  CONTACT FORM
-   9.  FOOTER YEAR
-   10. TRANSLATIONS (UI + per-product)
-   11. LANGUAGE SWITCHER
-   12. SHOPPING CART + ORDER MODAL
-   13. INIT
-================================================================ */
-
-
-/* ================================================================
-   1. PRODUCT DATA
-
-   ★ FIELD REFERENCE:
-   id          → Unique number, never repeat.
-   name        → Display name (card + modal).
-   family      → Human-readable group label. Shown in modal header.
-   category    → Must match a filter button's data-filter in index.html.
-                 Values: "tshirt" | "tshirt-nolog" | "hoodie" | "sweatshirt"
-                         | "shorts" | "cap" | "socks" | "accessories" | "pack"
-   price       → Display string: "€15"
-   badge       → Small label or null.
-   image       → Default/primary image path (images/products/...)
-   description → Text shown in modal.
-   sizes       → Array of size strings. ["One Size"] for non-sized items.
-   colors      → Optional array of color variant objects:
-                 { label: "Burgundy", hex: "#5C1A1A", image: "images/products/shirt1.jpg" }
-                 label = shown as tooltip on hover (translated by tColor at render time)
-                 hex   = the circle colour shown as swatch
-                 image = the product image to display when this colour is selected
-                 If colors is absent or empty, no swatch UI is shown.
-
-   ★ COLOR GROUPING:
-   Products in the same "family" (e.g. T-Shirt Logo) share the same
-   color family. The colors array on each product points to the image
-   for THAT colour — so shirt1.jpg is Burgundy for Logo Tee,
-   and shirt6.jpg is Burgundy for the No-Logo Tee.
-
-   ★ HOW TO ADD A PRODUCT:
-   Copy an existing entry, paste before the final ], update all values.
-================================================================ */
-
-/* Reusable colour definitions (hex values) */
 const COLORS = {
-  burgundy:     { label: 'Burgundy',     hex: '#5C1A1A' },
-  navy:         { label: 'Navy',         hex: '#1B2A4A' },
-  forestGreen:  { label: 'Forest Green', hex: '#2D4A2D' },
-  black:        { label: 'Black',        hex: '#111111' },
-  white:        { label: 'White',        hex: '#F0F0F0' },
+  burgundy: {
+    label: "Burgundy",
+    hex: "#5C1A1A"
+  },
+  navy: {
+    label: "Navy",
+    hex: "#1B2A4A"
+  },
+  forestGreen: {
+    label: "Forest Green",
+    hex: "#2D4A2D"
+  },
+  black: {
+    label: "Black",
+    hex: "#111111"
+  },
+  white: {
+    label: "White",
+    hex: "#F0F0F0"
+  }
 };
 
-/*
-  PRODUCTS array
-
-  ★ FIELDS:
-  id          → unique number, never repeat
-  name        → display name (English source of truth; PT in PRODUCT_TRANSLATIONS)
-  family      → human-readable group label
-  category    → must match a filter button data-filter in index.html
-                 valid: tshirt | tshirt-nolog | hoodie | sweatshirt | shorts |
-                        accessories | cap | socks | pack
-  price       → display string, e.g. "€15" or "€1.50"
-  badge       → null | "Best Seller" | "New" | "Best Value"
-  save        → optional savings indicator shown next to price (packs only)
-                 e.g. "€3" → renders as "Save €3"
-  image       → primary/default image path
-  description → modal body text
-  sizes       → ["S","M","L","XL"] for apparel, ["One Size"] otherwise
-  colors      → array of { label, hex, image } variants, or null
-*/
-const PRODUCTS = [
-
-  /* ──────────────── APPAREL ──────────────── */
-  {
-    id: 1,
-    name: "T-Shirt",
-    family: "T-Shirt",
-    category: "tshirt",
-    price: "€15",
-    badge: "Best Seller",
+const PRODUCTS = [ {
+  id: 1,
+  name: "T-Shirt",
+  family: "T-Shirt",
+  category: "tshirt",
+  price: "€15",
+  badge: "Best Seller",
+  image: "images/products/shirt1.jpg",
+  description: "T-shirt with exclusive brand design.",
+  sizes: [ "S", "M", "L", "XL" ],
+  colors: [ {
+    ...COLORS.burgundy,
     image: "images/products/shirt1.jpg",
-    description: "T-shirt with exclusive brand design.",
-    sizes: ["S", "M", "L", "XL"],
-    colors: [
-      {
-        ...COLORS.burgundy,
-        image: "images/products/shirt1.jpg",
-        images: [
-          "images/products/shirt1.jpg",
-          "images/products/tshirt_red_2.png",
-        ]
-      },
-      {
-        ...COLORS.navy,
-        image: "images/products/shirt2.jpg",
-        images: [
-          "images/products/shirt2.jpg",
-          "images/products/tshirt_navy_2.png",
-        ]
-      },
-      {
-        ...COLORS.forestGreen,
-        image: "images/products/shirt3.jpg",
-        images: [
-          "images/products/shirt3.jpg",
-          "images/products/tshirt_green_2.png",
-        ]
-      },
-      { ...COLORS.black, image: "images/products/shirt4.jpg" },
-      { ...COLORS.white, image: "images/products/shirt5.jpg" },
-    ]
-  },
-  {
-    id: 2,
-    name: 'T-Shirt "The Best." Collection',
-    family: 'T-Shirt "The Best." Collection',
-    category: "tshirt-nolog",
-    price: "€15",
-    badge: "New",
-    image: "images/products/shirt6.jpg",
-    description: 'T-shirt with exclusive brand design.',
-    sizes: ["S", "M", "L", "XL"],
-    colors: [
-      { ...COLORS.burgundy,    image: "images/products/shirt6.jpg" },
-      { ...COLORS.navy,        image: "images/products/shirt7.jpg" },
-      { ...COLORS.forestGreen, image: "images/products/shirt8.jpg" },
-      { ...COLORS.black,       image: "images/products/shirt9.jpg" },
-      { ...COLORS.white,       image: "images/products/shirt10.jpg" },
-    ]
-  },
-  {
-    id: 3,
-    name: "Hoodie",
-    family: "Hoodie",
-    category: "hoodie",
-    price: "€20",
-    badge: null,
+    images: [ "images/products/shirt1.jpg", "images/products/tshirt_red_2.png" ]
+  }, {
+    ...COLORS.navy,
+    image: "images/products/shirt2.jpg",
+    images: [ "images/products/shirt2.jpg", "images/products/tshirt_navy_2.png" ]
+  }, {
+    ...COLORS.forestGreen,
+    image: "images/products/shirt3.jpg",
+    images: [ "images/products/shirt3.jpg", "images/products/tshirt_green_2.png" ]
+  }, {
+    ...COLORS.black,
+    image: "images/products/shirt4.jpg"
+  }, {
+    ...COLORS.white,
+    image: "images/products/shirt5.jpg"
+  } ]
+}, {
+  id: 2,
+  name: 'T-Shirt "The Best." Collection',
+  family: 'T-Shirt "The Best." Collection',
+  category: "tshirt-nolog",
+  price: "€15",
+  badge: "New",
+  image: "images/products/shirt6.jpg",
+  description: "T-shirt with exclusive brand design.",
+  sizes: [ "S", "M", "L", "XL" ],
+  colors: [ {
+    ...COLORS.burgundy,
+    image: "images/products/shirt6.jpg"
+  }, {
+    ...COLORS.navy,
+    image: "images/products/shirt7.jpg"
+  }, {
+    ...COLORS.forestGreen,
+    image: "images/products/shirt8.jpg"
+  }, {
+    ...COLORS.black,
+    image: "images/products/shirt9.jpg"
+  }, {
+    ...COLORS.white,
+    image: "images/products/shirt10.jpg"
+  } ]
+}, {
+  id: 3,
+  name: "Hoodie",
+  family: "Hoodie",
+  category: "hoodie",
+  price: "€20",
+  badge: null,
+  image: "images/products/hoodie1.jpg",
+  description: "Hoodie with exclusive brand design.",
+  sizes: [ "S", "M", "L", "XL" ],
+  colors: [ {
+    ...COLORS.white,
     image: "images/products/hoodie1.jpg",
-    description: "Hoodie with exclusive brand design.",
-    sizes: ["S", "M", "L", "XL"],
-    colors: [
-      {
-        ...COLORS.white,
-        image: "images/products/hoodie1.jpg",  /* Default = first image */
-        images: [
-          "images/products/hoodie1.jpg",
-          "images/products/hoodie_white_2.png",
-        ]
-      },
-      {
-        ...COLORS.black,
-        image: "images/products/hoodie2.jpg",
-        images: [
-          "images/products/hoodie2.jpg",
-          "images/products/hoodie_black_2.png",
-        ]
-      },
-    ]
-  },
-  {
-    id: 4,
-    name: "Sweatshirt",
-    family: "Sweatshirt",
-    category: "sweatshirt",
-    price: "€16",
-    badge: null,
+    images: [ "images/products/hoodie1.jpg", "images/products/hoodie_white_2.png" ]
+  }, {
+    ...COLORS.black,
+    image: "images/products/hoodie2.jpg",
+    images: [ "images/products/hoodie2.jpg", "images/products/hoodie_black_2.png" ]
+  } ]
+}, {
+  id: 4,
+  name: "Sweatshirt",
+  family: "Sweatshirt",
+  category: "sweatshirt",
+  price: "€16",
+  badge: null,
+  image: "images/products/sweatshirt1.jpg",
+  description: "Sweatshirt with exclusive brand design.",
+  sizes: [ "S", "M", "L", "XL" ],
+  colors: [ {
+    ...COLORS.white,
     image: "images/products/sweatshirt1.jpg",
-    description: "Sweatshirt with exclusive brand design.",
-    sizes: ["S", "M", "L", "XL"],
-    colors: [
-      {
-        ...COLORS.white,
-        image: "images/products/sweatshirt1.jpg",
-        images: [
-          "images/products/sweatshirt1.jpg",
-          "images/products/sweatshirt_white_2.png",
-        ]
-      },
-      {
-        ...COLORS.black,
-        image: "images/products/sweatshirt2.jpg",
-        images: [
-          "images/products/sweatshirt2.jpg",
-          "images/products/sweatshirt_black_2.png",
-        ]
-      },
-    ]
-  },
-  {
-    id: 5,
-    name: "Shorts",
-    family: "Shorts",
-    category: "shorts",
-    price: "€15",
-    badge: null,
-    image: "images/products/shorts1.jpg",
-    /*
-      Multiple images for a single-variant product live in a top-level
-      `images` array. The modal's gallery shows thumbnails when this exists.
-    */
-    images: [
-      "images/products/shorts1.jpg",
-      "images/products/shorts_black_2.png",
-    ],
-    description: "Shorts with exclusive brand design.",
-    sizes: ["S", "M", "L", "XL"],
-    colors: null
-  },
-
-  /* ──────────────── CAPS ──────────────── */
-  {
-    id: 6,
-    name: "Cap",
-    family: "Cap",
-    category: "cap",
-    price: "€8",
-    badge: "Best Seller",
-    image: "images/products/cap1.jpg",
-    description: "Cap with brand detail.",
-    sizes: ["One Size"],
-    colors: null
-  },
-
-  /* ──────────────── SOCKS ──────────────── */
-  {
-    id: 7,
-    name: "Socks",
-    family: "Socks",
-    category: "socks",
-    price: "€5",
-    badge: "Best Seller",
+    images: [ "images/products/sweatshirt1.jpg", "images/products/sweatshirt_white_2.png" ]
+  }, {
+    ...COLORS.black,
+    image: "images/products/sweatshirt2.jpg",
+    images: [ "images/products/sweatshirt2.jpg", "images/products/sweatshirt_black_2.png" ]
+  } ]
+}, {
+  id: 5,
+  name: "Shorts",
+  family: "Shorts",
+  category: "shorts",
+  price: "€15",
+  badge: null,
+  image: "images/products/shorts1.jpg",
+  images: [ "images/products/shorts1.jpg", "images/products/shorts_black_2.png" ],
+  description: "Shorts with exclusive brand design.",
+  sizes: [ "S", "M", "L", "XL" ],
+  colors: null
+}, {
+  id: 6,
+  name: "Cap",
+  family: "Cap",
+  category: "cap",
+  price: "€8",
+  badge: "Best Seller",
+  image: "images/products/cap1.jpg",
+  description: "Cap with brand detail.",
+  sizes: [ "One Size" ],
+  colors: null
+}, {
+  id: 7,
+  name: "Socks",
+  family: "Socks",
+  category: "socks",
+  price: "€5",
+  badge: "Best Seller",
+  image: "images/products/socks-white-1.jpg",
+  description: "Socks with exclusive brand design.",
+  sizes: [ "One Size" ],
+  colors: [ {
+    ...COLORS.white,
     image: "images/products/socks-white-1.jpg",
-    description: "Socks with exclusive brand design.",
-    sizes: ["One Size"],
-    colors: [
-      {
-        ...COLORS.white,
-        image: "images/products/socks-white-1.jpg",
-        images: [
-          "images/products/socks-white-1.jpg",
-          "images/products/socks-white-2.png",
-        ]
-      },
-      {
-        ...COLORS.black,
-        image: "images/products/socks_black_1.jpg",
-        images: [
-          "images/products/socks_black_1.jpg",
-          "images/products/socks_black_2.png",
-        ]
-      },
-    ]
-  },
-
-  /* ──────────────── ACCESSORIES ──────────────── */
-  {
-    id: 8,
-    name: "Water Bottle",
-    family: "Water Bottle A&M",
-    category: "accessories",
-    price: "€12",
-    badge: "New",
+    images: [ "images/products/socks-white-1.jpg", "images/products/socks-white-2.png" ]
+  }, {
+    ...COLORS.black,
+    image: "images/products/socks_black_1.jpg",
+    images: [ "images/products/socks_black_1.jpg", "images/products/socks_black_2.png" ]
+  } ]
+}, {
+  id: 8,
+  name: "Water Bottle",
+  family: "Water Bottle A&M",
+  category: "accessories",
+  price: "€12",
+  badge: "New",
+  image: "images/products/bottle1.jpg",
+  description: "Reusable water bottle with brand branding.",
+  sizes: [ "One Size" ],
+  colors: [ {
+    ...COLORS.navy,
     image: "images/products/bottle1.jpg",
-    description: "Reusable water bottle with brand branding.",
-    sizes: ["One Size"],
-    colors: [
-      {
-        ...COLORS.navy,
-        image: "images/products/bottle1.jpg",  /* Default — also shown as the swatch's primary */
-        images: [
-          "images/products/bottle1.jpg",
-          "images/products/bottle1-1.jpg",
-          "images/products/bottle1-2.jpg",
-        ]
-      },
-      {
-        ...COLORS.black,
-        image: "images/products/bottle2.jpg",
-        images: [
-          "images/products/bottle2.jpg",
-          "images/products/bottle2-1.jpg",
-        ]
-      },
-    ]
+    images: [ "images/products/bottle1.jpg", "images/products/bottle1-1.jpg", "images/products/bottle1-2.jpg" ]
+  }, {
+    ...COLORS.black,
+    image: "images/products/bottle2.jpg",
+    images: [ "images/products/bottle2.jpg", "images/products/bottle2-1.jpg" ]
+  } ]
+}, {
+  id: 9,
+  name: "Totebag",
+  family: "Totebag",
+  category: "accessories",
+  price: "€8",
+  badge: "New",
+  image: "images/products/tote1.jpg",
+  description: "Totebag with brand branding.",
+  sizes: [ "One Size" ],
+  colors: null
+}, {
+  id: 10,
+  name: "Playing Cards",
+  family: "Playing Cards",
+  category: "accessories",
+  price: "€10",
+  badge: "New",
+  image: "images/products/baralho_cartas1.jpg",
+  images: [ "images/products/baralho_cartas1.jpg", "images/products/baralho_cartas2.jpg" ],
+  description: "Plastic-coated playing cards with custom design.",
+  sizes: [ "One Size" ],
+  colors: null
+}, {
+  id: 11,
+  name: "Coasters",
+  family: "Coasters",
+  category: "accessories",
+  price: "€15",
+  badge: "New",
+  image: "images/products/base_copos1.jpg",
+  images: [ "images/products/base_copos1.jpg", "images/products/base_copos2.jpg" ],
+  description: "Leather coasters with brand detail.",
+  sizes: [ "One Size" ],
+  colors: null
+}, {
+  id: 12,
+  name: "Notebook",
+  family: "Notebook",
+  category: "accessories",
+  price: "€10",
+  badge: "New",
+  image: "images/products/caderno1.jpg",
+  description: "A5 lined notebook with brand detail.",
+  sizes: [ "One Size" ],
+  colors: null
+}, {
+  id: 13,
+  name: "Pen",
+  family: "Pen",
+  category: "accessories",
+  price: "€1.50",
+  badge: "Best Seller",
+  image: "images/products/caneta1.jpg",
+  description: "Pen with brand detail.",
+  sizes: [ "One Size" ],
+  colors: null
+}, {
+  id: 14,
+  name: "Pack of Pens",
+  family: "Pack of Pens",
+  category: "accessories",
+  price: "€3.50",
+  badge: "Best Seller",
+  image: "images/products/pack_canetas1.jpg",
+  description: "Pens with brand detail. The complete writing pack.",
+  sizes: [ "One Size" ],
+  colors: null
+}, {
+  id: 15,
+  name: "Keychain",
+  family: "Keychain",
+  category: "accessories",
+  price: "€4",
+  badge: "New",
+  image: "images/products/porta_chaves.jpg",
+  description: "Metal keychain with brand branding.",
+  sizes: [ "One Size" ],
+  colors: null
+}, {
+  id: 16,
+  name: "Phone Case",
+  family: "Phone Case",
+  category: "accessories",
+  price: "€5",
+  badge: "New",
+  image: "images/products/capa_telemovel.jpg",
+  images: [ "images/products/capa_telemovel.jpg", "images/products/capa-telemovel-2.jpg" ],
+  description: "Black phone case with brand branding.",
+  sizeGroups: {
+    "iPhone 16": [ "iPhone 16", "iPhone 16 Plus", "iPhone 16 Pro", "iPhone 16 Pro Max" ],
+    "iPhone 15": [ "iPhone 15", "iPhone 15 Plus", "iPhone 15 Pro", "iPhone 15 Pro Max" ],
+    "iPhone 14": [ "iPhone 14", "iPhone 14 Plus", "iPhone 14 Pro", "iPhone 14 Pro Max" ],
+    "iPhone 13": [ "iPhone 13", "iPhone 13 Pro", "iPhone 13 Pro Max" ],
+    "iPhone 12": [ "iPhone 12", "iPhone 12 Pro", "iPhone 12 Pro Max" ],
+    "iPhone 11": [ "iPhone 11", "iPhone 11 Pro", "iPhone 11 Pro Max" ],
+    "iPhone X/XS": [ "iPhone X/XS", "iPhone XS Max" ],
+    "iPhone 7/8/SE": [ "iPhone 7/8/SE2/SE3", "iPhone 7 Plus/8 Plus" ]
   },
-  {
-    id: 9,
-    name: "Totebag",
-    family: "Totebag",
-    category: "accessories",
-    price: "€8",
-    badge: "New",
-    image: "images/products/tote1.jpg",
-    description: "Totebag with brand branding.",
-    sizes: ["One Size"],
-    colors: null
+  colors: null
+}, {
+  id: 17,
+  name: "Summer Pack",
+  family: "Packs",
+  category: "pack",
+  price: "€25",
+  save: "€3",
+  badge: "Best Value",
+  image: "images/products/summerpack1.jpg",
+  description: "The Summer Pack: T-Shirt + Shorts + Socks. Everything you need for the warm months, bundled at a saving.",
+  sizes: [ "S", "M", "L", "XL" ],
+  colors: null
+}, {
+  id: 18,
+  name: "Winter Pack",
+  family: "Packs",
+  category: "pack",
+  price: "€36",
+  save: "€5",
+  badge: "Best Value",
+  image: "images/products/winterpack1.jpg",
+  description: "The Winter Pack: Hoodie + Sweatshirt + Socks. Stay warm, stay fresh.",
+  sizes: [ "S", "M", "L", "XL" ],
+  colors: null
+}, {
+  id: 19,
+  name: "Essential Pack",
+  family: "Packs",
+  category: "pack",
+  price: "€28",
+  save: "€3",
+  badge: "Best Value",
+  image: "images/products/essentialpack1.jpg",
+  description: "The Essential Pack: T-Shirt + Totebag + Socks. The perfect starter kit.",
+  sizes: [ "S", "M", "L", "XL" ],
+  colors: null
+}, {
+  id: 20,
+  name: "Complete Pack",
+  family: "Packs",
+  category: "pack",
+  price: "€43",
+  save: "€5",
+  badge: "Best Value",
+  image: "images/products/completepack1.jpg",
+  description: "The Complete Pack: T-Shirt + Hoodie + Shorts + Socks + Totebag. The full A&M experience.",
+  sizes: [ "S", "M", "L", "XL" ],
+  colors: null
+}, {
+  id: 21,
+  name: "Office Pack",
+  family: "Packs",
+  category: "pack",
+  price: "€25.50",
+  save: "€3",
+  badge: "Best Value",
+  image: "images/products/officepack1.jpg",
+  images: [ "images/products/officepack1.jpg", "images/products/officepack2.jpg" ],
+  description: "The Office Pack. Everything you need for the desk, bundled at a saving.",
+  sizes: [ "One Size" ],
+  colors: null
+}, {
+  id: 22,
+  name: "Street Pack",
+  family: "Packs",
+  category: "pack",
+  price: "€15",
+  save: "€2",
+  badge: "Best Value",
+  image: "images/products/streetpack1.jpg",
+  images: [ "images/products/streetpack1.jpg", "images/products/streetpack2.jpg", "images/products/streetpack3.jpg" ],
+  description: "The Street Pack. Everyday essentials, bundled at a saving.",
+  sizeGroups: {
+    "iPhone 16": [ "iPhone 16", "iPhone 16 Plus", "iPhone 16 Pro", "iPhone 16 Pro Max" ],
+    "iPhone 15": [ "iPhone 15", "iPhone 15 Plus", "iPhone 15 Pro", "iPhone 15 Pro Max" ],
+    "iPhone 14": [ "iPhone 14", "iPhone 14 Plus", "iPhone 14 Pro", "iPhone 14 Pro Max" ],
+    "iPhone 13": [ "iPhone 13", "iPhone 13 Pro", "iPhone 13 Pro Max" ],
+    "iPhone 12": [ "iPhone 12", "iPhone 12 Pro", "iPhone 12 Pro Max" ],
+    "iPhone 11": [ "iPhone 11", "iPhone 11 Pro", "iPhone 11 Pro Max" ],
+    "iPhone X/XS": [ "iPhone X/XS", "iPhone XS Max" ],
+    "iPhone 7/8/SE": [ "iPhone 7/8/SE2/SE3", "iPhone 7 Plus/8 Plus" ]
   },
-  {
-    id: 10,
-    name: "Playing Cards",
-    family: "Playing Cards",
-    category: "accessories",
-    price: "€10",
-    badge: "New",
-    image: "images/products/baralho_cartas1.jpg",
-    images: [
-      "images/products/baralho_cartas1.jpg",
-      "images/products/baralho_cartas2.jpg",
-    ],
-    description: "Plastic-coated playing cards with custom design.",
-    sizes: ["One Size"],
-    colors: null
-  },
-  {
-    id: 11,
-    name: "Coasters",
-    family: "Coasters",
-    category: "accessories",
-    price: "€15",
-    badge: "New",
-    image: "images/products/base_copos1.jpg",
-    images: [
-      "images/products/base_copos1.jpg",
-      "images/products/base_copos2.jpg",
-    ],
-    description: "Leather coasters with brand detail.",
-    sizes: ["One Size"],
-    colors: null
-  },
-  {
-    id: 12,
-    name: "Notebook",
-    family: "Notebook",
-    category: "accessories",
-    price: "€10",
-    badge: "New",
-    image: "images/products/caderno1.jpg",
-    description: "A5 lined notebook with brand detail.",
-    sizes: ["One Size"],
-    colors: null
-  },
-  {
-    id: 13,
-    name: "Pen",
-    family: "Pen",
-    category: "accessories",
-    price: "€1.50",
-    badge: "Best Seller",
-    image: "images/products/caneta1.jpg",
-    description: "Pen with brand detail.",
-    sizes: ["One Size"],
-    colors: null
-  },
-  {
-    id: 14,
-    name: "Pack of Pens",
-    family: "Pack of Pens",
-    category: "accessories",
-    price: "€3.50",
-    badge: "Best Seller",
-    image: "images/products/pack_canetas1.jpg",
-    description: "Pens with brand detail. The complete writing pack.",
-    sizes: ["One Size"],
-    colors: null
-  },
-  {
-    id: 15,
-    name: "Keychain",
-    family: "Keychain",
-    category: "accessories",
-    price: "€4",
-    badge: "New",
-    image: "images/products/porta_chaves.jpg",
-    description: "Metal keychain with brand branding.",
-    sizes: ["One Size"],
-    colors: null
-  },
-  {
-    id: 16,
-    name: "Phone Case",
-    family: "Phone Case",
-    category: "accessories",
-    price: "€5",
-    badge: "New",
-    image: "images/products/capa_telemovel.jpg",
-    images: [
-      "images/products/capa_telemovel.jpg",
-      "images/products/capa-telemovel-2.jpg",
-    ],
-    description: "Black phone case with brand branding.",
-    /*
-      Phone case uses a TWO-STEP model picker instead of a flat size list.
-      
-      `sizeGroups` maps a generation label → its specific models. The modal
-      shows generation buttons first (iPhone 16, 15, …); picking one reveals
-      a second row with that generation's variants. The final selected model
-      (e.g. "iPhone 11 Pro Max") is what goes in the cart.
-      
-      Names follow Apple's convention: lowercase-i "iPhone", "Max" (no accent
-      or period). Generations ordered newest → oldest.
-      
-      Note: when a product has sizeGroups, the modal renders the two-step UI
-      and ignores `sizes`. Products with a normal `sizes` array are unaffected.
-    */
-    sizeGroups: {
-      "iPhone 16": ["iPhone 16", "iPhone 16 Plus", "iPhone 16 Pro", "iPhone 16 Pro Max"],
-      "iPhone 15": ["iPhone 15", "iPhone 15 Plus", "iPhone 15 Pro", "iPhone 15 Pro Max"],
-      "iPhone 14": ["iPhone 14", "iPhone 14 Plus", "iPhone 14 Pro", "iPhone 14 Pro Max"],
-      "iPhone 13": ["iPhone 13", "iPhone 13 Pro", "iPhone 13 Pro Max"],
-      "iPhone 12": ["iPhone 12", "iPhone 12 Pro", "iPhone 12 Pro Max"],
-      "iPhone 11": ["iPhone 11", "iPhone 11 Pro", "iPhone 11 Pro Max"],
-      "iPhone X/XS": ["iPhone X/XS", "iPhone XS Max"],
-      "iPhone 7/8/SE": ["iPhone 7/8/SE2/SE3", "iPhone 7 Plus/8 Plus"],
-    },
-    colors: null
-  },
+  colors: null
+} ];
 
-  /* ──────────────── PACKS ────────────────
-     Packs use the optional `save` field to display "Save €X" next to the price. */
-  {
-    id: 17,
-    name: "Summer Pack",
-    family: "Packs",
-    category: "pack",
-    price: "€25",
-    save: "€3",
-    badge: "Best Value",
-    image: "images/products/summerpack1.jpg",
-    description: "The Summer Pack: T-Shirt + Shorts + Socks. Everything you need for the warm months, bundled at a saving.",
-    sizes: ["S", "M", "L", "XL"],
-    colors: null
-  },
-  {
-    id: 18,
-    name: "Winter Pack",
-    family: "Packs",
-    category: "pack",
-    price: "€36",
-    save: "€5",
-    badge: "Best Value",
-    image: "images/products/winterpack1.jpg",
-    description: "The Winter Pack: Hoodie + Sweatshirt + Socks. Stay warm, stay fresh.",
-    sizes: ["S", "M", "L", "XL"],
-    colors: null
-  },
-  {
-    id: 19,
-    name: "Essential Pack",
-    family: "Packs",
-    category: "pack",
-    price: "€28",
-    save: "€3",
-    badge: "Best Value",
-    image: "images/products/essentialpack1.jpg",
-    description: "The Essential Pack: T-Shirt + Totebag + Socks. The perfect starter kit.",
-    sizes: ["S", "M", "L", "XL"],
-    colors: null
-  },
-  {
-    id: 20,
-    name: "Complete Pack",
-    family: "Packs",
-    category: "pack",
-    price: "€43",
-    save: "€5",
-    badge: "Best Value",
-    image: "images/products/completepack1.jpg",
-    description: "The Complete Pack: T-Shirt + Hoodie + Shorts + Socks + Totebag. The full A&M experience.",
-    sizes: ["S", "M", "L", "XL"],
-    colors: null
-  },
-  {
-    id: 21,
-    name: "Office Pack",
-    family: "Packs",
-    category: "pack",
-    price: "€25.50",
-    save: "€3",
-    badge: "Best Value",
-    image: "images/products/officepack1.jpg",
-    images: [
-      "images/products/officepack1.jpg",
-      "images/products/officepack2.jpg",
-    ],
-    description: "The Office Pack. Everything you need for the desk, bundled at a saving.",
-    sizes: ["One Size"],
-    colors: null
-  },
-  {
-    id: 22,
-    name: "Street Pack",
-    family: "Packs",
-    category: "pack",
-    price: "€15",
-    save: "€2",
-    badge: "Best Value",
-    image: "images/products/streetpack1.jpg",
-    images: [
-      "images/products/streetpack1.jpg",
-      "images/products/streetpack2.jpg",
-      "images/products/streetpack3.jpg",
-    ],
-    description: "The Street Pack. Everyday essentials, bundled at a saving.",
-    /*
-      Includes a phone case, so it uses the same two-step iPhone model
-      picker as the Phone Case product. The selected model is captured
-      so you know which case to include in the pack.
-    */
-    sizeGroups: {
-      "iPhone 16": ["iPhone 16", "iPhone 16 Plus", "iPhone 16 Pro", "iPhone 16 Pro Max"],
-      "iPhone 15": ["iPhone 15", "iPhone 15 Plus", "iPhone 15 Pro", "iPhone 15 Pro Max"],
-      "iPhone 14": ["iPhone 14", "iPhone 14 Plus", "iPhone 14 Pro", "iPhone 14 Pro Max"],
-      "iPhone 13": ["iPhone 13", "iPhone 13 Pro", "iPhone 13 Pro Max"],
-      "iPhone 12": ["iPhone 12", "iPhone 12 Pro", "iPhone 12 Pro Max"],
-      "iPhone 11": ["iPhone 11", "iPhone 11 Pro", "iPhone 11 Pro Max"],
-      "iPhone X/XS": ["iPhone X/XS", "iPhone XS Max"],
-      "iPhone 7/8/SE": ["iPhone 7/8/SE2/SE3", "iPhone 7 Plus/8 Plus"],
-    },
-    colors: null
-  },
-];
-
-
-
-/* ================================================================
-   2. CUSTOM CURSOR — GPU-Accelerated
-
-   Uses CSS transform (GPU composited) instead of left/top (slow).
-   The dot follows the mouse instantly.
-   The ring chases the dot with lerp for the trailing effect.
-
-   ★ LERP FACTOR: 0.12 = current. Higher = snappier. Range 0.05–0.25
-================================================================ */
 function initCursor() {
-  const cursor   = document.getElementById('cursor');
-  const follower = document.getElementById('cursorFollower');
+  const cursor = document.getElementById("cursor");
+  const follower = document.getElementById("cursorFollower");
   if (!cursor || !follower) return;
-
   let mouseX = 0, mouseY = 0;
-  let ringX  = 0, ringY  = 0;
-  const LERP = 0.12;
-
-  document.addEventListener('mousemove', (e) => {
+  let ringX = 0, ringY = 0;
+  const LERP = .12;
+  document.addEventListener("mousemove", e => {
     mouseX = e.clientX;
     mouseY = e.clientY;
-  }, { passive: true });
-
+  }, {
+    passive: true
+  });
   function tick() {
     cursor.style.transform = `translate(${mouseX}px, ${mouseY}px)`;
     ringX += (mouseX - ringX) * LERP;
@@ -583,377 +381,173 @@ function initCursor() {
     requestAnimationFrame(tick);
   }
   tick();
-
-  const hoverTargets = 'a, button, .product-card, .filter-btn, .size-btn, .lang-btn, .color-swatch, .modal__thumb';
-  document.addEventListener('mouseover', (e) => {
-    if (e.target.closest(hoverTargets)) follower.classList.add('is-hovering');
+  const hoverTargets = "a, button, .product-card, .filter-btn, .size-btn, .lang-btn, .color-swatch, .modal__thumb";
+  document.addEventListener("mouseover", e => {
+    if (e.target.closest(hoverTargets)) follower.classList.add("is-hovering");
   });
-  document.addEventListener('mouseout', (e) => {
-    if (e.target.closest(hoverTargets)) follower.classList.remove('is-hovering');
+  document.addEventListener("mouseout", e => {
+    if (e.target.closest(hoverTargets)) follower.classList.remove("is-hovering");
   });
 }
 
-
-/* ================================================================
-   3. NAVIGATION — Scroll Detection
-================================================================ */
 function initNav() {
-  const nav = document.getElementById('mainNav');
+  const nav = document.getElementById("mainNav");
   if (!nav) return;
-  const onScroll = () => nav.classList.toggle('is-scrolled', window.scrollY > 50);
-  window.addEventListener('scroll', onScroll, { passive: true });
+  const onScroll = () => nav.classList.toggle("is-scrolled", window.scrollY > 50);
+  window.addEventListener("scroll", onScroll, {
+    passive: true
+  });
   onScroll();
 }
 
-/*
-  Pick the right hero video source for the viewport.
-  
-  Mobile (≤768px wide) gets images/main_mobile.mp4 — a portrait-friendly cut.
-  Desktop gets images/main.mp4.
-  
-  We do this in JS rather than via <source media="..."> because that attribute
-  is unreliable on <video> across browsers (Chrome/Safari support is partial
-  and largely deprecated). Setting .src directly and calling .load() is the
-  robust way to choose a source.
-  
-  Runs once on load. We intentionally don't swap on resize — switching the
-  video mid-session (e.g. desktop devtools resizing to mobile) would restart
-  playback, which is jarring and pointless for real users who don't change
-  device class mid-visit.
-*/
 function initHeroVideo() {
-  const video  = document.getElementById('heroVideo');
-  const source = document.getElementById('heroVideoSource');
+  const video = document.getElementById("heroVideo");
+  const source = document.getElementById("heroVideoSource");
   if (!video || !source) return;
-
-  const isMobile = window.matchMedia('(max-width: 768px)').matches;
-  const desired  = isMobile ? 'images/main_mobile.mp4' : 'images/main.mp4';
-
-  /* Set the correct source for the viewport if not already set */
+  const isMobile = window.matchMedia("(max-width: 768px)").matches;
+  const desired = isMobile ? "images/main_mobile.mp4" : "images/main.mp4";
   if (!source.src.endsWith(desired)) {
     source.src = desired;
     video.load();
   }
-
-  /*
-    Attempt playback. Browsers may block autoplay when:
-      - the OS "reduce motion" accessibility setting is on
-      - a data-saver / low-power mode is active
-      - the tab loads in the background
-    When blocked, the video freezes on its first frame. To recover, we:
-      1. Try to play immediately.
-      2. If that's rejected, retry on the first user interaction (any
-         pointer/touch/scroll/keypress), which browsers accept as a
-         user gesture that unblocks playback.
-    
-    The video stays muted + playsinline so the retry is allowed.
-  */
   const tryPlay = () => video.play().catch(() => {});
-
   tryPlay();
-
-  /* One-time retry on the first interaction, then clean up the listeners */
   const retryOnce = () => {
     tryPlay();
-    ['pointerdown', 'touchstart', 'scroll', 'keydown'].forEach(evt =>
-      window.removeEventListener(evt, retryOnce)
-    );
+    [ "pointerdown", "touchstart", "scroll", "keydown" ].forEach(evt => window.removeEventListener(evt, retryOnce));
   };
-  ['pointerdown', 'touchstart', 'scroll', 'keydown'].forEach(evt =>
-    window.addEventListener(evt, retryOnce, { once: false, passive: true })
-  );
-
-  /* Also retry if the tab becomes visible again (loaded in background) */
-  document.addEventListener('visibilitychange', () => {
+  [ "pointerdown", "touchstart", "scroll", "keydown" ].forEach(evt => window.addEventListener(evt, retryOnce, {
+    once: false,
+    passive: true
+  }));
+  document.addEventListener("visibilitychange", () => {
     if (!document.hidden) tryPlay();
   });
 }
 
-
-/* ================================================================
-   4. SCROLL REVEAL
-   
-   IntersectionObserver fires when elements enter the viewport.
-   Product cards get a staggered delay based on column position.
-================================================================ */
 function initScrollReveal() {
-  /*
-    Generic scroll-reveal observer for [data-reveal] elements.
-    These animate in as they enter the viewport.
-    Used on section headers, CTAs, and other accent content.
-  */
-  const observer = new IntersectionObserver((entries) => {
+  const observer = new IntersectionObserver(entries => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
-        entry.target.classList.add('is-revealed');
+        entry.target.classList.add("is-revealed");
         observer.unobserve(entry.target);
       }
     });
-  }, { threshold: 0.15 });
-
-  document.querySelectorAll('[data-reveal]').forEach(el => observer.observe(el));
-
-  /*
-    Product cards: revealed immediately on page load with a quick stagger.
-    
-    Why not scroll-triggered? The grid is a content-heavy area — making 
-    customers scroll to "load" the products feels wrong. They might think
-    the grid is broken if they land mid-page. The brief stagger still adds 
-    polish without forcing a wait.
-    
-    The stagger is small (40ms × column index) so it's perceived as elegant
-    rather than slow. Even with 24 products, the last card is revealed in
-    under 200ms.
-  */
+  }, {
+    threshold: .15
+  });
+  document.querySelectorAll("[data-reveal]").forEach(el => observer.observe(el));
   function revealCards() {
-    const cards = document.querySelectorAll('.product-card:not(.is-hidden)');
+    const cards = document.querySelectorAll(".product-card:not(.is-hidden)");
     cards.forEach((card, i) => {
-      card.style.setProperty('--delay', `${(i % 4) * 40}ms`);
-      card.classList.add('is-revealed');
+      card.style.setProperty("--delay", `${i % 4 * 40}ms`);
+      card.classList.add("is-revealed");
     });
   }
-
   window.revealProductCards = revealCards;
   revealCards();
 }
 
-
-/* ================================================================
-   5. RENDER PRODUCTS
-
-   Builds product cards from the PRODUCTS array.
-   Cards show a small row of color dots if the product has colors.
-   Clicking a card opens the full modal with color swatches.
-================================================================ */
 function renderProducts() {
-  const grid = document.getElementById('productGrid');
+  const grid = document.getElementById("productGrid");
   if (!grid) return;
-
-  /*
-    Resolve UI translations once per render. Card overlays and badges
-    are built fresh on every render, so they read the current language
-    at this moment — no data-i18n attribute needed.
-  */
-  const lang = document.documentElement.dataset.lang || 'en';
-  const t    = TRANSLATIONS[lang];
-  const viewLabel = t['product.view'] || 'View Product';
-
+  const lang = document.documentElement.dataset.lang || "en";
+  const t = TRANSLATIONS[lang];
+  const viewLabel = t["product.view"] || "View Product";
   grid.innerHTML = PRODUCTS.map(product => {
-    /* Resolve translated name/family for the current language */
-    const tName   = tProduct(product, 'name');
-    const tFamily = tProduct(product, 'family');
+    const tName = tProduct(product, "name");
+    const tFamily = tProduct(product, "family");
     const tBadgeLabel = product.badge ? tBadge(product.badge) : null;
-
-    /* Show up to 5 color dots on the card preview */
-    const colorDotsHtml = (product.colors && product.colors.length > 0)
-      ? `<div class="product-card__color-dots">
-           ${product.colors.slice(0, 5).map(c =>
-             `<span class="color-dot" style="background:${c.hex}" title="${tColor(c.label)}"></span>`
-           ).join('')}
-           ${product.colors.length > 5 ? `<span class="color-dot-more">+${product.colors.length - 5}</span>` : ''}
-         </div>`
-      : '';
-
-    return `
-      <div
-        class="product-card"
-        data-category="${product.category}"
-        data-id="${product.id}"
-        data-name="${tName.toLowerCase()}"
-        data-price="${parseFloat(product.price.replace(/[^0-9.]/g, ''))}"
-        role="button"
-        tabindex="0"
-        aria-label="${viewLabel}: ${tName}"
-      >
-        <div class="product-card__image-wrap">
-          <img src="${product.image}" alt="${tName}" loading="lazy" onerror="this.style.display='none'" />
-          <div class="product-card__overlay">
-            <span class="product-card__overlay-btn">${viewLabel}</span>
-          </div>
-        </div>
-        <div class="product-card__body">
-          ${tBadgeLabel ? `<span class="product-card__badge">${tBadgeLabel}</span>` : ''}
-          <p class="product-card__name">${tName}</p>
-          <p class="product-card__family">${tFamily}</p>
-          <div class="product-card__footer">
-            <div class="product-card__price-block">
-              <p class="product-card__price">${product.price}</p>
-              ${product.save ? `<span class="product-card__save">${tSave(product.save)}</span>` : ''}
-            </div>
-            ${colorDotsHtml}
-          </div>
-        </div>
-      </div>
-    `;
-  }).join('');
-
-  document.querySelectorAll('.product-card').forEach(card => {
-    card.addEventListener('click', () => {
+    const colorDotsHtml = product.colors && product.colors.length > 0 ? `<div class="product-card__color-dots">\n           ${product.colors.slice(0, 5).map(c => `<span class="color-dot" style="background:${c.hex}" title="${tColor(c.label)}"></span>`).join("")}\n           ${product.colors.length > 5 ? `<span class="color-dot-more">+${product.colors.length - 5}</span>` : ""}\n         </div>` : "";
+    return `\n      <div\n        class="product-card"\n        data-category="${product.category}"\n        data-id="${product.id}"\n        data-name="${tName.toLowerCase()}"\n        data-price="${parseFloat(product.price.replace(/[^0-9.]/g, ""))}"\n        role="button"\n        tabindex="0"\n        aria-label="${viewLabel}: ${tName}"\n      >\n        <div class="product-card__image-wrap">\n          <img src="${product.image}" alt="${tName}" loading="lazy" onerror="this.style.display='none'" />\n          <div class="product-card__overlay">\n            <span class="product-card__overlay-btn">${viewLabel}</span>\n          </div>\n        </div>\n        <div class="product-card__body">\n          ${tBadgeLabel ? `<span class="product-card__badge">${tBadgeLabel}</span>` : ""}\n          <p class="product-card__name">${tName}</p>\n          <p class="product-card__family">${tFamily}</p>\n          <div class="product-card__footer">\n            <div class="product-card__price-block">\n              <p class="product-card__price">${product.price}</p>\n              ${product.save ? `<span class="product-card__save">${tSave(product.save)}</span>` : ""}\n            </div>\n            ${colorDotsHtml}\n          </div>\n        </div>\n      </div>\n    `;
+  }).join("");
+  document.querySelectorAll(".product-card").forEach(card => {
+    card.addEventListener("click", () => {
       const product = PRODUCTS.find(p => p.id === parseInt(card.dataset.id));
       if (product) openModal(product);
     });
-    card.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); card.click(); }
+    card.addEventListener("keydown", e => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        card.click();
+      }
     });
   });
 }
 
-
-/* ================================================================
-   6. PRODUCT FILTERS + SORT
-
-   Filter buttons show/hide cards by category.
-   Sort select re-orders visible cards by name or price.
-
-   ★ GHOST CARD FIX:
-   CSS grid always fills columns to complete rows, which creates
-   empty grey placeholder cells at the end when the count isn't
-   a clean multiple of the column count.
-   We fix this by appending invisible "filler" <div> elements —
-   as many as needed to complete the last row without showing borders.
-   These have no content and no background, so they're truly invisible.
-   They're recalculated every time filter or sort changes.
-
-   ★ SORT LOGIC:
-   We don't re-render the cards — we reorder the existing DOM nodes
-   by appending them to the grid in the new sorted order.
-   This keeps event listeners intact and avoids a full re-render.
-================================================================ */
-
-/* Returns the number of columns in the grid at current viewport width */
 function getGridColumnCount() {
-  const grid = document.getElementById('productGrid');
+  const grid = document.getElementById("productGrid");
   if (!grid) return 4;
-  /* getComputedStyle gives us the actual rendered column template */
-  const cols = getComputedStyle(grid).gridTemplateColumns.split(' ').length;
+  const cols = getComputedStyle(grid).gridTemplateColumns.split(" ").length;
   return cols || 4;
 }
 
-/* Remove any existing ghost fillers, then add the right number of new ones */
 function fixGhostCells() {
-  const grid = document.getElementById('productGrid');
+  const grid = document.getElementById("productGrid");
   if (!grid) return;
-
-  /* Remove previously added fillers */
-  grid.querySelectorAll('.grid-filler').forEach(el => el.remove());
-
-  /* Count visible (non-hidden) real cards */
-  const visibleCards = grid.querySelectorAll('.product-card:not(.is-hidden)').length;
+  grid.querySelectorAll(".grid-filler").forEach(el => el.remove());
+  const visibleCards = grid.querySelectorAll(".product-card:not(.is-hidden)").length;
   const cols = getGridColumnCount();
   const remainder = visibleCards % cols;
-  if (remainder === 0) return; /* Last row is already complete */
-
-  /* Add enough invisible fillers to complete the last row */
+  if (remainder === 0) return;
   const fillersNeeded = cols - remainder;
   for (let i = 0; i < fillersNeeded; i++) {
-    const filler = document.createElement('div');
-    filler.className = 'grid-filler';
+    const filler = document.createElement("div");
+    filler.className = "grid-filler";
     grid.appendChild(filler);
   }
 }
 
-/* Sort visible cards in the DOM by the given key */
 function sortCards(value) {
-  const grid = document.getElementById('productGrid');
+  const grid = document.getElementById("productGrid");
   if (!grid) return;
-
-  const cards = Array.from(grid.querySelectorAll('.product-card:not(.grid-filler)'));
-
+  const cards = Array.from(grid.querySelectorAll(".product-card:not(.grid-filler)"));
   cards.sort((a, b) => {
-    if (value === 'name-asc')  return a.dataset.name.localeCompare(b.dataset.name);
-    if (value === 'name-desc') return b.dataset.name.localeCompare(a.dataset.name);
-    if (value === 'price-asc')  return parseFloat(a.dataset.price) - parseFloat(b.dataset.price);
-    if (value === 'price-desc') return parseFloat(b.dataset.price) - parseFloat(a.dataset.price);
-    /* 'default': sort by original id order */
+    if (value === "name-asc") return a.dataset.name.localeCompare(b.dataset.name);
+    if (value === "name-desc") return b.dataset.name.localeCompare(a.dataset.name);
+    if (value === "price-asc") return parseFloat(a.dataset.price) - parseFloat(b.dataset.price);
+    if (value === "price-desc") return parseFloat(b.dataset.price) - parseFloat(a.dataset.price);
     return parseInt(a.dataset.id) - parseInt(b.dataset.id);
   });
-
-  /* Re-append in new order (fillers come last and are re-added by fixGhostCells) */
   cards.forEach(card => grid.appendChild(card));
   fixGhostCells();
 }
 
 function initFilters() {
-  const filterBtns = document.querySelectorAll('.filter-btn');
-  const sortSelect = document.getElementById('sortSelect');
-
+  const filterBtns = document.querySelectorAll(".filter-btn");
+  const sortSelect = document.getElementById("sortSelect");
   filterBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      filterBtns.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-
+    btn.addEventListener("click", () => {
+      filterBtns.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
       const filter = btn.dataset.filter;
-      document.querySelectorAll('.product-card').forEach(card => {
-        const match = filter === 'all' || card.dataset.category === filter;
-        card.classList.toggle('is-hidden', !match);
+      document.querySelectorAll(".product-card").forEach(card => {
+        const match = filter === "all" || card.dataset.category === filter;
+        card.classList.toggle("is-hidden", !match);
         if (match) {
-          card.classList.remove('is-revealed');
-          card.style.setProperty('--delay', '0ms');
+          card.classList.remove("is-revealed");
+          card.style.setProperty("--delay", "0ms");
         }
       });
-
-      /* Re-apply current sort after filtering */
-      if (sortSelect) sortCards(sortSelect.value);
-      else fixGhostCells();
-
+      if (sortSelect) sortCards(sortSelect.value); else fixGhostCells();
       if (window.revealProductCards) window.revealProductCards();
     });
   });
-
-  /* Sort dropdown */
   if (sortSelect) {
-    sortSelect.addEventListener('change', () => sortCards(sortSelect.value));
+    sortSelect.addEventListener("change", () => sortCards(sortSelect.value));
   }
-
-  /* Initial ghost fix after first render */
   fixGhostCells();
-
-  /* Recalculate on resize (column count can change) */
-  window.addEventListener('resize', fixGhostCells, { passive: true });
+  window.addEventListener("resize", fixGhostCells, {
+    passive: true
+  });
 }
 
+let selectedSize = null;
 
-/* ================================================================
-   7. PRODUCT MODAL — with Color Swatches
-
-   openModal(product) builds the panel HTML dynamically.
-
-   ★ COLOR SWATCH BEHAVIOUR:
-   If the product has a `colors` array, a row of circular swatches
-   appears in the modal. Each swatch is a button with:
-     - background colour = the color hex
-     - white border when selected (.selected class)
-     - title tooltip on hover = color label
-   
-   Clicking a swatch:
-   1. Marks it .selected (adds white ring)
-   2. Fades the main product image out, swaps the src to the
-      color's image, then fades back in
-   3. Updates a small "selected colour" text label below the swatches
-   
-   The initial selected swatch is the one that matches the product's
-   current image (i.e., the colour the card was showing when clicked).
-
-   ★ ADD TO CART:
-   Replace the alert() in the modalAddBtn click handler with your 
-   cart system (Shopify, Snipcart, etc.).
-================================================================ */
-let selectedSize  = null;
 let selectedColor = null;
 
-/*
-  Handle for the in-flight image crossfade timer.
-  
-  Colour/thumbnail/size switches fade the image out, then after 180ms swap
-  the src and fade back in. If the user closes the modal and opens a
-  different product within that 180ms, the old timer would otherwise fire
-  and write the PREVIOUS product's image onto the NEW modal (which reuses
-  the same #modalProductImage element). We track the timer here so
-  openModal() and closeModal() can cancel any pending fade.
-*/
 let imageFadeTimer = null;
 
-/* Cancel any pending image crossfade. Safe to call when none is scheduled. */
 function cancelImageFade() {
   if (imageFadeTimer !== null) {
     clearTimeout(imageFadeTimer);
@@ -961,30 +555,8 @@ function cancelImageFade() {
   }
 }
 
-/*
-  Resolve the right product image given the current colour and size selection.
-  Returns the SINGLE image to display as the main one.
-  
-  The data model supports three levels of image richness, in priority order:
-    1. imageBySize: { "size": "path" } — image varies by size for this colour.
-       Available if you re-introduce sized variants with different photos.
-    2. images: [...] — multiple shots of the same variant (front/back/detail).
-       Used by Hoodie, Sweatshirt, Socks (white), T-Shirt (3 colours), Bottle (navy).
-    3. image — single fallback when none of the above apply.
-  
-  Resolution order:
-  1. If the colour has imageBySize and that size exists → use it.
-  2. Else if the colour has images[] → return the first one.
-  3. Else → fall back to color.image.
-  4. If no colour selected → use product.images[0] (top-level) or product.image.
-  
-  This keeps the data model flexible: most products only need one image
-  field per colour. Multi-shot products opt in via `images: [...]`.
-  Size-specific products opt in via `imageBySize: {...}`.
-*/
 function resolveProductImage(product, color, size) {
   if (!color) {
-    /* No colour variants — top-level images[] takes precedence over single image */
     return product.images?.[0] ?? product.image;
   }
   if (color.imageBySize && size && color.imageBySize[size]) {
@@ -996,1099 +568,709 @@ function resolveProductImage(product, color, size) {
   return color.image;
 }
 
-/*
-  Resolve the FULL list of images for a colour selection. Used to build
-  the thumbnail gallery in the modal.
-  
-  Returns an array of image paths. If the variant only has one image,
-  the array has one entry — the gallery code can decide whether to
-  show thumbnails based on length > 1.
-  
-  Note: when imageBySize is in play for a (colour, size) cell, this returns
-  just that single image — sized-variants don't currently expose multi-shot
-  galleries within a cell. That's a more complex matrix we can build later
-  if needed.
-*/
 function resolveProductImages(product, color, size) {
   if (!color) {
-    return product.images ?? [product.image];
+    return product.images ?? [ product.image ];
   }
   if (color.imageBySize && size && color.imageBySize[size]) {
-    return [color.imageBySize[size]];
+    return [ color.imageBySize[size] ];
   }
   if (color.images && color.images.length > 0) {
     return color.images;
   }
-  return [color.image];
+  return [ color.image ];
 }
 
 function openModal(product) {
-  const modal   = document.getElementById('productModal');
-  const content = document.getElementById('modalContent');
+  const modal = document.getElementById("productModal");
+  const content = document.getElementById("modalContent");
   if (!modal || !content) return;
-
-  /*
-    Cancel any image crossfade still pending from the previously-opened
-    product. Without this, a fade scheduled in the last modal could fire
-    after this new modal renders and overwrite its image with the old one.
-    We also reset selection state here so nothing leaks between products.
-  */
   cancelImageFade();
-  selectedSize  = null;
+  selectedSize = null;
   selectedColor = null;
-
-  const lang = document.documentElement.dataset.lang || 'en';
-  const t    = TRANSLATIONS[lang];
-
-  /* ── Build sizes HTML ──
-       Two modes:
-       1. sizeGroups present → two-step picker: generation buttons on top,
-          a (initially empty) variant row below that JS fills when a
-          generation is clicked.
-       2. plain sizes array → flat row of size buttons.
-       
-       data-size keeps the RAW (English) value so cart logic + email body
-       stay consistent across languages. The visible label is translated. */
+  const lang = document.documentElement.dataset.lang || "en";
+  const t = TRANSLATIONS[lang];
   let sizesHTML;
   if (product.sizeGroups) {
     const generations = Object.keys(product.sizeGroups);
-    sizesHTML = `
-      <div class="modal__size-groups" id="modalSizeGroups">
-        ${generations.map(gen => `
-          <button class="size-btn size-btn--group" data-group="${gen}">${gen}</button>
-        `).join('')}
-      </div>
-      <div class="modal__sizes-grid modal__sizes-variants" id="modalSizeVariants" hidden></div>
-    `;
+    sizesHTML = `\n      <div class="modal__size-groups" id="modalSizeGroups">\n        ${generations.map(gen => `\n          <button class="size-btn size-btn--group" data-group="${gen}">${gen}</button>\n        `).join("")}\n      </div>\n      <div class="modal__sizes-grid modal__sizes-variants" id="modalSizeVariants" hidden></div>\n    `;
   } else {
-    sizesHTML = `<div class="modal__sizes-grid">
-      ${product.sizes.map(size => `
-        <button class="size-btn" data-size="${size}" aria-label="${t['modal.size'] || 'Size'} ${tSize(size)}">${tSize(size)}</button>
-      `).join('')}
-    </div>`;
+    sizesHTML = `<div class="modal__sizes-grid">\n      ${product.sizes.map(size => `\n        <button class="size-btn" data-size="${size}" aria-label="${t["modal.size"] || "Size"} ${tSize(size)}">${tSize(size)}</button>\n      `).join("")}\n    </div>`;
   }
-
-  /* ── Build color swatches HTML ── */
-  let colorsHTML = '';
+  let colorsHTML = "";
   if (product.colors && product.colors.length > 0) {
-    /* Find which color is currently active (match by image path) */
     const activeIdx = product.colors.findIndex(c => c.image === product.image) ?? 0;
-    selectedColor   = product.colors[activeIdx >= 0 ? activeIdx : 0];
-
-    const swatchesHTML = product.colors.map((color, idx) => `
-      <button
-        class="color-swatch${idx === (activeIdx >= 0 ? activeIdx : 0) ? ' selected' : ''}"
-        data-color-idx="${idx}"
-        style="background: ${color.hex}"
-        title="${tColor(color.label)}"
-        aria-label="${t['modal.colour'] || 'Colour'}: ${tColor(color.label)}"
-      ></button>
-    `).join('');
-
-    colorsHTML = `
-      <div class="modal__colors">
-        <div class="modal__colors-header">
-          <span class="modal__sizes-label">${t['modal.colour'] || 'Colour'}</span>
-          <span class="modal__color-selected" id="modalColorSelected">${tColor(selectedColor.label)}</span>
-        </div>
-        <div class="modal__color-swatches">${swatchesHTML}</div>
-      </div>
-    `;
+    selectedColor = product.colors[activeIdx >= 0 ? activeIdx : 0];
+    const swatchesHTML = product.colors.map((color, idx) => `\n      <button\n        class="color-swatch${idx === (activeIdx >= 0 ? activeIdx : 0) ? " selected" : ""}"\n        data-color-idx="${idx}"\n        style="background: ${color.hex}"\n        title="${tColor(color.label)}"\n        aria-label="${t["modal.colour"] || "Colour"}: ${tColor(color.label)}"\n      ></button>\n    `).join("");
+    colorsHTML = `\n      <div class="modal__colors">\n        <div class="modal__colors-header">\n          <span class="modal__sizes-label">${t["modal.colour"] || "Colour"}</span>\n          <span class="modal__color-selected" id="modalColorSelected">${tColor(selectedColor.label)}</span>\n        </div>\n        <div class="modal__color-swatches">${swatchesHTML}</div>\n      </div>\n    `;
   }
-
-  /*
-    Resolve the initial main image and the gallery for the active variant.
-    Use product.sizes[0] as the size — that's the one that will be
-    pre-selected after this HTML renders. This keeps the image consistent
-    with the visible size selection, e.g. for the Water Bottle: if 350ml is
-    the first size in the array, the modal opens showing the 350ml image,
-    not the 600ml one.
-  */
-  const initialSize   = product.sizes?.[0] ?? null;
-  const initialImage  = resolveProductImage(product, selectedColor, initialSize);
+  const initialSize = product.sizes?.[0] ?? null;
+  const initialImage = resolveProductImage(product, selectedColor, initialSize);
   const initialImages = resolveProductImages(product, selectedColor, initialSize);
-
-  /*
-    Build the thumbnail gallery if the variant has more than one image.
-    Hidden entirely when there's only one — no empty rail.
-  */
-  const galleryHTML = initialImages.length > 1
-    ? `<div class="modal__gallery" id="modalGallery">
-         ${initialImages.map((src, idx) => `
-           <button
-             class="modal__thumb${idx === 0 ? ' is-active' : ''}"
-             data-thumb-idx="${idx}"
-             aria-label="View image ${idx + 1}"
-           >
-             <img src="${src}" alt="" loading="lazy" />
-           </button>
-         `).join('')}
-       </div>`
-    : '';
-
-  /* ── Assemble full modal content ──
-       Layout: two columns on wide screens (image left, details right),
-       stacked on narrow screens. .modal__layout is the flex/grid wrapper. */
-  content.innerHTML = `
-    <div class="modal__layout">
-      <div class="modal__media">
-        <img
-          class="modal__image"
-          id="modalProductImage"
-          src="${initialImage}"
-          alt="${product.name}"
-          onerror="this.style.background='var(--color-navy-mid)'; this.removeAttribute('src')"
-        />
-        ${galleryHTML}
-      </div>
-
-      <div class="modal__details">
-        <div class="modal__meta">
-          <p class="modal__family">${tProduct(product, 'family')}</p>
-          <h2 class="modal__title">${tProduct(product, 'name')}</h2>
-          <div class="modal__price-row">
-            <p class="modal__price">${product.price}</p>
-            ${product.save ? `<span class="modal__save">${tSave(product.save)}</span>` : ''}
-          </div>
-        </div>
-        <p class="modal__desc">${tProduct(product, 'description')}</p>
-
-        ${colorsHTML}
-
-        <div class="modal__sizes">
-          <span class="modal__sizes-label">${t['modal.selectSize'] || 'Select Size'}</span>
-          ${sizesHTML}
-        </div>
-
-        <button class="btn btn--primary btn--full" id="modalAddBtn" style="margin-top:1.5rem">
-          ${t['modal.addToCart'] || 'Add to Cart'}
-        </button>
-        <div class="modal__shipping-note">
-          ${(t['modal.shipping'] || 'Free shipping over €50')
-              .split('•')
-              .map(perk => `<span class="perk">${perk.trim()}</span>`)
-              .join('')}
-        </div>
-      </div>
-    </div>
-  `;
-
-  /*
-    Helper: rebuild the thumbnail gallery for the current variant.
-    Called on initial render (via wireGalleryThumbs) and whenever the
-    colour changes. Hides the gallery if the new variant has ≤1 image.
-  */
+  const galleryHTML = initialImages.length > 1 ? `<div class="modal__gallery" id="modalGallery">\n         ${initialImages.map((src, idx) => `\n           <button\n             class="modal__thumb${idx === 0 ? " is-active" : ""}"\n             data-thumb-idx="${idx}"\n             aria-label="View image ${idx + 1}"\n           >\n             <img src="${src}" alt="" loading="lazy" />\n           </button>\n         `).join("")}\n       </div>` : "";
+  content.innerHTML = `\n    <div class="modal__layout">\n      <div class="modal__media">\n        <img\n          class="modal__image"\n          id="modalProductImage"\n          src="${initialImage}"\n          alt="${product.name}"\n          onerror="this.style.background='var(--color-navy-mid)'; this.removeAttribute('src')"\n        />\n        ${galleryHTML}\n      </div>\n\n      <div class="modal__details">\n        <div class="modal__meta">\n          <p class="modal__family">${tProduct(product, "family")}</p>\n          <h2 class="modal__title">${tProduct(product, "name")}</h2>\n          <div class="modal__price-row">\n            <p class="modal__price">${product.price}</p>\n            ${product.save ? `<span class="modal__save">${tSave(product.save)}</span>` : ""}\n          </div>\n        </div>\n        <p class="modal__desc">${tProduct(product, "description")}</p>\n\n        ${colorsHTML}\n\n        <div class="modal__sizes">\n          <span class="modal__sizes-label">${t["modal.selectSize"] || "Select Size"}</span>\n          ${sizesHTML}\n        </div>\n\n        <button class="btn btn--primary btn--full" id="modalAddBtn" style="margin-top:1.5rem">\n          ${t["modal.addToCart"] || "Add to Cart"}\n        </button>\n        <div class="modal__shipping-note">\n          ${(t["modal.shipping"] || "Free shipping over €50").split("•").map(perk => `<span class="perk">${perk.trim()}</span>`).join("")}\n        </div>\n      </div>\n    </div>\n  `;
   function rebuildGallery() {
-    const galleryEl = content.querySelector('#modalGallery');
+    const galleryEl = content.querySelector("#modalGallery");
     const images = resolveProductImages(product, selectedColor, selectedSize);
-
     if (images.length <= 1) {
-      /* Single image — hide the gallery if it exists, no thumbs needed */
-      if (galleryEl) galleryEl.style.display = 'none';
+      if (galleryEl) galleryEl.style.display = "none";
       return;
     }
-
-    /* Multi-image — make sure the gallery exists and has the right thumbs */
     let target = galleryEl;
     if (!target) {
-      /* Gallery wasn't in the initial HTML (this colour's first time having multiple
-         images) — create one. Rare in practice but supported. */
-      target = document.createElement('div');
-      target.className = 'modal__gallery';
-      target.id = 'modalGallery';
-      content.querySelector('.modal__media').appendChild(target);
+      target = document.createElement("div");
+      target.className = "modal__gallery";
+      target.id = "modalGallery";
+      content.querySelector(".modal__media").appendChild(target);
     }
-    target.style.display = '';
-    target.innerHTML = images.map((src, idx) => `
-      <button
-        class="modal__thumb${idx === 0 ? ' is-active' : ''}"
-        data-thumb-idx="${idx}"
-        aria-label="View image ${idx + 1}"
-      ><img src="${src}" alt="" loading="lazy" /></button>
-    `).join('');
-
+    target.style.display = "";
+    target.innerHTML = images.map((src, idx) => `\n      <button\n        class="modal__thumb${idx === 0 ? " is-active" : ""}"\n        data-thumb-idx="${idx}"\n        aria-label="View image ${idx + 1}"\n      ><img src="${src}" alt="" loading="lazy" /></button>\n    `).join("");
     wireGalleryThumbs();
   }
-
-  /*
-    Wire up the click handlers on the current set of thumbnails.
-    Called once on initial render and again whenever rebuildGallery
-    rewrites the thumbs after a colour change.
-  */
   function wireGalleryThumbs() {
-    const modalImage = content.querySelector('#modalProductImage');
+    const modalImage = content.querySelector("#modalProductImage");
     if (!modalImage) return;
-
-    content.querySelectorAll('.modal__thumb').forEach(thumb => {
-      thumb.addEventListener('click', () => {
-        const newSrc = thumb.querySelector('img')?.src;
+    content.querySelectorAll(".modal__thumb").forEach(thumb => {
+      thumb.addEventListener("click", () => {
+        const newSrc = thumb.querySelector("img")?.src;
         if (!newSrc) return;
-
-        /* Update active thumb */
-        content.querySelectorAll('.modal__thumb').forEach(t => t.classList.remove('is-active'));
-        thumb.classList.add('is-active');
-
-        /* Crossfade main image (tracked so it can be cancelled on modal switch) */
+        content.querySelectorAll(".modal__thumb").forEach(t => t.classList.remove("is-active"));
+        thumb.classList.add("is-active");
         cancelImageFade();
-        modalImage.style.opacity = '0';
+        modalImage.style.opacity = "0";
         imageFadeTimer = setTimeout(() => {
           modalImage.src = newSrc;
-          modalImage.style.opacity = '1';
+          modalImage.style.opacity = "1";
           imageFadeTimer = null;
         }, 180);
       });
     });
   }
-
-  /* Wire initial thumbs (if any) */
   wireGalleryThumbs();
-
-  /* ── Color swatch interactions ── */
   if (product.colors && product.colors.length > 0) {
-    const modalImage     = content.querySelector('#modalProductImage');
-    const colorSelected  = content.querySelector('#modalColorSelected');
-
-    content.querySelectorAll('.color-swatch').forEach(swatch => {
-      swatch.addEventListener('click', () => {
-        /* Update active swatch */
-        content.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
-        swatch.classList.add('selected');
-
-        const idx   = parseInt(swatch.dataset.colorIdx);
+    const modalImage = content.querySelector("#modalProductImage");
+    const colorSelected = content.querySelector("#modalColorSelected");
+    content.querySelectorAll(".color-swatch").forEach(swatch => {
+      swatch.addEventListener("click", () => {
+        content.querySelectorAll(".color-swatch").forEach(s => s.classList.remove("selected"));
+        swatch.classList.add("selected");
+        const idx = parseInt(swatch.dataset.colorIdx);
         const color = product.colors[idx];
         selectedColor = color;
-
-        /* Update the label text */
         if (colorSelected) colorSelected.textContent = tColor(color.label);
-
-        /* Crossfade to the right image for this colour + current size combo */
         cancelImageFade();
-        modalImage.style.opacity = '0';
+        modalImage.style.opacity = "0";
         imageFadeTimer = setTimeout(() => {
           modalImage.src = resolveProductImage(product, color, selectedSize);
-          modalImage.style.opacity = '1';
+          modalImage.style.opacity = "1";
           imageFadeTimer = null;
         }, 180);
-
-        /* Rebuild the thumbnail gallery for this colour's images */
         rebuildGallery();
       });
     });
   }
-
-  /*
-    Size interactions. Two paths depending on the product:
-    
-    A) Grouped (sizeGroups, e.g. phone case): clicking a generation button
-       reveals that generation's variant buttons in the second row. Clicking
-       a variant sets selectedSize. No pre-selection — the customer must
-       choose a generation then a model deliberately.
-    
-    B) Flat (sizes): the usual single row of size buttons. The first is
-       pre-selected for short lists (apparel).
-  */
   if (product.sizeGroups) {
-    const groupsEl   = content.querySelector('#modalSizeGroups');
-    const variantsEl = content.querySelector('#modalSizeVariants');
-
-    /* Helper: render the variant buttons for a chosen generation */
+    const groupsEl = content.querySelector("#modalSizeGroups");
+    const variantsEl = content.querySelector("#modalSizeVariants");
     function showVariants(generation) {
       const variants = product.sizeGroups[generation] || [];
-      variantsEl.innerHTML = variants.map(model => `
-        <button class="size-btn" data-size="${model}">${model}</button>
-      `).join('');
+      variantsEl.innerHTML = variants.map(model => `\n        <button class="size-btn" data-size="${model}">${model}</button>\n      `).join("");
       variantsEl.hidden = false;
-
-      /* Wire each variant button */
-      variantsEl.querySelectorAll('.size-btn').forEach(vBtn => {
-        vBtn.addEventListener('click', () => {
-          variantsEl.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
-          vBtn.classList.add('selected');
+      variantsEl.querySelectorAll(".size-btn").forEach(vBtn => {
+        vBtn.addEventListener("click", () => {
+          variantsEl.querySelectorAll(".size-btn").forEach(b => b.classList.remove("selected"));
+          vBtn.classList.add("selected");
           selectedSize = vBtn.dataset.size;
         });
       });
     }
-
-    /* Generation buttons */
-    groupsEl.querySelectorAll('.size-btn--group').forEach(gBtn => {
-      gBtn.addEventListener('click', () => {
-        groupsEl.querySelectorAll('.size-btn--group').forEach(b => b.classList.remove('selected'));
-        gBtn.classList.add('selected');
-        /* Switching generation clears any previously selected model */
+    groupsEl.querySelectorAll(".size-btn--group").forEach(gBtn => {
+      gBtn.addEventListener("click", () => {
+        groupsEl.querySelectorAll(".size-btn--group").forEach(b => b.classList.remove("selected"));
+        gBtn.classList.add("selected");
         selectedSize = null;
         showVariants(gBtn.dataset.group);
       });
     });
-
   } else {
-    /* Flat size list */
-    content.querySelectorAll('.size-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        content.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
-        btn.classList.add('selected');
+    content.querySelectorAll(".size-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        content.querySelectorAll(".size-btn").forEach(b => b.classList.remove("selected"));
+        btn.classList.add("selected");
         selectedSize = btn.dataset.size;
-
-        /*
-          If this product has size-specific images for the current colour
-          (a future sized product with imageBySize), swap the image.
-          No-op for products without imageBySize.
-        */
-        const modalImage = content.querySelector('#modalProductImage');
+        const modalImage = content.querySelector("#modalProductImage");
         if (modalImage && selectedColor?.imageBySize) {
           const newSrc = resolveProductImage(product, selectedColor, selectedSize);
           if (modalImage.src !== newSrc && !modalImage.src.endsWith(newSrc)) {
             cancelImageFade();
-            modalImage.style.opacity = '0';
+            modalImage.style.opacity = "0";
             imageFadeTimer = setTimeout(() => {
               modalImage.src = newSrc;
-              modalImage.style.opacity = '1';
+              modalImage.style.opacity = "1";
               imageFadeTimer = null;
             }, 180);
           }
         }
       });
     });
-
-    /*
-      Pre-select the first size for short flat lists (apparel S/M/L/XL or a
-      single "One Size"). Skipped for longer lists so the customer chooses
-      deliberately.
-    */
     const PRESELECT_MAX = 6;
     if (product.sizes && product.sizes.length <= PRESELECT_MAX) {
-      const firstSizeBtn = content.querySelector('.size-btn');
+      const firstSizeBtn = content.querySelector(".size-btn");
       if (firstSizeBtn) {
-        firstSizeBtn.classList.add('selected');
+        firstSizeBtn.classList.add("selected");
         selectedSize = firstSizeBtn.dataset.size;
       }
     }
   }
-
-  /* ── Add to Cart ── */
-  content.querySelector('#modalAddBtn')?.addEventListener('click', () => {
-    /*
-      Require a selection when the product offers a real choice.
-      - Grouped products (sizeGroups): always require a model pick.
-      - Flat products with >1 size: require a size pick.
-      Single-size products ("One Size") need no selection.
-    */
-    const needsSelection = !!product.sizeGroups || (product.sizes && product.sizes.length > 1);
+  content.querySelector("#modalAddBtn")?.addEventListener("click", () => {
+    const needsSelection = !!product.sizeGroups || product.sizes && product.sizes.length > 1;
     if (!selectedSize && needsSelection) {
-      alert(t['modal.selectSizeAlert'] || 'Please select an option first.');
+      alert(t["modal.selectSizeAlert"] || "Please select an option first.");
       return;
     }
-    /* Add the item to the real cart (defined in section 12) */
     Cart.add({
-      id:       product.id,
-      name:     product.name,
-      family:   product.family,
-      price:    parseFloat(product.price.replace(/[^0-9.]/g, '')),
+      id: product.id,
+      name: product.name,
+      family: product.family,
+      price: parseFloat(product.price.replace(/[^0-9.]/g, "")),
       priceStr: product.price,
-      size:     selectedSize || 'One Size',
-      color:    selectedColor ? selectedColor.label : null,
-      image:    resolveProductImage(product, selectedColor, selectedSize),
+      size: selectedSize || "One Size",
+      color: selectedColor ? selectedColor.label : null,
+      image: resolveProductImage(product, selectedColor, selectedSize)
     });
     closeModal();
-    /* Brief delay then open the cart so the user sees what was added */
     setTimeout(() => Cart.open(), 350);
   });
-
-  modal.classList.add('is-open');
-  modal.setAttribute('aria-hidden', 'false');
-  document.body.style.overflow = 'hidden';
+  modal.classList.add("is-open");
+  modal.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
   selectedColor = product.colors?.[0] ?? null;
 }
 
 function closeModal() {
-  const modal = document.getElementById('productModal');
+  const modal = document.getElementById("productModal");
   if (!modal) return;
-  /* Cancel any pending image crossfade so it can't fire after close */
   cancelImageFade();
-  modal.classList.remove('is-open');
-  modal.setAttribute('aria-hidden', 'true');
-  document.body.style.overflow = '';
+  modal.classList.remove("is-open");
+  modal.setAttribute("aria-hidden", "true");
+  document.body.style.overflow = "";
 }
 
 function initModal() {
-  document.getElementById('modalClose')?.addEventListener('click', closeModal);
-  document.getElementById('modalBackdrop')?.addEventListener('click', closeModal);
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+  document.getElementById("modalClose")?.addEventListener("click", closeModal);
+  document.getElementById("modalBackdrop")?.addEventListener("click", closeModal);
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape") closeModal();
+  });
 }
 
-/*
-  Shipping & Returns info modal.
-  Opened from the footer button, closed via its X, backdrop, or Escape.
-  Reuses the same centered-modal styling as the order modal.
-*/
 function initInfoModal() {
-  const modal   = document.getElementById('infoModal');
-  const openBtn = document.getElementById('shippingReturnsBtn');
+  const modal = document.getElementById("infoModal");
+  const openBtn = document.getElementById("shippingReturnsBtn");
   if (!modal || !openBtn) return;
-
   const open = () => {
-    modal.classList.add('is-open');
-    modal.setAttribute('aria-hidden', 'false');
-    document.body.style.overflow = 'hidden';
+    modal.classList.add("is-open");
+    modal.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
   };
   const close = () => {
-    modal.classList.remove('is-open');
-    modal.setAttribute('aria-hidden', 'true');
-    document.body.style.overflow = '';
+    modal.classList.remove("is-open");
+    modal.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
   };
-
-  openBtn.addEventListener('click', open);
-  document.getElementById('infoClose')?.addEventListener('click', close);
-  document.getElementById('infoBackdrop')?.addEventListener('click', close);
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && modal.classList.contains('is-open')) close();
+  openBtn.addEventListener("click", open);
+  document.getElementById("infoClose")?.addEventListener("click", close);
+  document.getElementById("infoBackdrop")?.addEventListener("click", close);
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape" && modal.classList.contains("is-open")) close();
   });
 }
 
+const FORMSPREE_ID = "xpqbozoq";
 
-/* ================================================================
-   8. CONTACT FORM
-   
-   The form uses two strategies depending on whether Formspree is set up:
-   
-   1. If FORMSPREE_ID is configured → posts to Formspree, which forwards
-      the message as an email to thebest.aem@gmail.com. Seamless: the
-      customer sees a success message, never leaves the page.
-   
-   2. If FORMSPREE_ID is left as 'YOUR_FORM_ID' → falls back to mailto:
-      Opens the customer's default email client with the message
-      pre-filled, addressed to thebest.aem@gmail.com. The customer
-      clicks Send themselves. Works without any backend setup.
-   
-   ★ TO UPGRADE TO FORMSPREE (recommended):
-   1. Go to https://formspree.io → sign up → create a form
-   2. Set the form's recipient to thebest.aem@gmail.com
-   3. Copy the 8-character Form ID (e.g. "xpzvwqbo")
-   4. Replace 'YOUR_FORM_ID' below with your actual ID
-   
-   Free tier: 50 submissions/month.
-================================================================ */
-const FORMSPREE_ID = 'xpqbozoq'; /* Configured — submissions go to thebest.aem@gmail.com via Formspree */
-const CONTACT_EMAIL = 'thebest.aem@gmail.com';
+const CONTACT_EMAIL = "thebest.aem@gmail.com";
 
 function initContactForm() {
-  const form    = document.getElementById('contactForm');
-  const success = document.getElementById('formSuccess');
+  const form = document.getElementById("contactForm");
+  const success = document.getElementById("formSuccess");
   if (!form) return;
-
-  /* Floating label support — adds .has-value when input has text */
-  form.querySelectorAll('input, textarea').forEach(field => {
-    field.addEventListener('input', () => {
-      field.classList.toggle('has-value', field.value.trim() !== '');
+  form.querySelectorAll("input, textarea").forEach(field => {
+    field.addEventListener("input", () => {
+      field.classList.toggle("has-value", field.value.trim() !== "");
     });
   });
-
-  form.addEventListener('submit', async (e) => {
+  form.addEventListener("submit", async e => {
     e.preventDefault();
-
-    /* Pull the values once, used by both submission paths */
-    const name    = form.querySelector('#fieldName').value.trim();
-    const email   = form.querySelector('#fieldEmail').value.trim();
-    const message = form.querySelector('#fieldMessage').value.trim();
-    /* Subject is no longer a form field — always use a generic line so you can
-       still distinguish website messages in your inbox. */
-    const subject = 'New message from A&M website';
-
-    /* Path 1: Formspree configured — submit via fetch, no page leave */
-    if (FORMSPREE_ID && FORMSPREE_ID !== 'YOUR_FORM_ID') {
+    const name = form.querySelector("#fieldName").value.trim();
+    const email = form.querySelector("#fieldEmail").value.trim();
+    const message = form.querySelector("#fieldMessage").value.trim();
+    const subject = "New message from A&M website";
+    if (FORMSPREE_ID && FORMSPREE_ID !== "YOUR_FORM_ID") {
       try {
         const res = await fetch(`https://formspree.io/f/${FORMSPREE_ID}`, {
-          method:  'POST',
-          body:    new FormData(form),
-          headers: { 'Accept': 'application/json' }
+          method: "POST",
+          body: new FormData(form),
+          headers: {
+            Accept: "application/json"
+          }
         });
         if (res.ok) {
           showSuccess();
         } else {
-          /* Formspree returned an error — fall back to mailto */
           openMailto(name, email, subject, message);
         }
       } catch {
-        /* Network error — fall back to mailto */
         openMailto(name, email, subject, message);
       }
       return;
     }
-
-    /* Path 2: No Formspree ID — open the user's email client directly */
     openMailto(name, email, subject, message);
     showSuccess();
   });
-
-  /*
-    Build a mailto: link with the message body and open the customer's
-    email client. Works offline, no backend needed.
-    
-    The email body includes the customer's name, email, and message —
-    everything you'd need to reply to them directly.
-  */
   function openMailto(name, email, subject, message) {
-    const body = [
-      `From: ${name}`,
-      `Email: ${email}`,
-      '',
-      'Message:',
-      message,
-      '',
-      '— Sent from the A&M website'
-    ].join('\n');
-
-    const mailto = `mailto:${CONTACT_EMAIL}` +
-      `?subject=${encodeURIComponent(subject)}` +
-      `&body=${encodeURIComponent(body)}`;
-
+    const body = [ `From: ${name}`, `Email: ${email}`, "", "Message:", message, "", "— Sent from the A&M website" ].join("\n");
+    const mailto = `mailto:${CONTACT_EMAIL}` + `?subject=${encodeURIComponent(subject)}` + `&body=${encodeURIComponent(body)}`;
     window.location.href = mailto;
   }
-
-  /*
-    Show the success state. We fully hide the form fields so the success
-    message stands alone, instead of dimming the form and leaving both
-    visible (which made the success feel less prominent). The form is
-    kept in the DOM so that if you later wanted to re-enable submission
-    it could be re-shown without rebuilding.
-  */
   function showSuccess() {
-    /* Hide every direct child of the form except the success element */
     Array.from(form.children).forEach(child => {
-      if (child.id !== 'formSuccess') child.style.display = 'none';
+      if (child.id !== "formSuccess") child.style.display = "none";
     });
     if (success) {
-      success.classList.add('is-visible');
-      /* Make sure the success isn't inheriting any dimmed state */
-      success.style.opacity = '1';
+      success.classList.add("is-visible");
+      success.style.opacity = "1";
     }
   }
 }
 
-
-/* ================================================================
-   9. FOOTER YEAR
-================================================================ */
 function initFooterYear() {
-  const el = document.getElementById('footerYear');
-  if (el) el.textContent = new Date().getFullYear();
+  const el = document.getElementById("footerYear");
+  if (el) el.textContent = (new Date).getFullYear();
 }
 
-
-/* ================================================================
-   10. TRANSLATIONS — EN / PT-PT
-
-   Two parts:
-   
-   PRODUCT_TRANSLATIONS — keyed by product ID, with name/family/description
-   for each language. English values are already in the PRODUCTS array
-   as defaults, so we only need to define non-English here.
-   
-   TRANSLATIONS — UI text (buttons, labels, messages).
-
-   ★ HOW TO ADD/EDIT TRANSLATIONS:
-   
-   For PRODUCT names/descriptions:
-     Edit PRODUCT_TRANSLATIONS below. Use the product's id as the key.
-     If a key is missing for a given language, the English default 
-     from PRODUCTS is used as a fallback.
-   
-   For UI text:
-     Find the key in TRANSLATIONS that matches data-i18n in index.html
-     and update its value.
-   
-   ★ HOW TO ADD A NEW UI STRING:
-   1. Add data-i18n="my.key" to the element in index.html.
-   2. Add "my.key": "English text" to en: {}.
-   3. Add "my.key": "Texto PT" to pt: {}.
-================================================================ */
-
-/*
-  Per-product translations. English is the source of truth in PRODUCTS;
-  add Portuguese (and any future language) entries below for each product
-  you want translated.
-  
-  Fields you can translate per product:
-    name        — shown on cards, modal, cart, order summary
-    family      — shown on cards (the muted line under the name) and in modal
-    description — shown in modal only
-  
-  Any missing field falls back to the value in PRODUCTS.
-*/
 const PRODUCT_TRANSLATIONS = {
   pt: {
-    /* Apparel */
-    1:  {
-      name: 'T-Shirt',
-      family: 'T-Shirt',
-      description: 'T-shirt com design exclusivo da marca.'
+    1: {
+      name: "T-Shirt",
+      family: "T-Shirt",
+      description: "T-shirt com design exclusivo da marca."
     },
-    2:  {
+    2: {
       name: 'T-Shirt Coleção "The Best."',
       family: 'T-Shirt Coleção "The Best."',
-      description: 'T-shirt com design exclusivo da marca.'
+      description: "T-shirt com design exclusivo da marca."
     },
-    3:  {
-      name: 'Hoodie',
-      family: 'Hoodie',
-      description: 'Hoodie com design exclusivo da marca.'
+    3: {
+      name: "Hoodie",
+      family: "Hoodie",
+      description: "Hoodie com design exclusivo da marca."
     },
-    4:  {
-      name: 'Sweatshirt',
-      family: 'Sweatshirt',
-      description: 'Sweatshirt com design exclusivo da marca.'
+    4: {
+      name: "Sweatshirt",
+      family: "Sweatshirt",
+      description: "Sweatshirt com design exclusivo da marca."
     },
-    5:  {
-      name: 'Calções',
-      family: 'Calções',
-      description: 'Calções com design exclusivo da marca.'
+    5: {
+      name: "Calções",
+      family: "Calções",
+      description: "Calções com design exclusivo da marca."
     },
-
-    /* Caps */
-    6:  {
-      name: 'Boné',
-      family: 'Boné',
-      description: 'Boné com detalhe da marca.'
+    6: {
+      name: "Boné",
+      family: "Boné",
+      description: "Boné com detalhe da marca."
     },
-
-    /* Socks */
-    7:  {
-      name: 'Meias',
-      family: 'Meias',
-      description: 'Meias com design exclusivo da marca.'
+    7: {
+      name: "Meias",
+      family: "Meias",
+      description: "Meias com design exclusivo da marca."
     },
-
-    /* Accessories */
-    8:  {
-      name: 'Garrafa de Água',
-      family: 'Garrafa A&M',
-      description: 'Garrafa de água reutilizável com branding da marca.'
+    8: {
+      name: "Garrafa de Água",
+      family: "Garrafa A&M",
+      description: "Garrafa de água reutilizável com branding da marca."
     },
-    9:  {
-      name: 'Totebag',
-      family: 'Totebag',
-      description: 'Totebag com branding da marca.'
+    9: {
+      name: "Totebag",
+      family: "Totebag",
+      description: "Totebag com branding da marca."
     },
     10: {
-      name: 'Baralho de Cartas',
-      family: 'Baralho de Cartas',
-      description: 'Baralho de cartas plastificadas com design personalizado.'
+      name: "Baralho de Cartas",
+      family: "Baralho de Cartas",
+      description: "Baralho de cartas plastificadas com design personalizado."
     },
     11: {
-      name: 'Bases para Copos',
-      family: 'Bases para Copos',
-      description: 'Bases para copos em cabedal com detalhe da marca.'
+      name: "Bases para Copos",
+      family: "Bases para Copos",
+      description: "Bases para copos em cabedal com detalhe da marca."
     },
     12: {
-      name: 'Caderno',
-      family: 'Caderno',
-      description: 'Caderno A5 de linhas com detalhe da marca.'
+      name: "Caderno",
+      family: "Caderno",
+      description: "Caderno A5 de linhas com detalhe da marca."
     },
     13: {
-      name: 'Caneta',
-      family: 'Caneta',
-      description: 'Caneta com detalhe da marca.'
+      name: "Caneta",
+      family: "Caneta",
+      description: "Caneta com detalhe da marca."
     },
     14: {
-      name: 'Pack de Canetas',
-      family: 'Pack de Canetas',
-      description: 'Canetas com detalhe da marca. O pack de escrita completo.'
+      name: "Pack de Canetas",
+      family: "Pack de Canetas",
+      description: "Canetas com detalhe da marca. O pack de escrita completo."
     },
     15: {
-      name: 'Porta-chaves',
-      family: 'Porta-chaves',
-      description: 'Porta-chaves metálico com branding da marca.'
+      name: "Porta-chaves",
+      family: "Porta-chaves",
+      description: "Porta-chaves metálico com branding da marca."
     },
     16: {
-      name: 'Capa de Telemóvel',
-      family: 'Capa de Telemóvel',
-      description: 'Capa de telemóvel preta com branding da marca.'
+      name: "Capa de Telemóvel",
+      family: "Capa de Telemóvel",
+      description: "Capa de telemóvel preta com branding da marca."
     },
-
-    /* Packs */
     17: {
-      name: 'Pack Verão',
-      family: 'Packs',
-      description: 'O Pack Verão: T-Shirt + Calções + Meias. Tudo o que precisas para os meses quentes, com desconto.'
+      name: "Pack Verão",
+      family: "Packs",
+      description: "O Pack Verão: T-Shirt + Calções + Meias. Tudo o que precisas para os meses quentes, com desconto."
     },
     18: {
-      name: 'Pack Inverno',
-      family: 'Packs',
-      description: 'O Pack Inverno: Hoodie + Sweatshirt + Meias. Mantém-te quente, mantém-te fresh.'
+      name: "Pack Inverno",
+      family: "Packs",
+      description: "O Pack Inverno: Hoodie + Sweatshirt + Meias. Mantém-te quente, mantém-te fresh."
     },
     19: {
-      name: 'Pack Essencial',
-      family: 'Packs',
-      description: 'O Pack Essencial: T-Shirt + Totebag + Meias. O kit inicial perfeito.'
+      name: "Pack Essencial",
+      family: "Packs",
+      description: "O Pack Essencial: T-Shirt + Totebag + Meias. O kit inicial perfeito."
     },
     20: {
-      name: 'Pack Completo',
-      family: 'Packs',
-      description: 'O Pack Completo: T-Shirt + Hoodie + Calções + Meias + Totebag. A experiência A&M completa.'
+      name: "Pack Completo",
+      family: "Packs",
+      description: "O Pack Completo: T-Shirt + Hoodie + Calções + Meias + Totebag. A experiência A&M completa."
     },
     21: {
-      name: 'Pack Office',
-      family: 'Packs',
-      description: 'O Pack Office. Tudo o que precisas para a secretária, com desconto.'
+      name: "Pack Office",
+      family: "Packs",
+      description: "O Pack Office. Tudo o que precisas para a secretária, com desconto."
     },
     22: {
-      name: 'Pack Street',
-      family: 'Packs',
-      description: 'O Pack Street. Essenciais do dia a dia, com desconto.'
-    },
+      name: "Pack Street",
+      family: "Packs",
+      description: "O Pack Street. Essenciais do dia a dia, com desconto."
+    }
   }
 };
 
-/*
-  Resolve a translated value for a product field in the current language.
-  Falls back to the value on the PRODUCTS object if no translation exists.
-  
-  Usage: tProduct(product, 'name')   → returns translated name or default
-*/
 function tProduct(product, field) {
-  const lang = document.documentElement.dataset.lang || 'en';
-  if (lang === 'en') return product[field];
+  const lang = document.documentElement.dataset.lang || "en";
+  if (lang === "en") return product[field];
   return PRODUCT_TRANSLATIONS[lang]?.[product.id]?.[field] ?? product[field];
 }
 
-
-/*
-  Colour name translations.
-  
-  English labels live on the COLORS map in section 1 (e.g. 'Burgundy').
-  When the language is set to PT, we look up the English label here
-  and return its Portuguese equivalent.
-  
-  ★ TO ADD A COLOUR:
-  1. Add it to COLORS in section 1 with an English label.
-  2. Add the Portuguese translation here, keyed by the English label.
-*/
 const COLOR_TRANSLATIONS = {
   pt: {
-    'Burgundy':     'Bordeaux',
-    'Navy':         'Azul Marinho',
-    'Forest Green': 'Verde Floresta',
-    'Black':        'Preto',
-    'White':        'Branco',
+    Burgundy: "Bordeaux",
+    Navy: "Azul Marinho",
+    "Forest Green": "Verde Floresta",
+    Black: "Preto",
+    White: "Branco"
   }
 };
 
-/* Look up a colour's translated label. Falls back to English. */
 function tColor(label) {
-  const lang = document.documentElement.dataset.lang || 'en';
-  if (lang === 'en') return label;
+  const lang = document.documentElement.dataset.lang || "en";
+  if (lang === "en") return label;
   return COLOR_TRANSLATIONS[lang]?.[label] ?? label;
 }
 
-/*
-  Build the localised "Save €X" string from a product's `save` field.
-  Used for the savings indicator on packs.
-  Example: tSave('€3') → "Save €3" (EN) / "Poupa €3" (PT)
-*/
 function tSave(amount) {
-  const lang = document.documentElement.dataset.lang || 'en';
-  const verb = lang === 'pt' ? 'Poupa' : 'Save';
+  const lang = document.documentElement.dataset.lang || "en";
+  const verb = lang === "pt" ? "Poupa" : "Save";
   return `${verb} ${amount}`;
 }
 
-/*
-  Translate a product badge label.
-  Three valid badges: "Best Seller", "New", "Best Value".
-  Stored on each product as the English string, so we look up the PT equivalent.
-  Falls back to the original label if no translation found (e.g. custom badges).
-*/
 const BADGE_TRANSLATIONS = {
   pt: {
-    'Best Seller': 'Mais Vendido',
-    'New':         'Novo',
-    'Best Value':  'Melhor Valor',
+    "Best Seller": "Mais Vendido",
+    New: "Novo",
+    "Best Value": "Melhor Valor"
   }
 };
 
 function tBadge(label) {
-  const lang = document.documentElement.dataset.lang || 'en';
-  if (lang === 'en') return label;
+  const lang = document.documentElement.dataset.lang || "en";
+  if (lang === "en") return label;
   return BADGE_TRANSLATIONS[lang]?.[label] ?? label;
 }
 
-/*
-  Translate size labels. Most sizes (S, M, L, XL) are universal abbreviations
-  and don't need translating. The exceptions: "One Size" needs a PT version,
-  and bottle volumes ("350ml", "600ml") are language-neutral but listed here
-  for completeness so any future locale-specific size labels have a home.
-  Falls back to the raw label if no translation found.
-*/
 const SIZE_TRANSLATIONS = {
   pt: {
-    'One Size': 'Tamanho Único',
+    "One Size": "Tamanho Único"
   }
 };
 
 function tSize(label) {
-  const lang = document.documentElement.dataset.lang || 'en';
-  if (lang === 'en') return label;
+  const lang = document.documentElement.dataset.lang || "en";
+  if (lang === "en") return label;
   return SIZE_TRANSLATIONS[lang]?.[label] ?? label;
 }
 
-
 const TRANSLATIONS = {
   en: {
-    'nav.shop': 'Shop', 'nav.contact': 'Contact',
-    'hero.eyebrow': 'New Season Drop', 'hero.line1': 'WEAR', 'hero.line2': 'YOUR',
-    'hero.line3': 'STANDARD', 'hero.sub': 'Premium quality. Minimal design. Built to last.',
-    'hero.cta': 'Shop the Collection', 'hero.scroll': 'Scroll',
-    'ticker.1': 'Premium Merch', 'ticker.2': 'Free Shipping Over €50',
-    'ticker.3': 'New Drops Weekly', 'ticker.4': 'Unisex Sizing',
-    'ticker.5': '100% Organic Cotton', 'ticker.6': 'Limited Quantities',
-    'products.eyebrow': 'The Collection', 'products.title': 'Shop Everything',
-    'filter.all': 'All', 'filter.tshirt': 'T-Shirts', 'filter.tshirt-nolog': '"The Best." Collection',
-    'filter.hoodie': 'Hoodies', 'filter.sweatshirt': 'Sweatshirts', 'filter.shorts': 'Shorts',
-    'filter.cap': 'Caps', 'filter.socks': 'Socks', 'filter.accessories': 'Accessories',
-    'filter.pack': 'Packs',
-    'product.view': 'View Product',
-    'modal.selectSize': 'Select Size', 'modal.colour': 'Colour',
-    'modal.addToCart': 'Add to Cart', 'modal.shipping': 'Free shipping over €50 • Free pen with orders over €25',
-    'modal.selectSizeAlert': 'Please select an option first.', 'modal.size': 'Size',
-    'sort.label': 'Sort:', 'sort.default': 'Default',
-    'sort.nameAsc': 'Name A→Z', 'sort.nameDesc': 'Name Z→A',
-    'sort.priceAsc': 'Price ↑', 'sort.priceDesc': 'Price ↓',
-    'cart.title': 'Your Cart', 'cart.total': 'Total',
-    'cart.orderByEmail': 'Order by Email', 'cart.empty': 'Your cart is empty.',
-    'order.eyebrow': 'Complete your order', 'order.title': 'Order by Email',
-    'order.name': 'Name', 'order.phone': 'Phone Number',
-    'order.email': 'Email', 'order.address': 'Delivery Address',
-    'order.submit': 'Order',
-    'email.subject': 'A&M Order',
-    'email.heading': 'New A&M order',
-    'email.customer': 'CUSTOMER:',
-    'email.name': 'Name',
-    'email.phone': 'Phone',
-    'email.email': 'Email',
-    'email.address': 'Address',
-    'email.items': 'ITEMS:',
-    'email.total': 'TOTAL',
-    'email.footer': 'Awaiting payment confirmation.',
-    'contact.eyebrow': 'Get in Touch', 'contact.title': "Let's Talk",
-    'contact.desc': 'Questions about sizing, wholesale, or collabs?<br />We usually reply within 24 hours.',
-    'contact.name': 'Your Name', 'contact.email': 'Email Address',
-    'contact.message': 'Your Message',
-    'contact.send': 'Send Message', 'contact.success': "✓ Message sent! We'll be in touch soon.",
-    'footer.rights': 'All rights reserved.',
-    'footer.shippingReturns': 'Shipping & Returns',
-    'info.eyebrow': 'Good to know',
-    'info.title': 'Shipping & Returns',
-    'info.shippingHeading': 'Shipping',
-    'info.shippingBody': "We ship across Portugal. Orders are prepared and sent once payment is confirmed, and we'll keep you updated by email along the way. Shipping is free on orders over €50.",
-    'info.returnsHeading': 'Returns',
-    'info.returnsBody': "If something isn't right with your order, get in touch within a reasonable time of receiving it and we'll do our best to sort it out. Items should be unused and in their original condition.",
-    'info.contactHeading': 'Questions?',
-    'info.contactBody': 'For anything about your order, reach us through the contact form or by email and we\'ll get back to you.',
+    "nav.shop": "Shop",
+    "nav.contact": "Contact",
+    "hero.eyebrow": "New Season Drop",
+    "hero.line1": "WEAR",
+    "hero.line2": "YOUR",
+    "hero.line3": "STANDARD",
+    "hero.sub": "Premium quality. Minimal design. Built to last.",
+    "hero.cta": "Shop the Collection",
+    "hero.scroll": "Scroll",
+    "ticker.1": "Premium Merch",
+    "ticker.2": "Free Shipping Over €50",
+    "ticker.3": "New Drops Weekly",
+    "ticker.4": "Unisex Sizing",
+    "ticker.5": "100% Organic Cotton",
+    "ticker.6": "Limited Quantities",
+    "products.eyebrow": "The Collection",
+    "products.title": "Shop Everything",
+    "filter.all": "All",
+    "filter.tshirt": "T-Shirts",
+    "filter.tshirt-nolog": '"The Best." Collection',
+    "filter.hoodie": "Hoodies",
+    "filter.sweatshirt": "Sweatshirts",
+    "filter.shorts": "Shorts",
+    "filter.cap": "Caps",
+    "filter.socks": "Socks",
+    "filter.accessories": "Accessories",
+    "filter.pack": "Packs",
+    "product.view": "View Product",
+    "modal.selectSize": "Select Size",
+    "modal.colour": "Colour",
+    "modal.addToCart": "Add to Cart",
+    "modal.shipping": "Free shipping over €50 • Free pen with orders over €25",
+    "modal.selectSizeAlert": "Please select an option first.",
+    "modal.size": "Size",
+    "sort.label": "Sort:",
+    "sort.default": "Default",
+    "sort.nameAsc": "Name A→Z",
+    "sort.nameDesc": "Name Z→A",
+    "sort.priceAsc": "Price ↑",
+    "sort.priceDesc": "Price ↓",
+    "cart.title": "Your Cart",
+    "cart.total": "Total",
+    "cart.orderByEmail": "Order by Email",
+    "cart.empty": "Your cart is empty.",
+    "order.eyebrow": "Complete your order",
+    "order.title": "Order by Email",
+    "order.name": "Name",
+    "order.phone": "Phone Number",
+    "order.email": "Email",
+    "order.address": "Delivery Address",
+    "order.submit": "Order",
+    "email.subject": "A&M Order",
+    "email.heading": "New A&M order",
+    "email.customer": "CUSTOMER:",
+    "email.name": "Name",
+    "email.phone": "Phone",
+    "email.email": "Email",
+    "email.address": "Address",
+    "email.items": "ITEMS:",
+    "email.total": "TOTAL",
+    "email.footer": "Awaiting payment confirmation.",
+    "contact.eyebrow": "Get in Touch",
+    "contact.title": "Let's Talk",
+    "contact.desc": "Questions about sizing, wholesale, or collabs?<br />We usually reply within 24 hours.",
+    "contact.name": "Your Name",
+    "contact.email": "Email Address",
+    "contact.message": "Your Message",
+    "contact.send": "Send Message",
+    "contact.success": "✓ Message sent! We'll be in touch soon.",
+    "footer.rights": "All rights reserved.",
+    "footer.shippingReturns": "Shipping & Returns",
+    "info.eyebrow": "Good to know",
+    "info.title": "Shipping & Returns",
+    "info.shippingHeading": "Shipping",
+    "info.shippingBody": "We ship across Portugal. Orders are prepared and sent once payment is confirmed, and we'll keep you updated by email along the way. Shipping is free on orders over €50.",
+    "info.returnsHeading": "Returns",
+    "info.returnsBody": "If something isn't right with your order, get in touch within a reasonable time of receiving it and we'll do our best to sort it out. Items should be unused and in their original condition.",
+    "info.contactHeading": "Questions?",
+    "info.contactBody": "For anything about your order, reach us through the contact form or by email and we'll get back to you."
   },
   pt: {
-    'nav.shop': 'Loja', 'nav.contact': 'Contacto',
-    'hero.eyebrow': 'Nova Coleção', 'hero.line1': 'VESTE', 'hero.line2': 'O TEU',
-    'hero.line3': 'STANDARD', 'hero.sub': 'Qualidade premium. Design minimalista. Feito para durar.',
-    'hero.cta': 'Ver Coleção', 'hero.scroll': 'Explorar',
-    'ticker.1': 'Merch Premium', 'ticker.2': 'Envio Grátis Acima de €50',
-    'ticker.3': 'Novidades Semanais', 'ticker.4': 'Tamanhos Unissexo',
-    'ticker.5': '100% Algodão Orgânico', 'ticker.6': 'Quantidades Limitadas',
-    'products.eyebrow': 'A Coleção', 'products.title': 'Ver Tudo',
-    'filter.all': 'Todos', 'filter.tshirt': 'T-Shirts', 'filter.tshirt-nolog': 'Coleção "The Best."',
-    'filter.hoodie': 'Hoodies', 'filter.sweatshirt': 'Sweatshirts', 'filter.shorts': 'Calções',
-    'filter.cap': 'Bonés', 'filter.socks': 'Meias', 'filter.accessories': 'Acessórios',
-    'filter.pack': 'Packs',
-    'product.view': 'Ver Produto',
-    'modal.selectSize': 'Escolher Tamanho', 'modal.colour': 'Cor',
-    'modal.addToCart': 'Adicionar ao Carrinho', 'modal.shipping': 'Envio grátis acima de €50 • Oferta de caneta acima de €25',
-    'modal.selectSizeAlert': 'Por favor escolhe uma opção.', 'modal.size': 'Tamanho',
-    'sort.label': 'Ordenar:', 'sort.default': 'Padrão',
-    'sort.nameAsc': 'Nome A→Z', 'sort.nameDesc': 'Nome Z→A',
-    'sort.priceAsc': 'Preço ↑', 'sort.priceDesc': 'Preço ↓',
-    'cart.title': 'O Teu Carrinho', 'cart.total': 'Total',
-    'cart.orderByEmail': 'Encomendar por Email', 'cart.empty': 'O teu carrinho está vazio.',
-    'order.eyebrow': 'Finaliza a tua encomenda', 'order.title': 'Encomendar por Email',
-    'order.name': 'Nome', 'order.phone': 'Número de Telefone',
-    'order.email': 'Email', 'order.address': 'Morada de Entrega',
-    'order.submit': 'Encomendar',
-    'email.subject': 'Encomenda A&M',
-    'email.heading': 'Nova encomenda A&M',
-    'email.customer': 'CLIENTE:',
-    'email.name': 'Nome',
-    'email.phone': 'Telefone',
-    'email.email': 'Email',
-    'email.address': 'Morada',
-    'email.items': 'ARTIGOS:',
-    'email.total': 'TOTAL',
-    'email.footer': 'A aguardar confirmação de pagamento.',
-    'contact.eyebrow': 'Fala Connosco', 'contact.title': 'Vamos Falar',
-    'contact.desc': 'Dúvidas sobre tamanhos, grossista ou colaborações?<br />Respondemos geralmente em 24 horas.',
-    'contact.name': 'O Teu Nome', 'contact.email': 'Endereço de Email',
-    'contact.message': 'A Tua Mensagem',
-    'contact.send': 'Enviar Mensagem', 'contact.success': '✓ Mensagem enviada! Estamos em contacto.',
-    'footer.rights': 'Todos os direitos reservados.',
-    'footer.shippingReturns': 'Envios e Devoluções',
-    'info.eyebrow': 'Bom saber',
-    'info.title': 'Envios e Devoluções',
-    'info.shippingHeading': 'Envios',
-    'info.shippingBody': 'Enviamos para todo o Portugal. As encomendas são preparadas e enviadas após confirmação do pagamento, e mantemos-te a par por email ao longo do processo. Envio grátis em encomendas acima de €50.',
-    'info.returnsHeading': 'Devoluções',
-    'info.returnsBody': 'Se algo não estiver bem com a tua encomenda, contacta-nos num prazo razoável após a receção e faremos o nosso melhor para resolver. Os artigos devem estar por usar e na condição original.',
-    'info.contactHeading': 'Dúvidas?',
-    'info.contactBody': 'Para qualquer questão sobre a tua encomenda, fala connosco através do formulário de contacto ou por email e respondemos assim que possível.',
+    "nav.shop": "Loja",
+    "nav.contact": "Contacto",
+    "hero.eyebrow": "Nova Coleção",
+    "hero.line1": "VESTE",
+    "hero.line2": "O TEU",
+    "hero.line3": "STANDARD",
+    "hero.sub": "Qualidade premium. Design minimalista. Feito para durar.",
+    "hero.cta": "Ver Coleção",
+    "hero.scroll": "Explorar",
+    "ticker.1": "Merch Premium",
+    "ticker.2": "Envio Grátis Acima de €50",
+    "ticker.3": "Novidades Semanais",
+    "ticker.4": "Tamanhos Unissexo",
+    "ticker.5": "100% Algodão Orgânico",
+    "ticker.6": "Quantidades Limitadas",
+    "products.eyebrow": "A Coleção",
+    "products.title": "Ver Tudo",
+    "filter.all": "Todos",
+    "filter.tshirt": "T-Shirts",
+    "filter.tshirt-nolog": 'Coleção "The Best."',
+    "filter.hoodie": "Hoodies",
+    "filter.sweatshirt": "Sweatshirts",
+    "filter.shorts": "Calções",
+    "filter.cap": "Bonés",
+    "filter.socks": "Meias",
+    "filter.accessories": "Acessórios",
+    "filter.pack": "Packs",
+    "product.view": "Ver Produto",
+    "modal.selectSize": "Escolher Tamanho",
+    "modal.colour": "Cor",
+    "modal.addToCart": "Adicionar ao Carrinho",
+    "modal.shipping": "Envio grátis acima de €50 • Oferta de caneta acima de €25",
+    "modal.selectSizeAlert": "Por favor escolhe uma opção.",
+    "modal.size": "Tamanho",
+    "sort.label": "Ordenar:",
+    "sort.default": "Padrão",
+    "sort.nameAsc": "Nome A→Z",
+    "sort.nameDesc": "Nome Z→A",
+    "sort.priceAsc": "Preço ↑",
+    "sort.priceDesc": "Preço ↓",
+    "cart.title": "O Teu Carrinho",
+    "cart.total": "Total",
+    "cart.orderByEmail": "Encomendar por Email",
+    "cart.empty": "O teu carrinho está vazio.",
+    "order.eyebrow": "Finaliza a tua encomenda",
+    "order.title": "Encomendar por Email",
+    "order.name": "Nome",
+    "order.phone": "Número de Telefone",
+    "order.email": "Email",
+    "order.address": "Morada de Entrega",
+    "order.submit": "Encomendar",
+    "email.subject": "Encomenda A&M",
+    "email.heading": "Nova encomenda A&M",
+    "email.customer": "CLIENTE:",
+    "email.name": "Nome",
+    "email.phone": "Telefone",
+    "email.email": "Email",
+    "email.address": "Morada",
+    "email.items": "ARTIGOS:",
+    "email.total": "TOTAL",
+    "email.footer": "A aguardar confirmação de pagamento.",
+    "contact.eyebrow": "Fala Connosco",
+    "contact.title": "Vamos Falar",
+    "contact.desc": "Dúvidas sobre tamanhos, grossista ou colaborações?<br />Respondemos geralmente em 24 horas.",
+    "contact.name": "O Teu Nome",
+    "contact.email": "Endereço de Email",
+    "contact.message": "A Tua Mensagem",
+    "contact.send": "Enviar Mensagem",
+    "contact.success": "✓ Mensagem enviada! Estamos em contacto.",
+    "footer.rights": "Todos os direitos reservados.",
+    "footer.shippingReturns": "Envios e Devoluções",
+    "info.eyebrow": "Bom saber",
+    "info.title": "Envios e Devoluções",
+    "info.shippingHeading": "Envios",
+    "info.shippingBody": "Enviamos para todo o Portugal. As encomendas são preparadas e enviadas após confirmação do pagamento, e mantemos-te a par por email ao longo do processo. Envio grátis em encomendas acima de €50.",
+    "info.returnsHeading": "Devoluções",
+    "info.returnsBody": "Se algo não estiver bem com a tua encomenda, contacta-nos num prazo razoável após a receção e faremos o nosso melhor para resolver. Os artigos devem estar por usar e na condição original.",
+    "info.contactHeading": "Dúvidas?",
+    "info.contactBody": "Para qualquer questão sobre a tua encomenda, fala connosco através do formulário de contacto ou por email e respondemos assim que possível."
   }
 };
 
-
-/* ================================================================
-   11. LANGUAGE SWITCHER
-================================================================ */
 function setLanguage(lang) {
   if (!TRANSLATIONS[lang]) return;
   const t = TRANSLATIONS[lang];
-
-  /* Update all [data-i18n] elements */
-  document.querySelectorAll('[data-i18n]').forEach(el => {
+  document.querySelectorAll("[data-i18n]").forEach(el => {
     const key = el.dataset.i18n;
     if (!t[key]) return;
-    /* contact.desc contains a <br> tag — use innerHTML; everything else is plain text */
-    if (key === 'contact.desc') {
+    if (key === "contact.desc") {
       el.innerHTML = t[key];
     } else {
       el.textContent = t[key];
     }
   });
-
-  /* Also update <option> elements inside the sort select (data-i18n on options) */
-  document.querySelectorAll('option[data-i18n]').forEach(opt => {
+  document.querySelectorAll("option[data-i18n]").forEach(opt => {
     const key = opt.dataset.i18n;
     if (t[key]) opt.textContent = t[key];
   });
-
-  document.querySelectorAll('.lang-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.lang === lang);
+  document.querySelectorAll(".lang-btn").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.lang === lang);
   });
   document.documentElement.dataset.lang = lang;
-  try { localStorage.setItem('am-lang', lang); } catch {}
-
-  /*
-    Re-render any UI that contains translated product names.
-    Product cards are rebuilt as fresh DOM nodes; the cart re-renders
-    to update line item names.
-    Guard with typeof so this can be called before init too.
-  */
-  if (typeof renderProducts === 'function' && document.getElementById('productGrid')) {
+  try {
+    localStorage.setItem("am-lang", lang);
+  } catch {}
+  if (typeof renderProducts === "function" && document.getElementById("productGrid")) {
     renderProducts();
-    /* Re-apply current sort/filter state after re-render */
-    const activeFilter = document.querySelector('.filter-btn.active');
-    if (activeFilter && activeFilter.dataset.filter !== 'all') {
-      document.querySelectorAll('.product-card').forEach(card => {
-        card.classList.toggle('is-hidden', card.dataset.category !== activeFilter.dataset.filter);
+    const activeFilter = document.querySelector(".filter-btn.active");
+    if (activeFilter && activeFilter.dataset.filter !== "all") {
+      document.querySelectorAll(".product-card").forEach(card => {
+        card.classList.toggle("is-hidden", card.dataset.category !== activeFilter.dataset.filter);
       });
     }
-    /*
-      The IntersectionObserver from initScrollReveal() already disconnected
-      after the initial reveal. The freshly rendered cards have opacity:0
-      from CSS, so we reveal them immediately — language switches always
-      happen with the grid in view, so the scroll-in animation isn't needed.
-    */
-    document.querySelectorAll('.product-card').forEach(card => {
-      card.classList.add('is-revealed');
+    document.querySelectorAll(".product-card").forEach(card => {
+      card.classList.add("is-revealed");
     });
-    if (typeof fixGhostCells === 'function') fixGhostCells();
+    if (typeof fixGhostCells === "function") fixGhostCells();
   }
-  if (typeof Cart !== 'undefined' && Cart.render) Cart.render();
+  if (typeof Cart !== "undefined" && Cart.render) Cart.render();
 }
 
 function initLanguageSwitcher() {
-  document.querySelectorAll('.lang-btn').forEach(btn => {
-    btn.addEventListener('click', () => setLanguage(btn.dataset.lang));
+  document.querySelectorAll(".lang-btn").forEach(btn => {
+    btn.addEventListener("click", () => setLanguage(btn.dataset.lang));
   });
-
-  /*
-    Language priority on page load:
-    1. The user's saved preference (set by clicking EN/PT before).
-    2. Otherwise: default to Portuguese (the brand's primary market).
-    
-    To change the default language, edit DEFAULT_LANG below.
-  */
-  const DEFAULT_LANG = 'pt';
-
+  const DEFAULT_LANG = "pt";
   try {
-    const saved = localStorage.getItem('am-lang');
+    const saved = localStorage.getItem("am-lang");
     if (saved && TRANSLATIONS[saved]) {
       setLanguage(saved);
     } else {
       setLanguage(DEFAULT_LANG);
     }
   } catch {
-    /* localStorage unavailable (private mode) — still apply the default */
     setLanguage(DEFAULT_LANG);
   }
 }
 
+const ORDER_EMAIL = "thebest.aem@gmail.com";
 
-/* ================================================================
-   12. SHOPPING CART
-
-   The Cart object is a singleton that manages cart state, persists
-   to localStorage so items survive page refresh, and renders into
-   the cart panel + count badge.
-
-   ★ HOW THE CHECKOUT WORKS:
-   GitHub Pages is static — there's no backend to send emails from.
-   The "Order by Email" button opens a modal with the order summary
-   and a customer info form. On submit, it builds a mailto: link
-   pre-filled with all the details and opens the customer's email
-   client. They click "Send" once, and the email arrives at
-   ORDER_EMAIL below. After submitting, the cart is emptied.
-
-   ★ WHERE ORDERS ARE SENT:
-   Change ORDER_EMAIL to send orders elsewhere.
-
-   ★ MBWAY PAYMENT NUMBER:
-   MBWAY_NUMBER is kept for reference but is NOT currently shown anywhere
-   (payment details are handled separately when you reply to the customer).
-   Left here so the number lives in one known place if you want to reuse it.
-
-   ★ ITEM IDENTITY:
-   Each cart line is identified by id + size + color, so the same
-   product in different sizes/colours becomes separate cart lines.
-================================================================ */
-
-const ORDER_EMAIL  = 'thebest.aem@gmail.com';
-const MBWAY_NUMBER = '912 025 191';
+const MBWAY_NUMBER = "912 025 191";
 
 const Cart = {
   items: [],
-
-  /* Load saved cart from localStorage on init */
   init() {
     try {
-      const saved = localStorage.getItem('am-cart');
+      const saved = localStorage.getItem("am-cart");
       if (saved) this.items = JSON.parse(saved);
-    } catch { this.items = []; }
+    } catch {
+      this.items = [];
+    }
     this.render();
   },
-
-  /* Persist cart to localStorage so refresh doesn't lose items */
   save() {
-    try { localStorage.setItem('am-cart', JSON.stringify(this.items)); } catch {}
+    try {
+      localStorage.setItem("am-cart", JSON.stringify(this.items));
+    } catch {}
   },
-
-  /* Add an item — if same product+size+color exists, increment quantity */
   add(item) {
-    const existing = this.items.find(i =>
-      i.id === item.id && i.size === item.size && i.color === item.color
-    );
+    const existing = this.items.find(i => i.id === item.id && i.size === item.size && i.color === item.color);
     if (existing) {
       existing.qty += 1;
     } else {
-      this.items.push({ ...item, qty: 1 });
+      this.items.push({
+        ...item,
+        qty: 1
+      });
     }
     this.save();
     this.render();
   },
-
-  /* Change quantity by delta (+1 or -1). Removes line when qty hits 0. */
   changeQty(idx, delta) {
     const item = this.items[idx];
     if (!item) return;
@@ -2097,323 +1279,182 @@ const Cart = {
     this.save();
     this.render();
   },
-
   remove(idx) {
     this.items.splice(idx, 1);
     this.save();
     this.render();
   },
-
   empty() {
     this.items = [];
     this.save();
     this.render();
   },
-
-  /* Total price across all line items */
   total() {
-    return this.items.reduce((sum, i) => sum + (i.price * i.qty), 0);
+    return this.items.reduce((sum, i) => sum + i.price * i.qty, 0);
   },
-
-  /* Total number of items (sum of quantities) for the badge */
   count() {
     return this.items.reduce((sum, i) => sum + i.qty, 0);
   },
-
-  /* Show the cart side panel */
   open() {
-    const panel = document.getElementById('cartPanel');
+    const panel = document.getElementById("cartPanel");
     if (!panel) return;
-    panel.classList.add('is-open');
-    panel.setAttribute('aria-hidden', 'false');
-    document.body.style.overflow = 'hidden';
+    panel.classList.add("is-open");
+    panel.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
   },
-
   close() {
-    const panel = document.getElementById('cartPanel');
+    const panel = document.getElementById("cartPanel");
     if (!panel) return;
-    panel.classList.remove('is-open');
-    panel.setAttribute('aria-hidden', 'true');
-    document.body.style.overflow = '';
+    panel.classList.remove("is-open");
+    panel.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
   },
-
-  /* Re-render: cart count badge, line items, total, empty state */
   render() {
-    const lang  = document.documentElement.dataset.lang || 'en';
-    const t     = TRANSLATIONS[lang];
-
-    /* Count badge */
-    const countEl = document.getElementById('cartCount');
+    const lang = document.documentElement.dataset.lang || "en";
+    const t = TRANSLATIONS[lang];
+    const countEl = document.getElementById("cartCount");
     if (countEl) {
       const c = this.count();
       countEl.textContent = c;
-      countEl.classList.toggle('is-active', c > 0);
+      countEl.classList.toggle("is-active", c > 0);
     }
-
-    const itemsEl  = document.getElementById('cartItems');
-    const footerEl = document.getElementById('cartFooter');
-    const emptyEl  = document.getElementById('cartEmpty');
-    const totalEl  = document.getElementById('cartTotal');
-
+    const itemsEl = document.getElementById("cartItems");
+    const footerEl = document.getElementById("cartFooter");
+    const emptyEl = document.getElementById("cartEmpty");
+    const totalEl = document.getElementById("cartTotal");
     if (!itemsEl) return;
-
-    /* Empty state */
     if (this.items.length === 0) {
-      itemsEl.innerHTML = '';
-      if (footerEl) footerEl.style.display = 'none';
-      if (emptyEl)  emptyEl.style.display  = 'flex';
+      itemsEl.innerHTML = "";
+      if (footerEl) footerEl.style.display = "none";
+      if (emptyEl) emptyEl.style.display = "flex";
       return;
     }
-
-    if (footerEl) footerEl.style.display = '';
-    if (emptyEl)  emptyEl.style.display  = 'none';
-
-    /* Render line items */
+    if (footerEl) footerEl.style.display = "";
+    if (emptyEl) emptyEl.style.display = "none";
     itemsEl.innerHTML = this.items.map((item, idx) => {
-      /* Resolve the current translated name from PRODUCTS at render time */
       const product = PRODUCTS.find(p => p.id === item.id);
-      const displayName = product ? tProduct(product, 'name') : item.name;
-
-      return `
-      <div class="cart-item">
-        <img class="cart-item__image" src="${item.image}" alt="${displayName}"
-          onerror="this.style.background='var(--color-navy-mid)'; this.removeAttribute('src')" />
-        <div class="cart-item__body">
-          <p class="cart-item__name">${displayName}</p>
-          <p class="cart-item__meta">
-            ${item.color ? `${tColor(item.color)} · ` : ''}${tSize(item.size)}
-          </p>
-          <div class="cart-item__row">
-            <div class="cart-item__qty">
-              <button class="qty-btn" data-action="dec" data-idx="${idx}" aria-label="Decrease">−</button>
-              <span class="qty-value">${item.qty}</span>
-              <button class="qty-btn" data-action="inc" data-idx="${idx}" aria-label="Increase">+</button>
-            </div>
-            <p class="cart-item__price">€${(item.price * item.qty).toFixed(0)}</p>
-          </div>
-        </div>
-        <button class="cart-item__remove" data-idx="${idx}" aria-label="Remove">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M2 2L12 12M12 2L2 12" stroke="currentColor" stroke-width="1.5"/>
-          </svg>
-        </button>
-      </div>
-    `;}).join('');
-
-    /* Wire up qty buttons + remove buttons */
-    itemsEl.querySelectorAll('.qty-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const idx    = parseInt(btn.dataset.idx);
-        const delta  = btn.dataset.action === 'inc' ? 1 : -1;
+      const displayName = product ? tProduct(product, "name") : item.name;
+      return `\n      <div class="cart-item">\n        <img class="cart-item__image" src="${item.image}" alt="${displayName}"\n          onerror="this.style.background='var(--color-navy-mid)'; this.removeAttribute('src')" />\n        <div class="cart-item__body">\n          <p class="cart-item__name">${displayName}</p>\n          <p class="cart-item__meta">\n            ${item.color ? `${tColor(item.color)} · ` : ""}${tSize(item.size)}\n          </p>\n          <div class="cart-item__row">\n            <div class="cart-item__qty">\n              <button class="qty-btn" data-action="dec" data-idx="${idx}" aria-label="Decrease">−</button>\n              <span class="qty-value">${item.qty}</span>\n              <button class="qty-btn" data-action="inc" data-idx="${idx}" aria-label="Increase">+</button>\n            </div>\n            <p class="cart-item__price">€${(item.price * item.qty).toFixed(0)}</p>\n          </div>\n        </div>\n        <button class="cart-item__remove" data-idx="${idx}" aria-label="Remove">\n          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">\n            <path d="M2 2L12 12M12 2L2 12" stroke="currentColor" stroke-width="1.5"/>\n          </svg>\n        </button>\n      </div>\n    `;
+    }).join("");
+    itemsEl.querySelectorAll(".qty-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const idx = parseInt(btn.dataset.idx);
+        const delta = btn.dataset.action === "inc" ? 1 : -1;
         this.changeQty(idx, delta);
       });
     });
-    itemsEl.querySelectorAll('.cart-item__remove').forEach(btn => {
-      btn.addEventListener('click', () => this.remove(parseInt(btn.dataset.idx)));
+    itemsEl.querySelectorAll(".cart-item__remove").forEach(btn => {
+      btn.addEventListener("click", () => this.remove(parseInt(btn.dataset.idx)));
     });
-
-    /* Update total */
     if (totalEl) totalEl.textContent = `€${this.total().toFixed(0)}`;
-
-    /*
-      Perks nudge above the footer divider.
-      
-      When the cart total is over €25, show BOTH perk lines (free pen over
-      €25 and free shipping over €50) as informational nudges — same as the
-      product modal shows them. Below €25, the block is hidden.
-      
-      We reuse the same two perk strings from the product modal's shipping
-      note (split on the • separator) so wording and translations stay in
-      sync across the site.
-    */
-    const perksEl = document.getElementById('cartPerks');
+    const perksEl = document.getElementById("cartPerks");
     if (perksEl) {
       const total = this.total();
       if (total > 25) {
-        const perkParts = (t['modal.shipping'] || '')
-          .split('•')
-          .map(s => s.trim())
-          .filter(Boolean);
-        perksEl.innerHTML = perkParts
-          .map(p => `<span class="perk">${p}</span>`)
-          .join('');
+        const perkParts = (t["modal.shipping"] || "").split("•").map(s => s.trim()).filter(Boolean);
+        perksEl.innerHTML = perkParts.map(p => `<span class="perk">${p}</span>`).join("");
         perksEl.hidden = false;
       } else {
         perksEl.hidden = true;
-        perksEl.innerHTML = '';
+        perksEl.innerHTML = "";
       }
     }
   },
-
-  /* Build the order summary HTML for the order modal */
   summaryHTML() {
-    return `
-      <div class="order__items">
-        ${this.items.map(item => {
-          const product = PRODUCTS.find(p => p.id === item.id);
-          const displayName = product ? tProduct(product, 'name') : item.name;
-          return `
-          <div class="order__item">
-            <span class="order__item-name">
-              ${item.qty} × ${displayName}${item.color ? ` (${tColor(item.color)})` : ''} — ${tSize(item.size)}
-            </span>
-            <span class="order__item-price">€${(item.price * item.qty).toFixed(0)}</span>
-          </div>
-        `;}).join('')}
-      </div>
-      <div class="order__total-row">
-        <span>Total</span>
-        <span class="order__total">€${this.total().toFixed(0)}</span>
-      </div>
-    `;
+    return `\n      <div class="order__items">\n        ${this.items.map(item => {
+      const product = PRODUCTS.find(p => p.id === item.id);
+      const displayName = product ? tProduct(product, "name") : item.name;
+      return `\n          <div class="order__item">\n            <span class="order__item-name">\n              ${item.qty} × ${displayName}${item.color ? ` (${tColor(item.color)})` : ""} — ${tSize(item.size)}\n            </span>\n            <span class="order__item-price">€${(item.price * item.qty).toFixed(0)}</span>\n          </div>\n        `;
+    }).join("")}\n      </div>\n      <div class="order__total-row">\n        <span>Total</span>\n        <span class="order__total">€${this.total().toFixed(0)}</span>\n      </div>\n    `;
   },
-
-  /* Plain-text version of the cart for the email body */
   emailBody(customer) {
-    /*
-      Build the order email in whichever language the customer is browsing
-      in. The email is sent TO the shop owner, so a PT customer's order
-      arrives with PT labels. Item names, colours and sizes are translated
-      too, so the whole email is coherent in one language.
-    */
-    const lang = document.documentElement.dataset.lang || 'en';
-    const t    = TRANSLATIONS[lang];
-
+    const lang = document.documentElement.dataset.lang || "en";
+    const t = TRANSLATIONS[lang];
     const lines = this.items.map(item => {
-      const product     = PRODUCTS.find(p => p.id === item.id);
-      const displayName  = product ? tProduct(product, 'name') : item.name;
-      const displayColor = item.color ? ` (${tColor(item.color)})` : '';
-      const displaySize  = tSize(item.size);
+      const product = PRODUCTS.find(p => p.id === item.id);
+      const displayName = product ? tProduct(product, "name") : item.name;
+      const displayColor = item.color ? ` (${tColor(item.color)})` : "";
+      const displaySize = tSize(item.size);
       return `  • ${item.qty} × ${displayName}${displayColor} — ${displaySize}  —  €${(item.price * item.qty).toFixed(0)}`;
-    }).join('\n');
-
-    return [
-      t['email.heading'] || 'New A&M order',
-      '─────────────────────',
-      '',
-      t['email.customer'] || 'CUSTOMER:',
-      `  ${t['email.name']    || 'Name'}:    ${customer.name}`,
-      `  ${t['email.phone']   || 'Phone'}:   ${customer.phone}`,
-      `  ${t['email.email']   || 'Email'}:   ${customer.email}`,
-      `  ${t['email.address'] || 'Address'}: ${customer.address}`,
-      '',
-      t['email.items'] || 'ITEMS:',
-      lines,
-      '',
-      `${t['email.total'] || 'TOTAL'}: €${this.total().toFixed(0)}`,
-      '',
-      '─────────────────────',
-      t['email.footer'] || 'Awaiting payment confirmation.',
-    ].join('\n');
-  },
+    }).join("\n");
+    return [ t["email.heading"] || "New A&M order", "─────────────────────", "", t["email.customer"] || "CUSTOMER:", `  ${t["email.name"] || "Name"}:    ${customer.name}`, `  ${t["email.phone"] || "Phone"}:   ${customer.phone}`, `  ${t["email.email"] || "Email"}:   ${customer.email}`, `  ${t["email.address"] || "Address"}: ${customer.address}`, "", t["email.items"] || "ITEMS:", lines, "", `${t["email.total"] || "TOTAL"}: €${this.total().toFixed(0)}`, "", "─────────────────────", t["email.footer"] || "Awaiting payment confirmation." ].join("\n");
+  }
 };
 
 function initCart() {
   Cart.init();
-
-  /* Open cart from nav button */
-  document.getElementById('cartBtn')?.addEventListener('click', () => Cart.open());
-  document.getElementById('cartClose')?.addEventListener('click',     () => Cart.close());
-  document.getElementById('cartBackdrop')?.addEventListener('click',  () => Cart.close());
-
-  /* Close cart on Escape */
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
+  document.getElementById("cartBtn")?.addEventListener("click", () => Cart.open());
+  document.getElementById("cartClose")?.addEventListener("click", () => Cart.close());
+  document.getElementById("cartBackdrop")?.addEventListener("click", () => Cart.close());
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape") {
       Cart.close();
       closeOrderModal();
     }
   });
-
-  /* Open the order modal from the cart's checkout button */
-  document.getElementById('cartCheckoutBtn')?.addEventListener('click', () => {
+  document.getElementById("cartCheckoutBtn")?.addEventListener("click", () => {
     if (Cart.items.length === 0) return;
     openOrderModal();
   });
-
-  /* Order modal close handlers */
-  document.getElementById('orderClose')?.addEventListener('click',    closeOrderModal);
-  document.getElementById('orderBackdrop')?.addEventListener('click', closeOrderModal);
-
-  /* Floating labels for order form */
-  document.querySelectorAll('#orderForm input, #orderForm textarea').forEach(field => {
-    field.addEventListener('input', () => {
-      field.classList.toggle('has-value', field.value.trim() !== '');
+  document.getElementById("orderClose")?.addEventListener("click", closeOrderModal);
+  document.getElementById("orderBackdrop")?.addEventListener("click", closeOrderModal);
+  document.querySelectorAll("#orderForm input, #orderForm textarea").forEach(field => {
+    field.addEventListener("input", () => {
+      field.classList.toggle("has-value", field.value.trim() !== "");
     });
   });
-
-  /* Order form submission — builds mailto: and empties cart */
-  document.getElementById('orderForm')?.addEventListener('submit', handleOrderSubmit);
+  document.getElementById("orderForm")?.addEventListener("submit", handleOrderSubmit);
 }
 
 function openOrderModal() {
-  const modal      = document.getElementById('orderModal');
-  const summaryEl  = document.getElementById('orderSummary');
+  const modal = document.getElementById("orderModal");
+  const summaryEl = document.getElementById("orderSummary");
   if (!modal || !summaryEl) return;
-
-  /* Populate summary with current cart contents */
   summaryEl.innerHTML = Cart.summaryHTML();
-
-  modal.classList.add('is-open');
-  modal.setAttribute('aria-hidden', 'false');
-  /* Body scroll already locked (cart is open behind it) */
+  modal.classList.add("is-open");
+  modal.setAttribute("aria-hidden", "false");
 }
 
 function closeOrderModal() {
-  const modal = document.getElementById('orderModal');
+  const modal = document.getElementById("orderModal");
   if (!modal) return;
-  modal.classList.remove('is-open');
-  modal.setAttribute('aria-hidden', 'true');
+  modal.classList.remove("is-open");
+  modal.setAttribute("aria-hidden", "true");
 }
 
 function handleOrderSubmit(e) {
   e.preventDefault();
-
   const customer = {
-    name:    document.getElementById('orderName').value.trim(),
-    phone:   document.getElementById('orderPhone').value.trim(),
-    email:   document.getElementById('orderEmail').value.trim(),
-    address: document.getElementById('orderAddress').value.trim(),
+    name: document.getElementById("orderName").value.trim(),
+    phone: document.getElementById("orderPhone").value.trim(),
+    email: document.getElementById("orderEmail").value.trim(),
+    address: document.getElementById("orderAddress").value.trim()
   };
-
-  /*
-    Build a mailto: link with subject and body URL-encoded.
-    Opens the customer's default email app (Gmail, Mail.app, Outlook…)
-    with everything pre-filled. They just press Send.
-    Subject + body follow the currently selected language.
-  */
-  const lang     = document.documentElement.dataset.lang || 'en';
-  const tt       = TRANSLATIONS[lang];
-  const subject  = `${tt['email.subject'] || 'A&M Order'} — ${customer.name} — €${Cart.total().toFixed(0)}`;
-  const body     = Cart.emailBody(customer);
-  const mailto   = `mailto:${ORDER_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-
-  /* Trigger email client */
+  const lang = document.documentElement.dataset.lang || "en";
+  const tt = TRANSLATIONS[lang];
+  const subject = `${tt["email.subject"] || "A&M Order"} — ${customer.name} — €${Cart.total().toFixed(0)}`;
+  const body = Cart.emailBody(customer);
+  const mailto = `mailto:${ORDER_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   window.location.href = mailto;
-
-  /* Empty cart and reset everything */
   Cart.empty();
   closeOrderModal();
   Cart.close();
-  document.getElementById('orderForm').reset();
-  document.querySelectorAll('#orderForm .has-value').forEach(el => el.classList.remove('has-value'));
+  document.getElementById("orderForm").reset();
+  document.querySelectorAll("#orderForm .has-value").forEach(el => el.classList.remove("has-value"));
 }
 
-
-/* ================================================================
-   13. INIT
-================================================================ */
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", () => {
   initCursor();
   initNav();
-  initHeroVideo();   /* Pick mobile vs desktop hero video source */
+  initHeroVideo();
   renderProducts();
   initScrollReveal();
   initFilters();
   initModal();
-  initInfoModal();   /* Shipping & Returns footer modal */
+  initInfoModal();
   initContactForm();
   initFooterYear();
   initLanguageSwitcher();
-  initCart();   /* Shopping cart panel + checkout flow */
-  console.log('A&M — site loaded ✓');
+  initCart();
+  console.log("A&M — site loaded ✓");
 });
