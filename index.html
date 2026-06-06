@@ -1,40 +1,28 @@
 <!DOCTYPE html>
 <html lang="pt" data-lang="pt">
 <head>
-  <!-- ============================================================
-    HEAD
-    - charset: ensures special characters (ã, ç, €) display correctly
-    - viewport: makes the site responsive on all screen sizes
-    - title: shown on the browser tab
-    - Google Fonts: Bebas Neue (headlines) + DM Sans (body text)
-    - style.css: our main stylesheet
-  ============================================================ -->
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>A&amp;M — Premium Merch</title>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
 
-  <!-- Custom cursor (two layers: dot + ring) -->
+  
   <div class="cursor" id="cursor"></div>
   <div class="cursor-follower" id="cursorFollower"></div>
 
-  <!-- ============================================================
-    NAVIGATION
-    Logo image: put logo.png in the root folder (next to index.html).
-    Language switcher buttons call setLanguage() in main.js.
-    Cart button opens the shopping cart side panel.
-  ============================================================ -->
+  
   <nav class="nav" id="mainNav">
     <a href="#hero" class="nav__logo-link">
-      <img src="logo.png" alt="A&amp;M" class="nav__logo-img" />
+      <img src="logo.png" alt="A&amp;M" class="nav__logo-img">
     </a>
     <ul class="nav__links">
       <li><a href="#products" data-i18n="nav.shop">Shop</a></li>
@@ -48,7 +36,7 @@
         <button class="lang-btn" data-lang="en">EN</button>
       </div>
 
-      <!-- Cart button — shows item count badge when items are added -->
+      
       <button class="cart-btn" id="cartBtn" aria-label="Open cart">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
@@ -60,46 +48,16 @@
     </div>
   </nav>
 
-  <!-- ============================================================
-    HERO SECTION
-    
-    Background: a looping video. Different source files for mobile vs desktop
-    so the mobile crop/aspect is right.
-    
-    File mapping:
-      images/main.mp4         — desktop
-      images/main_mobile.mp4  — mobile portrait
-    
-    The right source is chosen by JS (initHeroVideo in main.js) based on
-    viewport width, because the <source media="..."> attribute is poorly
-    and inconsistently supported on <video> elements across browsers.
-    JS sets the source reliably before the video loads.
-    
-    The <video> attributes:
-      autoplay  — starts immediately
-      muted     — required for autoplay in modern browsers
-      loop      — restarts when it ends
-      playsinline — prevents fullscreen on mobile Safari
-      preload="auto" — starts loading immediately
-    
-    If the video fails to load, the fallback colour from .hero
-    background still shows underneath.
-  ============================================================ -->
+  
   <section class="hero" id="hero">
-    <video
-      class="hero__video"
-      id="heroVideo"
-      autoplay muted loop playsinline preload="auto"
-      poster="images/hero-poster.jpg"
-    >
-      <!-- src is set by initHeroVideo() in main.js based on viewport width.
-           This default points to desktop so the video still works if JS fails. -->
-      <source id="heroVideoSource" src="images/main.mp4" type="video/mp4" />
+    <video class="hero__video" id="heroVideo" autoplay muted loop playsinline preload="auto" poster="images/hero-poster.jpg">
+      
+      <source id="heroVideoSource" src="images/main.mp4" type="video/mp4">
     </video>
 
-    <!-- Dark gradient overlay — keeps text legible over any video frame -->
+    
     <div class="hero__overlay"></div>
-    <!-- Film grain texture on top -->
+    
     <div class="grain"></div>
     <div class="hero__content">
       <p class="hero__eyebrow" data-reveal data-i18n="hero.eyebrow">New Season Drop</p>
@@ -119,7 +77,7 @@
     </div>
   </section>
 
-  <!-- Scrolling ticker between hero and products -->
+  
   <div class="marquee" aria-hidden="true">
     <div class="marquee__track">
       <div class="marquee__content">
@@ -153,48 +111,38 @@
     </div>
   </div>
 
-  <!-- ============================================================
-    PRODUCTS SECTION
-    Filter buttons are grouped by the new product families.
-    JS injects product cards into #productGrid.
-    
-    FILTER CATEGORIES (data-filter must match product.category in main.js):
-      all | tshirt | tshirt-nolog | hoodie | sweatshirt |
-      shorts | cap | socks | accessories | pack
-  ============================================================ -->
+  
   <section class="section products" id="products">
     <div class="section__header" data-reveal>
       <p class="section__eyebrow" data-i18n="products.eyebrow">The Collection</p>
-      <h2 class="section__title"  data-i18n="products.title">Shop Everything</h2>
+      <h2 class="section__title" data-i18n="products.title">Shop Everything</h2>
     </div>
 
-    <!-- Filter + Sort bar -->
+    
     <div class="products__toolbar" data-reveal>
-      <!-- Category filters -->
+      
       <div class="products__filters">
-        <button class="filter-btn active" data-filter="all"          data-i18n="filter.all">All</button>
-        <button class="filter-btn"        data-filter="tshirt"       data-i18n="filter.tshirt">T-Shirts</button>
-        <button class="filter-btn"        data-filter="tshirt-nolog" data-i18n="filter.tshirt-nolog">"The Best." Collection</button>
-        <button class="filter-btn"        data-filter="hoodie"       data-i18n="filter.hoodie">Hoodies</button>
-        <button class="filter-btn"        data-filter="sweatshirt"   data-i18n="filter.sweatshirt">Sweatshirts</button>
-        <button class="filter-btn"        data-filter="shorts"       data-i18n="filter.shorts">Shorts</button>
-        <button class="filter-btn"        data-filter="cap"          data-i18n="filter.cap">Caps</button>
-        <button class="filter-btn"        data-filter="socks"        data-i18n="filter.socks">Socks</button>
-        <button class="filter-btn"        data-filter="accessories"  data-i18n="filter.accessories">Accessories</button>
-        <button class="filter-btn"        data-filter="pack"         data-i18n="filter.pack">Packs</button>
+        <button class="filter-btn active" data-filter="all" data-i18n="filter.all">All</button>
+        <button class="filter-btn" data-filter="tshirt" data-i18n="filter.tshirt">T-Shirts</button>
+        <button class="filter-btn" data-filter="tshirt-nolog" data-i18n="filter.tshirt-nolog">"The Best." Collection</button>
+        <button class="filter-btn" data-filter="hoodie" data-i18n="filter.hoodie">Hoodies</button>
+        <button class="filter-btn" data-filter="sweatshirt" data-i18n="filter.sweatshirt">Sweatshirts</button>
+        <button class="filter-btn" data-filter="shorts" data-i18n="filter.shorts">Shorts</button>
+        <button class="filter-btn" data-filter="cap" data-i18n="filter.cap">Caps</button>
+        <button class="filter-btn" data-filter="socks" data-i18n="filter.socks">Socks</button>
+        <button class="filter-btn" data-filter="accessories" data-i18n="filter.accessories">Accessories</button>
+        <button class="filter-btn" data-filter="pack" data-i18n="filter.pack">Packs</button>
       </div>
 
-      <!-- Sort dropdown
-           JS listens to change on #sortSelect and re-orders visible cards.
-           data-i18n keys are on the <option> elements for translation. -->
+      
       <div class="products__sort">
         <label for="sortSelect" class="sort-label" data-i18n="sort.label">Sort:</label>
         <select id="sortSelect" class="sort-select">
-          <option value="default"      data-i18n="sort.default">Default</option>
-          <option value="name-asc"     data-i18n="sort.nameAsc">Name A→Z</option>
-          <option value="name-desc"    data-i18n="sort.nameDesc">Name Z→A</option>
-          <option value="price-asc"    data-i18n="sort.priceAsc">Price ↑</option>
-          <option value="price-desc"   data-i18n="sort.priceDesc">Price ↓</option>
+          <option value="default" data-i18n="sort.default">Default</option>
+          <option value="name-asc" data-i18n="sort.nameAsc">Name A→Z</option>
+          <option value="name-desc" data-i18n="sort.nameDesc">Name Z→A</option>
+          <option value="price-asc" data-i18n="sort.priceAsc">Price ↑</option>
+          <option value="price-desc" data-i18n="sort.priceDesc">Price ↓</option>
         </select>
       </div>
     </div>
@@ -202,12 +150,7 @@
     <div class="product-grid" id="productGrid"></div>
   </section>
 
-  <!-- ============================================================
-    PRODUCT MODAL
-    Slides in from the right on product click.
-    Content populated by openModal() in main.js.
-    Includes: image, color swatches, size selector, add to cart.
-  ============================================================ -->
+  
   <div class="modal" id="productModal" aria-hidden="true">
     <div class="modal__backdrop" id="modalBackdrop"></div>
     <div class="modal__panel" id="modalPanel">
@@ -220,14 +163,14 @@
     </div>
   </div>
 
-  <!-- Contact form — Formspree handles email delivery -->
+  
   <section class="section contact" id="contact">
     <div class="contact__inner">
       <div class="contact__text" data-reveal>
         <p class="section__eyebrow" data-i18n="contact.eyebrow">Get in Touch</p>
-        <h2 class="section__title"  data-i18n="contact.title">Let's Talk</h2>
-        <p class="contact__desc"    data-i18n="contact.desc">
-          Questions about sizing, wholesale, or collabs?<br />
+        <h2 class="section__title" data-i18n="contact.title">Let's Talk</h2>
+        <p class="contact__desc" data-i18n="contact.desc">
+          Questions about sizing, wholesale, or collabs?<br>
           We usually reply within 24 hours.
         </p>
         <div class="contact__detail">
@@ -237,12 +180,12 @@
 
       <form class="contact__form" id="contactForm" data-reveal>
         <div class="form-field">
-          <input type="text" id="fieldName" name="name" required autocomplete="off" />
+          <input type="text" id="fieldName" name="name" required autocomplete="off">
           <label for="fieldName" data-i18n="contact.name">Your Name</label>
           <div class="form-field__line"></div>
         </div>
         <div class="form-field">
-          <input type="email" id="fieldEmail" name="email" required autocomplete="off" />
+          <input type="email" id="fieldEmail" name="email" required autocomplete="off">
           <label for="fieldEmail" data-i18n="contact.email">Email Address</label>
           <div class="form-field__line"></div>
         </div>
@@ -267,7 +210,7 @@
   <footer class="footer">
     <div class="footer__inner">
       <div class="footer__brand">
-        <img src="logo.png" alt="A&amp;M" class="footer__logo" />
+        <img src="logo.png" alt="A&amp;M" class="footer__logo">
       </div>
       <p class="footer__copy">© <span id="footerYear"></span> A&amp;M. <span data-i18n="footer.rights">All rights reserved.</span></p>
       <div class="footer__links">
@@ -276,13 +219,7 @@
     </div>
   </footer>
 
-  <!-- ============================================================
-    SHOPPING CART PANEL
-    Slides in from the right when the cart button is clicked.
-    Contents are populated by renderCart() in main.js.
-    
-    Cart state is persisted in localStorage so items survive a refresh.
-  ============================================================ -->
+  
   <div class="cart" id="cartPanel" aria-hidden="true">
     <div class="cart__backdrop" id="cartBackdrop"></div>
     <aside class="cart__panel">
@@ -295,13 +232,13 @@
         </button>
       </header>
 
-      <!-- JS injects cart line items here -->
+      
       <div class="cart__items" id="cartItems"></div>
 
-      <!-- Perks nudge — sits just above the footer divider. Shown by JS when total qualifies. -->
+      
       <div class="cart__perks" id="cartPerks" hidden></div>
 
-      <!-- Footer: total + checkout button. Hidden when cart is empty. -->
+      
       <footer class="cart__footer" id="cartFooter">
         <div class="cart__total">
           <span data-i18n="cart.total">Total</span>
@@ -312,21 +249,14 @@
         </button>
       </footer>
 
-      <!-- Empty state — shown when no items in cart -->
+      
       <div class="cart__empty" id="cartEmpty">
         <p data-i18n="cart.empty">Your cart is empty.</p>
       </div>
     </aside>
   </div>
 
-  <!-- ============================================================
-    ORDER MODAL
-    Opens from the cart "Order by Email" button.
-    User fills name, phone, email, address.
-    On submit: opens their email app pre-filled with the order details
-    sent to thebest.aem@gmail.com via mailto:
-    Then the cart is emptied.
-  ============================================================ -->
+  
   <div class="modal modal--order" id="orderModal" aria-hidden="true">
     <div class="modal__backdrop" id="orderBackdrop"></div>
     <div class="modal__panel modal__panel--center">
@@ -340,23 +270,23 @@
         <p class="modal__family" data-i18n="order.eyebrow">Complete your order</p>
         <h2 class="modal__title" data-i18n="order.title">Order by Email</h2>
 
-        <!-- Order summary: items + total — populated by JS -->
+        
         <div class="order__summary" id="orderSummary"></div>
 
-        <!-- Customer info form -->
+        
         <form class="order__form" id="orderForm">
           <div class="form-field">
-            <input type="text" id="orderName" name="name" required autocomplete="name" />
+            <input type="text" id="orderName" name="name" required autocomplete="name">
             <label for="orderName" data-i18n="order.name">Name</label>
             <div class="form-field__line"></div>
           </div>
           <div class="form-field">
-            <input type="tel" id="orderPhone" name="phone" required autocomplete="tel" />
+            <input type="tel" id="orderPhone" name="phone" required autocomplete="tel">
             <label for="orderPhone" data-i18n="order.phone">Phone Number</label>
             <div class="form-field__line"></div>
           </div>
           <div class="form-field">
-            <input type="email" id="orderEmail" name="email" required autocomplete="email" />
+            <input type="email" id="orderEmail" name="email" required autocomplete="email">
             <label for="orderEmail" data-i18n="order.email">Email</label>
             <div class="form-field__line"></div>
           </div>
@@ -377,12 +307,7 @@
     </div>
   </div>
 
-  <!-- ============================================================
-    SHIPPING & RETURNS INFO MODAL
-    Opened from the footer link. Centered modal, same pattern as the
-    order modal. Content is informational and intentionally
-    non-committal (no fixed delivery days or guarantees).
-  ============================================================ -->
+  
   <div class="modal modal--order" id="infoModal" aria-hidden="true">
     <div class="modal__backdrop" id="infoBackdrop"></div>
     <div class="modal__panel modal__panel--center">
