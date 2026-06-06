@@ -531,7 +531,21 @@ const PRODUCTS = [
       "images/products/streetpack3.jpg",
     ],
     description: "The Street Pack. Everyday essentials, bundled at a saving.",
-    sizes: ["One Size"],
+    /*
+      Includes a phone case, so it uses the same two-step iPhone model
+      picker as the Phone Case product. The selected model is captured
+      so you know which case to include in the pack.
+    */
+    sizeGroups: {
+      "iPhone 16": ["iPhone 16", "iPhone 16 Plus", "iPhone 16 Pro", "iPhone 16 Pro Max"],
+      "iPhone 15": ["iPhone 15", "iPhone 15 Plus", "iPhone 15 Pro", "iPhone 15 Pro Max"],
+      "iPhone 14": ["iPhone 14", "iPhone 14 Plus", "iPhone 14 Pro", "iPhone 14 Pro Max"],
+      "iPhone 13": ["iPhone 13", "iPhone 13 Pro", "iPhone 13 Pro Max"],
+      "iPhone 12": ["iPhone 12", "iPhone 12 Pro", "iPhone 12 Pro Max"],
+      "iPhone 11": ["iPhone 11", "iPhone 11 Pro", "iPhone 11 Pro Max"],
+      "iPhone X/XS": ["iPhone X/XS", "iPhone XS Max"],
+      "iPhone 7/8/SE": ["iPhone 7/8/SE2/SE3", "iPhone 7 Plus/8 Plus"],
+    },
     colors: null
   },
 ];
@@ -615,14 +629,44 @@ function initHeroVideo() {
   const isMobile = window.matchMedia('(max-width: 768px)').matches;
   const desired  = isMobile ? 'images/main_mobile.mp4' : 'images/main.mp4';
 
-  /* Only change + reload if the desired source differs from what's set */
+  /* Set the correct source for the viewport if not already set */
   if (!source.src.endsWith(desired)) {
     source.src = desired;
-    video.load();           /* Required for the <video> to pick up the new source */
-    video.play().catch(() => {
-      /* Autoplay can be blocked; that's fine — poster image shows instead */
-    });
+    video.load();
   }
+
+  /*
+    Attempt playback. Browsers may block autoplay when:
+      - the OS "reduce motion" accessibility setting is on
+      - a data-saver / low-power mode is active
+      - the tab loads in the background
+    When blocked, the video freezes on its first frame. To recover, we:
+      1. Try to play immediately.
+      2. If that's rejected, retry on the first user interaction (any
+         pointer/touch/scroll/keypress), which browsers accept as a
+         user gesture that unblocks playback.
+    
+    The video stays muted + playsinline so the retry is allowed.
+  */
+  const tryPlay = () => video.play().catch(() => {});
+
+  tryPlay();
+
+  /* One-time retry on the first interaction, then clean up the listeners */
+  const retryOnce = () => {
+    tryPlay();
+    ['pointerdown', 'touchstart', 'scroll', 'keydown'].forEach(evt =>
+      window.removeEventListener(evt, retryOnce)
+    );
+  };
+  ['pointerdown', 'touchstart', 'scroll', 'keydown'].forEach(evt =>
+    window.addEventListener(evt, retryOnce, { once: false, passive: true })
+  );
+
+  /* Also retry if the tab becomes visible again (loaded in background) */
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) tryPlay();
+  });
 }
 
 
@@ -2150,6 +2194,35 @@ const Cart = {
 
     /* Update total */
     if (totalEl) totalEl.textContent = `€${this.total().toFixed(0)}`;
+
+    /*
+      Perks nudge above the footer divider.
+      
+      When the cart total is over €25, show BOTH perk lines (free pen over
+      €25 and free shipping over €50) as informational nudges — same as the
+      product modal shows them. Below €25, the block is hidden.
+      
+      We reuse the same two perk strings from the product modal's shipping
+      note (split on the • separator) so wording and translations stay in
+      sync across the site.
+    */
+    const perksEl = document.getElementById('cartPerks');
+    if (perksEl) {
+      const total = this.total();
+      if (total > 25) {
+        const perkParts = (t['modal.shipping'] || '')
+          .split('•')
+          .map(s => s.trim())
+          .filter(Boolean);
+        perksEl.innerHTML = perkParts
+          .map(p => `<span class="perk">${p}</span>`)
+          .join('');
+        perksEl.hidden = false;
+      } else {
+        perksEl.hidden = true;
+        perksEl.innerHTML = '';
+      }
+    }
   },
 
   /* Build the order summary HTML for the order modal */
