@@ -1575,6 +1575,40 @@ button { cursor: none; font-family: var(--font-body); border: none; background: 
   flex-shrink: 0;
 }
 
+/*
+  Perks nudge in the cart, sitting just above the footer's top border.
+  Reuses the .perk dot-marker style. Padded to line up with cart items,
+  with a little breathing room above the divider.
+*/
+.cart__perks {
+  padding: 0 var(--space-md) var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.cart__perks[hidden] { display: none; }
+
+.cart__perks .perk {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--text-sm);
+  color: rgba(255, 255, 255, 0.85);
+  letter-spacing: 0.01em;
+  line-height: 1.3;
+}
+
+.cart__perks .perk::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  flex-shrink: 0;
+}
+
 .cart__total {
   display: flex;
   justify-content: space-between;
