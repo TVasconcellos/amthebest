@@ -127,6 +127,41 @@ const PRODUCTS = [ {
   sizes: [ "S", "M", "L", "XL" ],
   colors: null
 }, {
+  id: 23,
+  name: "Polo Shirt",
+  family: "Polo Shirt",
+  category: "polo",
+  price: "€12",
+  badge: "New",
+  image: "images/products/polo-branco-1-1.jpeg",
+  description: "Men's polo shirt with exclusive brand design.",
+  sizes: [ "S", "M", "L", "XL" ],
+  colors: [ {
+    ...COLORS.white,
+    image: "images/products/polo-branco-1-1.jpeg",
+    images: [ "images/products/polo-branco-1-1.jpeg", "images/products/polo-branco-1-2.jpeg", "images/products/polo-branco-1-3.jpeg" ]
+  }, {
+    ...COLORS.black,
+    image: "images/products/polo-preto-1-1.jpeg",
+    images: [ "images/products/polo-preto-1-1.jpeg", "images/products/polo-preto-1-2.jpeg", "images/products/polo-preto-1-3.jpeg" ]
+  }, {
+    ...COLORS.navy,
+    image: "images/products/polo-azul-1-1.jpeg",
+    images: [ "images/products/polo-azul-1-1.jpeg", "images/products/polo-azul-1-2.jpeg", "images/products/polo-azul-1-3.jpeg" ]
+  } ]
+}, {
+  id: 24,
+  name: "Women's Fitness Top",
+  family: "Women's Fitness Top",
+  category: "womens-top",
+  price: "€12",
+  badge: "New",
+  image: "images/products/top-fit-1-1.jpeg",
+  images: [ "images/products/top-fit-1-1.jpeg", "images/products/top-fit-1-2.jpeg", "images/products/top-fit-1-3.jpeg" ],
+  description: "Women's fitness top with exclusive brand design.",
+  sizes: [ "S", "M", "L", "XL" ],
+  colors: null
+}, {
   id: 6,
   name: "Cap",
   family: "Cap",
@@ -959,6 +994,16 @@ const PRODUCT_TRANSLATIONS = {
       name: "Pack Street",
       family: "Packs",
       description: "O Pack Street. Essenciais do dia a dia, com desconto."
+    },
+    23: {
+      name: "Polo",
+      family: "Polo",
+      description: "Polo de homem com design exclusivo da marca."
+    },
+    24: {
+      name: "Top de Fitness de Senhora",
+      family: "Top de Fitness de Senhora",
+      description: "Top de fitness de senhora com design exclusivo da marca."
     }
   }
 };
@@ -1041,6 +1086,8 @@ const TRANSLATIONS = {
     "filter.tshirt-nolog": '"The Best." Collection',
     "filter.hoodie": "Hoodies",
     "filter.sweatshirt": "Sweatshirts",
+    "filter.polo": "Polos",
+    "filter.womens-top": "Women's Tops",
     "filter.shorts": "Shorts",
     "filter.cap": "Caps",
     "filter.socks": "Socks",
@@ -1122,6 +1169,8 @@ const TRANSLATIONS = {
     "filter.tshirt-nolog": 'Coleção "The Best."',
     "filter.hoodie": "Hoodies",
     "filter.sweatshirt": "Sweatshirts",
+    "filter.polo": "Polos",
+    "filter.womens-top": "Tops de Senhora",
     "filter.shorts": "Calções",
     "filter.cap": "Bonés",
     "filter.socks": "Meias",
