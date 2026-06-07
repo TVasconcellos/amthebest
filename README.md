@@ -54,7 +54,7 @@ No `package.json`, no dependencies, no compile step. Edit a file, commit, push �
 
 ---
 
-## 4. Product catalog (22 products, in `PRODUCTS` array, section 1 of main.js)
+## 4. Product catalog (24 products, in `PRODUCTS` array, section 1 of main.js)
 
 Each product object:
 ```
@@ -78,6 +78,8 @@ Each product object:
 | 3 | Hoodie | €20 | — | white `hoodie1.jpg`+`hoodie_white_2.png`, black `hoodie2.jpg`+`hoodie_black_2.png` |
 | 4 | Sweatshirt | €16 | — | white `sweatshirt1.jpg`+`sweatshirt_white_2.png`, black `sweatshirt2.jpg`+`sweatshirt_black_2.png` |
 | 5 | Shorts | €15 | — | `shorts1.jpg`+`shorts_black_2.png` (top-level gallery) |
+| 23 | Polo Shirt | €12 | New | category `polo`. Men's. 3 colours, each a 3-img gallery: White `polo-branco-1-1/2/3.jpeg`, Black `polo-preto-1-1/2/3.jpeg`, Navy `polo-azul-1-1/2/3.jpeg` |
+| 24 | Women's Fitness Top | €12 | New | category `womens-top`. No colours, 3-img gallery `top-fit-1-1/2/3.jpeg` |
 
 **Caps / Socks** (own filter categories):
 | 6 | Cap | €8 | Best Seller | `cap1.jpg`, category `cap` |
@@ -155,7 +157,7 @@ Add-to-cart is blocked until a selection is made when the product has `sizeGroup
 ## 9. Adding / editing products
 
 Edit the `PRODUCTS` array in section 1 of `main.js` directly:
-1. Pick the next free `id` (currently 22 used, so 23 next).
+1. Pick the next free `id` (currently up to 24 used, so 25 next).
 2. Add the object (copy the closest existing product as a template).
 3. Put images in `images/products/` with matching filenames.
 4. Add PT translation in `PRODUCT_TRANSLATIONS.pt` keyed by the new id.
