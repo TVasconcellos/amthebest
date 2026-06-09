@@ -323,8 +323,8 @@ const PRODUCTS = [ {
   save: "€3",
   badge: "Best Value",
   image: "images/products/summerpack1.jpg",
-  description: "The Summer Pack: T-Shirt + Shorts + Socks. Everything you need for the warm months, bundled at a saving.",
-  sizes: [ "S", "M", "L", "XL" ],
+  description: "The Summer Pack: T-Shirt + Socks + Cap. Everything you need for the warm months, bundled at a saving.",
+  components: [ { ref: 1 }, { ref: 7 }, { ref: 6 } ],
   colors: null
 }, {
   id: 18,
@@ -336,7 +336,7 @@ const PRODUCTS = [ {
   badge: "Best Value",
   image: "images/products/winterpack1.jpg",
   description: "The Winter Pack: Hoodie + Sweatshirt + Socks. Stay warm, stay fresh.",
-  sizes: [ "S", "M", "L", "XL" ],
+  components: [ { ref: 3 }, { ref: 4 }, { ref: 7 } ],
   colors: null
 }, {
   id: 19,
@@ -347,8 +347,8 @@ const PRODUCTS = [ {
   save: "€3",
   badge: "Best Value",
   image: "images/products/essentialpack1.jpg",
-  description: "The Essential Pack: T-Shirt + Totebag + Socks. The perfect starter kit.",
-  sizes: [ "S", "M", "L", "XL" ],
+  description: "The Essential Pack: T-Shirt + Hoodie. The perfect starter kit.",
+  components: [ { ref: 1 }, { ref: 3 } ],
   colors: null
 }, {
   id: 20,
@@ -359,8 +359,8 @@ const PRODUCTS = [ {
   save: "€5",
   badge: "Best Value",
   image: "images/products/completepack1.jpg",
-  description: "The Complete Pack: T-Shirt + Hoodie + Shorts + Socks + Totebag. The full A&M experience.",
-  sizes: [ "S", "M", "L", "XL" ],
+  description: "The Complete Pack: Hoodie + T-Shirt + Socks + Cap. The full A&M experience.",
+  components: [ { ref: 3 }, { ref: 1 }, { ref: 7 }, { ref: 6 } ],
   colors: null
 }, {
   id: 21,
@@ -385,17 +385,8 @@ const PRODUCTS = [ {
   badge: "Best Value",
   image: "images/products/streetpack1.jpg",
   images: [ "images/products/streetpack1.jpg", "images/products/streetpack2.jpg", "images/products/streetpack3.jpg" ],
-  description: "The Street Pack. Everyday essentials, bundled at a saving.",
-  sizeGroups: {
-    "iPhone 16": [ "iPhone 16", "iPhone 16 Plus", "iPhone 16 Pro", "iPhone 16 Pro Max" ],
-    "iPhone 15": [ "iPhone 15", "iPhone 15 Plus", "iPhone 15 Pro", "iPhone 15 Pro Max" ],
-    "iPhone 14": [ "iPhone 14", "iPhone 14 Plus", "iPhone 14 Pro", "iPhone 14 Pro Max" ],
-    "iPhone 13": [ "iPhone 13", "iPhone 13 Pro", "iPhone 13 Pro Max" ],
-    "iPhone 12": [ "iPhone 12", "iPhone 12 Pro", "iPhone 12 Pro Max" ],
-    "iPhone 11": [ "iPhone 11", "iPhone 11 Pro", "iPhone 11 Pro Max" ],
-    "iPhone X/XS": [ "iPhone X/XS", "iPhone XS Max" ],
-    "iPhone 7/8/SE": [ "iPhone 7/8/SE2/SE3", "iPhone 7 Plus/8 Plus" ]
-  },
+  description: "The Street Pack: Cap + Phone Case. Everyday essentials, bundled at a saving.",
+  components: [ { ref: 6 }, { ref: 16 } ],
   colors: null
 } ];
 
@@ -627,6 +618,10 @@ function openModal(product) {
   cancelImageFade();
   selectedSize = null;
   selectedColor = null;
+  if (product.components) {
+    openPackModal(product, modal, content);
+    return;
+  }
   const lang = document.documentElement.dataset.lang || "en";
   const t = TRANSLATIONS[lang];
   let sizesHTML;
@@ -793,6 +788,126 @@ function closeModal() {
   modal.classList.remove("is-open");
   modal.setAttribute("aria-hidden", "true");
   document.body.style.overflow = "";
+}
+
+function openPackModal(product, modal, content) {
+  const lang = document.documentElement.dataset.lang || "en";
+  const t = TRANSLATIONS[lang];
+  const selections = product.components.map(() => ({
+    color: null,
+    size: null
+  }));
+  const initialImages = product.images ?? [ product.image ];
+  const galleryHTML = initialImages.length > 1 ? `<div class="modal__gallery" id="modalGallery">${initialImages.map((src, idx) => `<button class="modal__thumb${idx === 0 ? " is-active" : ""}" data-thumb-idx="${idx}" aria-label="View image ${idx + 1}"><img src="${src}" alt="" loading="lazy" /></button>`).join("")}</div>` : "";
+  const componentsHTML = product.components.map((comp, ci) => {
+    const refProduct = PRODUCTS.find(p => p.id === comp.ref);
+    if (!refProduct) return "";
+    const compName = tProduct(refProduct, "name");
+    let colourBlock = "";
+    if (refProduct.colors && refProduct.colors.length > 0) {
+      const swatches = refProduct.colors.map((c, idx) => `<button class="color-swatch" data-comp="${ci}" data-color-idx="${idx}" style="background: ${c.hex}" title="${tColor(c.label)}" aria-label="${tColor(c.label)}"></button>`).join("");
+      colourBlock = `<div class="pack-comp__row"><span class="pack-comp__label">${t["modal.colour"] || "Colour"}</span><span class="pack-comp__chosen" id="packChosen-${ci}-color">—</span></div><div class="modal__color-swatches">${swatches}</div>`;
+    }
+    let sizeBlock = "";
+    if (refProduct.sizeGroups) {
+      const generations = Object.keys(refProduct.sizeGroups);
+      sizeBlock = `<div class="pack-comp__row"><span class="pack-comp__label">${t["modal.size"] || "Size"}</span></div><div class="modal__size-groups" data-comp-groups="${ci}">${generations.map(gen => `<button class="size-btn size-btn--group" data-comp="${ci}" data-group="${gen}">${gen}</button>`).join("")}</div><div class="modal__sizes-grid modal__sizes-variants" data-comp-variants="${ci}" hidden></div>`;
+    } else if (refProduct.sizes && refProduct.sizes.length > 1) {
+      sizeBlock = `<div class="pack-comp__row"><span class="pack-comp__label">${t["modal.size"] || "Size"}</span></div><div class="modal__sizes-grid">${refProduct.sizes.map(size => `<button class="size-btn" data-comp="${ci}" data-size="${size}">${tSize(size)}</button>`).join("")}</div>`;
+    }
+    return `<div class="pack-comp"><h3 class="pack-comp__name">${compName}</h3>${colourBlock}${sizeBlock}</div>`;
+  }).join("");
+  content.innerHTML = `<div class="modal__layout"><div class="modal__media"><img class="modal__image" id="modalProductImage" src="${initialImages[0]}" alt="${product.name}" onerror="this.style.background='var(--color-navy-mid)'; this.removeAttribute('src')" />${galleryHTML}</div><div class="modal__details"><div class="modal__meta"><p class="modal__family">${tProduct(product, "family")}</p><h2 class="modal__title">${tProduct(product, "name")}</h2><div class="modal__price-row"><p class="modal__price">${product.price}</p>${product.save ? `<span class="modal__save">${tSave(product.save)}</span>` : ""}</div></div><p class="modal__desc">${tProduct(product, "description")}</p><div class="pack-comps">${componentsHTML}</div><button class="btn btn--primary btn--full" id="modalAddBtn" style="margin-top:1.5rem">${t["modal.addToCart"] || "Add to Cart"}</button><div class="modal__shipping-note">${(t["modal.shipping"] || "Free shipping over €50").split("•").map(perk => `<span class="perk">${perk.trim()}</span>`).join("")}</div></div></div>`;
+  const modalImage = content.querySelector("#modalProductImage");
+  content.querySelectorAll(".modal__thumb").forEach(thumb => {
+    thumb.addEventListener("click", () => {
+      const newSrc = thumb.querySelector("img")?.src;
+      if (!newSrc) return;
+      content.querySelectorAll(".modal__thumb").forEach(x => x.classList.remove("is-active"));
+      thumb.classList.add("is-active");
+      cancelImageFade();
+      modalImage.style.opacity = "0";
+      imageFadeTimer = setTimeout(() => {
+        modalImage.src = newSrc;
+        modalImage.style.opacity = "1";
+        imageFadeTimer = null;
+      }, 180);
+    });
+  });
+  content.querySelectorAll(".color-swatch").forEach(swatch => {
+    swatch.addEventListener("click", () => {
+      const ci = parseInt(swatch.dataset.comp);
+      const idx = parseInt(swatch.dataset.colorIdx);
+      const refProduct = PRODUCTS.find(p => p.id === product.components[ci].ref);
+      content.querySelectorAll(`.color-swatch[data-comp="${ci}"]`).forEach(s => s.classList.remove("selected"));
+      swatch.classList.add("selected");
+      selections[ci].color = refProduct.colors[idx].label;
+      const chosenEl = content.querySelector(`#packChosen-${ci}-color`);
+      if (chosenEl) chosenEl.textContent = tColor(refProduct.colors[idx].label);
+    });
+  });
+  content.querySelectorAll(".modal__sizes-grid:not(.modal__sizes-variants) .size-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const ci = parseInt(btn.dataset.comp);
+      content.querySelectorAll(`.size-btn[data-comp="${ci}"]:not(.size-btn--group)`).forEach(b => b.classList.remove("selected"));
+      btn.classList.add("selected");
+      selections[ci].size = btn.dataset.size;
+    });
+  });
+  content.querySelectorAll(".size-btn--group").forEach(gBtn => {
+    gBtn.addEventListener("click", () => {
+      const ci = parseInt(gBtn.dataset.comp);
+      const refProduct = PRODUCTS.find(p => p.id === product.components[ci].ref);
+      content.querySelectorAll(`.size-btn--group[data-comp="${ci}"]`).forEach(b => b.classList.remove("selected"));
+      gBtn.classList.add("selected");
+      selections[ci].size = null;
+      const variantsEl = content.querySelector(`[data-comp-variants="${ci}"]`);
+      const variants = refProduct.sizeGroups[gBtn.dataset.group] || [];
+      variantsEl.innerHTML = variants.map(model => `<button class="size-btn" data-comp="${ci}" data-size="${model}">${model}</button>`).join("");
+      variantsEl.hidden = false;
+      variantsEl.querySelectorAll(".size-btn").forEach(vBtn => {
+        vBtn.addEventListener("click", () => {
+          variantsEl.querySelectorAll(".size-btn").forEach(b => b.classList.remove("selected"));
+          vBtn.classList.add("selected");
+          selections[ci].size = vBtn.dataset.size;
+        });
+      });
+    });
+  });
+  content.querySelector("#modalAddBtn")?.addEventListener("click", () => {
+    const breakdown = [];
+    for (let ci = 0; ci < product.components.length; ci++) {
+      const refProduct = PRODUCTS.find(p => p.id === product.components[ci].ref);
+      if (!refProduct) continue;
+      const needsColor = refProduct.colors && refProduct.colors.length > 0;
+      const needsSize = !!refProduct.sizeGroups || refProduct.sizes && refProduct.sizes.length > 1;
+      if (needsColor && !selections[ci].color || needsSize && !selections[ci].size) {
+        alert(t["modal.selectPackAlert"] || "Please make all selections first.");
+        return;
+      }
+      breakdown.push({
+        name: refProduct.name,
+        color: selections[ci].color,
+        size: selections[ci].size
+      });
+    }
+    Cart.add({
+      id: product.id,
+      name: product.name,
+      family: product.family,
+      price: parseFloat(product.price.replace(/[^0-9.]/g, "")),
+      priceStr: product.price,
+      size: "One Size",
+      color: null,
+      image: initialImages[0],
+      components: breakdown
+    });
+    closeModal();
+    setTimeout(() => Cart.open(), 350);
+  });
+  modal.classList.add("is-open");
+  modal.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
 }
 
 function initModal() {
@@ -1103,6 +1218,7 @@ const TRANSLATIONS = {
     "modal.addToCart": "Add to Cart",
     "modal.shipping": "Free shipping over €50 • Free pen with orders over €25",
     "modal.selectSizeAlert": "Please select an option first.",
+    "modal.selectPackAlert": "Please make all selections first.",
     "modal.size": "Size",
     "sort.label": "Sort:",
     "sort.default": "Default",
@@ -1186,6 +1302,7 @@ const TRANSLATIONS = {
     "modal.addToCart": "Adicionar ao Carrinho",
     "modal.shipping": "Envio grátis acima de €50 • Oferta de caneta acima de €25",
     "modal.selectSizeAlert": "Por favor escolhe uma opção.",
+    "modal.selectPackAlert": "Por favor faz todas as escolhas primeiro.",
     "modal.size": "Tamanho",
     "sort.label": "Ordenar:",
     "sort.default": "Padrão",
@@ -1312,7 +1429,8 @@ const Cart = {
     } catch {}
   },
   add(item) {
-    const existing = this.items.find(i => i.id === item.id && i.size === item.size && i.color === item.color);
+    const key = i => `${i.id}|${i.size}|${i.color}|${i.components ? JSON.stringify(i.components) : ""}`;
+    const existing = this.items.find(i => key(i) === key(item));
     if (existing) {
       existing.qty += 1;
     } else {
@@ -1387,7 +1505,21 @@ const Cart = {
     itemsEl.innerHTML = this.items.map((item, idx) => {
       const product = PRODUCTS.find(p => p.id === item.id);
       const displayName = product ? tProduct(product, "name") : item.name;
-      return `\n      <div class="cart-item">\n        <img class="cart-item__image" src="${item.image}" alt="${displayName}"\n          onerror="this.style.background='var(--color-navy-mid)'; this.removeAttribute('src')" />\n        <div class="cart-item__body">\n          <p class="cart-item__name">${displayName}</p>\n          <p class="cart-item__meta">\n            ${item.color ? `${tColor(item.color)} · ` : ""}${tSize(item.size)}\n          </p>\n          <div class="cart-item__row">\n            <div class="cart-item__qty">\n              <button class="qty-btn" data-action="dec" data-idx="${idx}" aria-label="Decrease">−</button>\n              <span class="qty-value">${item.qty}</span>\n              <button class="qty-btn" data-action="inc" data-idx="${idx}" aria-label="Increase">+</button>\n            </div>\n            <p class="cart-item__price">€${(item.price * item.qty).toFixed(0)}</p>\n          </div>\n        </div>\n        <button class="cart-item__remove" data-idx="${idx}" aria-label="Remove">\n          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">\n            <path d="M2 2L12 12M12 2L2 12" stroke="currentColor" stroke-width="1.5"/>\n          </svg>\n        </button>\n      </div>\n    `;
+      let metaHTML;
+      if (item.components && item.components.length > 0) {
+        metaHTML = item.components.map(c => {
+          const refProduct = PRODUCTS.find(p => p.name === c.name);
+          const cName = refProduct ? tProduct(refProduct, "name") : c.name;
+          const bits = [];
+          if (c.color) bits.push(tColor(c.color));
+          if (c.size) bits.push(tSize(c.size));
+          return `<span class="cart-item__comp">${cName}${bits.length ? `: ${bits.join(" · ")}` : ""}</span>`;
+        }).join("");
+        metaHTML = `<div class="cart-item__comps">${metaHTML}</div>`;
+      } else {
+        metaHTML = `<p class="cart-item__meta">${item.color ? `${tColor(item.color)} · ` : ""}${tSize(item.size)}</p>`;
+      }
+      return `\n      <div class="cart-item">\n        <img class="cart-item__image" src="${item.image}" alt="${displayName}"\n          onerror="this.style.background='var(--color-navy-mid)'; this.removeAttribute('src')" />\n        <div class="cart-item__body">\n          <p class="cart-item__name">${displayName}</p>\n          ${metaHTML}\n          <div class="cart-item__row">\n            <div class="cart-item__qty">\n              <button class="qty-btn" data-action="dec" data-idx="${idx}" aria-label="Decrease">−</button>\n              <span class="qty-value">${item.qty}</span>\n              <button class="qty-btn" data-action="inc" data-idx="${idx}" aria-label="Increase">+</button>\n            </div>\n            <p class="cart-item__price">€${(item.price * item.qty).toFixed(0)}</p>\n          </div>\n        </div>\n        <button class="cart-item__remove" data-idx="${idx}" aria-label="Remove">\n          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">\n            <path d="M2 2L12 12M12 2L2 12" stroke="currentColor" stroke-width="1.5"/>\n          </svg>\n        </button>\n      </div>\n    `;
     }).join("");
     itemsEl.querySelectorAll(".qty-btn").forEach(btn => {
       btn.addEventListener("click", () => {
@@ -1426,6 +1558,18 @@ const Cart = {
     const lines = this.items.map(item => {
       const product = PRODUCTS.find(p => p.id === item.id);
       const displayName = product ? tProduct(product, "name") : item.name;
+      if (item.components && item.components.length > 0) {
+        const head = `  • ${item.qty} × ${displayName}  —  €${(item.price * item.qty).toFixed(0)}`;
+        const sub = item.components.map(c => {
+          const refProduct = PRODUCTS.find(p => p.name === c.name);
+          const cName = refProduct ? tProduct(refProduct, "name") : c.name;
+          const bits = [];
+          if (c.color) bits.push(tColor(c.color));
+          if (c.size) bits.push(tSize(c.size));
+          return `      - ${cName}${bits.length ? `: ${bits.join(", ")}` : ""}`;
+        }).join("\n");
+        return `${head}\n${sub}`;
+      }
       const displayColor = item.color ? ` (${tColor(item.color)})` : "";
       const displaySize = tSize(item.size);
       return `  • ${item.qty} × ${displayName}${displayColor} — ${displaySize}  —  €${(item.price * item.qty).toFixed(0)}`;
