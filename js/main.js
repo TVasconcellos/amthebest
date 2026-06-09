@@ -347,8 +347,8 @@ const PRODUCTS = [ {
   save: "€3",
   badge: "Best Value",
   image: "images/products/essentialpack1.jpg",
-  description: "The Essential Pack: T-Shirt + Hoodie. The perfect starter kit.",
-  components: [ { ref: 1 }, { ref: 3 } ],
+  description: "The Essential Pack: T-Shirt + Sweatshirt. The perfect starter kit.",
+  components: [ { ref: 1 }, { ref: 4 } ],
   colors: null
 }, {
   id: 20,
@@ -1087,7 +1087,7 @@ const PRODUCT_TRANSLATIONS = {
     17: {
       name: "Pack Verão",
       family: "Packs",
-      description: "O Pack Verão: T-Shirt + Calções + Meias. Tudo o que precisas para os meses quentes, com desconto."
+      description: "O Pack Verão: T-Shirt + Meias + Boné. Tudo o que precisas para os meses quentes, com desconto."
     },
     18: {
       name: "Pack Inverno",
@@ -1097,12 +1097,12 @@ const PRODUCT_TRANSLATIONS = {
     19: {
       name: "Pack Essencial",
       family: "Packs",
-      description: "O Pack Essencial: T-Shirt + Totebag + Meias. O kit inicial perfeito."
+      description: "O Pack Essencial: T-Shirt + Sweatshirt. O kit inicial perfeito."
     },
     20: {
       name: "Pack Completo",
       family: "Packs",
-      description: "O Pack Completo: T-Shirt + Hoodie + Calções + Meias + Totebag. A experiência A&M completa."
+      description: "O Pack Completo: Hoodie + T-Shirt + Meias + Boné. A experiência A&M completa."
     },
     21: {
       name: "Pack Office",
