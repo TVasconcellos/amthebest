@@ -96,15 +96,13 @@ Each product object:
 | 15 | Keychain | €4 | New | `porta_chaves.jpg` |
 | 16 | Phone Case | €5 | New | 2-img gallery `capa_telemovel.jpg`+`capa-telemovel-2.jpg`. Uses `sizeGroups` iPhone model picker (see §6) |
 
-**Packs** (category `pack`, badge Best Value, have a `save` field):
-| 17 | Summer Pack | €25 | save €3 | `summerpack1.jpg`. T-Shirt+Shorts+Socks |
-| 18 | Winter Pack | €36 | save €5 | `winterpack1.jpg`. Hoodie+Sweatshirt+Socks |
-| 19 | Essential Pack | €28 | save €3 | `essentialpack1.jpg`. T-Shirt+Totebag+Socks |
-| 20 | Complete Pack | €43 | save €5 | `completepack1.jpg`. T-Shirt+Hoodie+Shorts+Socks+Totebag |
-| 21 | Office Pack | €25.50 | save €3 | 2-img `officepack1.jpg`+`officepack2.jpg`, One Size. PT "Pack Office". **Contents not finalised — description is a placeholder** |
-| 22 | Street Pack | €15 | save €2 | 3-img `streetpack1/2/3.jpg`. PT "Pack Street". **Includes a phone case → uses `sizeGroups` iPhone picker.** Contents otherwise not finalised; description placeholder |
-
-> **OPEN ITEM:** Office & Street pack descriptions are placeholders. Street Pack uses the phone picker but if it ALSO contains sized apparel, the modal can only capture ONE selection dimension today (phone model OR apparel size, not both) — would need a two-dimension selector enhancement. Awaiting confirmation of exact pack contents.
+**Packs** (category `pack`, badge Best Value, have a `save` field). Packs with selectable contents use a `components` model — see §6.1:
+| 17 | Summer Pack | €25 | save €3 | `summerpack1.jpg`. Components: T-Shirt (ref 1), Socks (ref 7), Cap (ref 6) |
+| 18 | Winter Pack | €36 | save €5 | `winterpack1.jpg`. Components: Hoodie (ref 3), Sweatshirt (ref 4), Socks (ref 7) |
+| 19 | Essential Pack | €28 | save €3 | `essentialpack1.jpg`. Components: T-Shirt (ref 1), Hoodie (ref 3) |
+| 20 | Complete Pack | €43 | save €5 | `completepack1.jpg`. Components: Hoodie (ref 3), T-Shirt (ref 1), Socks (ref 7), Cap (ref 6) |
+| 21 | Office Pack | €25.50 | save €3 | 2-img `officepack1.jpg`+`officepack2.jpg`, One Size. PT "Pack Office". No components — nothing to choose. **Contents/description still placeholder** |
+| 22 | Street Pack | €15 | save €2 | 3-img `streetpack1/2/3.jpg`. PT "Pack Street". Components: Cap (ref 6), Phone Case (ref 16) |
 
 ---
 
@@ -125,6 +123,21 @@ Each product object:
 **B) Grouped `sizeGroups: {generation: [variants]}`** → two-step picker, used by Phone Case (16) and Street Pack (22). Row of generation buttons (iPhone 16, 15, 14, 13, 12, 11, X/XS, 7/8/SE); clicking one reveals that generation's variants below a divider. NO pre-selection (deliberate choice required). Selected generation highlights GOLD, selected final model highlights WHITE. The specific model (e.g. "iPhone 11 Pro Max") is what enters the cart. iPhone names normalised: lowercase-i "iPhone", "Max" (no accent/period). Newest→oldest order.
 
 Add-to-cart is blocked until a selection is made when the product has `sizeGroups` or more than one flat size.
+
+### 6.1 Pack components (multi-item selection)
+
+Packs that bundle items needing their own choices use a **`components`** array instead of `sizes`/`colors`/`sizeGroups` on the pack itself:
+```
+components: [ { ref: 1 }, { ref: 7 }, { ref: 6 } ]   // product ids of the bundled items
+```
+Each `ref` points to an existing product's id. The pack modal (`openPackModal`, a separate render path from the normal `openModal`) looks up each referenced product and renders ONE labelled picker block per component, showing colour swatches and/or size buttons / iPhone-model picker **based on that referenced product's own `colors`/`sizes`/`sizeGroups`**. This is intentional: change the T-Shirt's colours and every pack containing it updates automatically — no per-pack duplication.
+
+Behaviour:
+- Each component captures its own colour and/or size independently.
+- Add-to-cart is blocked until ALL required choices (every component's colour if it has colours, size if it has >1 size or sizeGroups) are made — alert key `modal.selectPackAlert`.
+- The cart line stores a `components: [{name, color, size}]` breakdown and displays it as sub-lines under the pack name. Cart dedup includes the serialized components, so two same packs with different selections are separate lines.
+- The order email lists the pack then an indented per-component breakdown, localised.
+- Office Pack (21) has NO `components` (nothing to choose) — it stays a plain `sizes:["One Size"]` add-to-cart.
 
 ---
 
@@ -175,7 +188,7 @@ Price strings include the euro sign (`"€15"`, `"€25.50"`); the cart parses t
 
 ## 11. Known open items / future ideas (not built)
 
-- **Office & Street pack** real contents + descriptions (placeholders currently). Street Pack two-dimension selector if it contains apparel + phone case.
+- **Office Pack** real contents + description (still a placeholder; it has no selectable components). Other packs now use the `components` model (§6.1) and capture per-item colour/size, so the earlier multi-dimension selection problem is solved.
 - **Custom domain:** exploring a free short domain (e.g. `amthebest.eu.org` via eu.org + Cloudflare DNS, or a PR-based service like is-a.dev / Open Domains). When live, update the hardcoded `og:url` / `og:image` paths in `index.html` (currently the github.io path). Also: renaming the repo to `tvasconcellos.github.io` would drop the `/amthebest/` path for free.
 - **Firebase profiles / loyalty (paused, learning project):** explored adding Google sign-in + profiles + order history + points via Firebase (project `amthebest-34fbd`, CDN approach, code to live in a separate `js/firebase.js`, sign-in as a small nav button). Blocked on a real design problem: with email-based orders the site never knows if an order was placed/paid, so history/points need either (A) record order to Firestore as 'pending' + owner marks paid manually, (B) real payments via Stripe, or (C) drop loyalty and keep profiles for autofill/favourites only. Not yet decided; nothing built.
 
