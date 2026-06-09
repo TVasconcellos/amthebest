@@ -83,17 +83,17 @@ const PRODUCTS = [ {
   category: "hoodie",
   price: "€20",
   badge: null,
-  image: "images/products/hoodie1.jpg",
+  image: "images/products/hoodie2.jpg",
   description: "Hoodie with exclusive brand design.",
   sizes: [ "S", "M", "L", "XL" ],
   colors: [ {
-    ...COLORS.white,
-    image: "images/products/hoodie1.jpg",
-    images: [ "images/products/hoodie1.jpg", "images/products/hoodie_white_2.png" ]
-  }, {
     ...COLORS.black,
     image: "images/products/hoodie2.jpg",
     images: [ "images/products/hoodie2.jpg", "images/products/hoodie_black_2.png" ]
+  }, {
+    ...COLORS.white,
+    image: "images/products/hoodie1.jpg",
+    images: [ "images/products/hoodie1.jpg", "images/products/hoodie_white_2.png" ]
   } ]
 }, {
   id: 4,
@@ -102,17 +102,17 @@ const PRODUCTS = [ {
   category: "sweatshirt",
   price: "€16",
   badge: null,
-  image: "images/products/sweatshirt1.jpg",
+  image: "images/products/sweatshirt2.jpg",
   description: "Sweatshirt with exclusive brand design.",
   sizes: [ "S", "M", "L", "XL" ],
   colors: [ {
-    ...COLORS.white,
-    image: "images/products/sweatshirt1.jpg",
-    images: [ "images/products/sweatshirt1.jpg", "images/products/sweatshirt_white_2.png" ]
-  }, {
     ...COLORS.black,
     image: "images/products/sweatshirt2.jpg",
     images: [ "images/products/sweatshirt2.jpg", "images/products/sweatshirt_black_2.png" ]
+  }, {
+    ...COLORS.white,
+    image: "images/products/sweatshirt1.jpg",
+    images: [ "images/products/sweatshirt1.jpg", "images/products/sweatshirt_white_2.png" ]
   } ]
 }, {
   id: 5,
@@ -133,10 +133,14 @@ const PRODUCTS = [ {
   category: "polo",
   price: "€12",
   badge: "New",
-  image: "images/products/polo-branco-1-1.jpeg",
+  image: "images/products/polo-azul-1-1.jpeg",
   description: "Men's polo shirt with exclusive brand design.",
   sizes: [ "S", "M", "L", "XL" ],
   colors: [ {
+    ...COLORS.navy,
+    image: "images/products/polo-azul-1-1.jpeg",
+    images: [ "images/products/polo-azul-1-1.jpeg", "images/products/polo-azul-1-2.jpeg", "images/products/polo-azul-1-3.jpeg" ]
+  }, {
     ...COLORS.white,
     image: "images/products/polo-branco-1-1.jpeg",
     images: [ "images/products/polo-branco-1-1.jpeg", "images/products/polo-branco-1-2.jpeg", "images/products/polo-branco-1-3.jpeg" ]
@@ -144,10 +148,6 @@ const PRODUCTS = [ {
     ...COLORS.black,
     image: "images/products/polo-preto-1-1.jpeg",
     images: [ "images/products/polo-preto-1-1.jpeg", "images/products/polo-preto-1-2.jpeg", "images/products/polo-preto-1-3.jpeg" ]
-  }, {
-    ...COLORS.navy,
-    image: "images/products/polo-azul-1-1.jpeg",
-    images: [ "images/products/polo-azul-1-1.jpeg", "images/products/polo-azul-1-2.jpeg", "images/products/polo-azul-1-3.jpeg" ]
   } ]
 }, {
   id: 24,
@@ -183,17 +183,17 @@ const PRODUCTS = [ {
   category: "socks",
   price: "€5",
   badge: "Best Seller",
-  image: "images/products/socks-white-1.jpg",
+  image: "images/products/socks_black_1.jpg",
   description: "Socks with exclusive brand design.",
   sizes: [ "One Size" ],
   colors: [ {
-    ...COLORS.white,
-    image: "images/products/socks-white-1.jpg",
-    images: [ "images/products/socks-white-1.jpg", "images/products/socks-white-2.png" ]
-  }, {
     ...COLORS.black,
     image: "images/products/socks_black_1.jpg",
     images: [ "images/products/socks_black_1.jpg", "images/products/socks_black_2.png" ]
+  }, {
+    ...COLORS.white,
+    image: "images/products/socks-white-1.jpg",
+    images: [ "images/products/socks-white-1.jpg", "images/products/socks-white-2.png" ]
   } ]
 }, {
   id: 8,
