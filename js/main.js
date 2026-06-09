@@ -171,7 +171,11 @@ const PRODUCTS = [ {
   image: "images/products/cap1.jpg",
   description: "Cap with brand detail.",
   sizes: [ "One Size" ],
-  colors: null
+  colors: [
+    { ...COLORS.white, image: "images/products/cap1.jpg" },
+    { ...COLORS.navy,  image: "images/products/cap1.jpg" },
+    { ...COLORS.black, image: "images/products/cap1.jpg" }
+  ]
 }, {
   id: 7,
   name: "Socks",
