@@ -99,7 +99,7 @@ Each product object:
 **Packs** (category `pack`, badge Best Value, have a `save` field). Packs with selectable contents use a `components` model — see §6.1:
 | 17 | Summer Pack | €25 | save €3 | `summerpack1.jpg`. Components: T-Shirt (ref 1), Socks (ref 7), Cap (ref 6) |
 | 18 | Winter Pack | €36 | save €5 | `winterpack1.jpg`. Components: Hoodie (ref 3), Sweatshirt (ref 4), Socks (ref 7) |
-| 19 | Essential Pack | €28 | save €3 | `essentialpack1.jpg`. Components: T-Shirt (ref 1), Hoodie (ref 3) |
+| 19 | Essential Pack | €28 | save €3 | `essentialpack1.jpg`. Components: T-Shirt (ref 1), Sweatshirt (ref 4) |
 | 20 | Complete Pack | €43 | save €5 | `completepack1.jpg`. Components: Hoodie (ref 3), T-Shirt (ref 1), Socks (ref 7), Cap (ref 6) |
 | 21 | Office Pack | €25.50 | save €3 | 2-img `officepack1.jpg`+`officepack2.jpg`, One Size. PT "Pack Office". No components — nothing to choose. **Contents/description still placeholder** |
 | 22 | Street Pack | €15 | save €2 | 3-img `streetpack1/2/3.jpg`. PT "Pack Street". Components: Cap (ref 6), Phone Case (ref 16) |
