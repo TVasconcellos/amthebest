@@ -313,6 +313,16 @@ button {
   color: var(--color-white);
   transform: translateY(-2px)
 }
+.btn--outline {
+  background: 0 0;
+  color: var(--color-white);
+  border-color: var(--color-white)
+}
+.btn--outline:hover {
+  background: var(--color-white);
+  color: var(--color-black);
+  transform: translateY(-2px)
+}
 .btn--full {
   width: 100%;
   justify-content: center
