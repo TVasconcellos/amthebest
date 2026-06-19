@@ -105,7 +105,7 @@ Each product object:
 | 22 | Street Pack | €15 | save €2 | 3-img `streetpack1/2/3.jpg`. PT "Pack Street". Components: Cap (ref 6), Phone Case (ref 16) |
 
 **Gift Cards** (category `giftcard`). No sizes, no colours, no fixed price. Value chosen at add-time. Custom modal path — see §6.2.
-| 25 | Gift Card | variable | — | `giftcard1.jpg`. EN "Gift Card", PT "Cartão Oferta". Preset values: €10, €25, €50, €100 + custom amount. Fields: To (required), From (optional), Message (optional). |
+| 25 | Gift Card | `"€10"` (floor) | — | `giftcard1.jpg`. EN "Gift Card", PT "Cartão Oferta". `price` MUST be a parseable string (renderProducts calls `.replace` on it) — it is the floor value; card displays localised "From €10"/"Desde €10" via `giftcard.priceFrom`. Cart price comes from the chosen value, not this. Preset values: €10, €25, €50, €100 + custom amount. Fields: To (required), From (optional), Message (optional). |
 
 ---
 
