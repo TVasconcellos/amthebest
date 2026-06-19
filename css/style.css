@@ -1448,3 +1448,18 @@ button {
 .order__form .form-field {
   margin-bottom: var(--space-sm)
 }
+.giftcard__fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm)
+}
+.giftcard__fields .form-field {
+  margin-bottom: 0
+}
+.giftcard__custom-wrap {
+  margin-top: 0
+}
+.giftcard__custom-wrap .form-field {
+  margin-bottom: 0
+}
