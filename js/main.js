@@ -83,17 +83,17 @@ const PRODUCTS = [ {
   category: "hoodie",
   price: "€20",
   badge: null,
-  image: "images/products/hoodie2.jpg",
+  image: "images/products/hoodie1.jpg",
   description: "Hoodie with exclusive brand design.",
   sizes: [ "S", "M", "L", "XL" ],
   colors: [ {
-    ...COLORS.black,
-    image: "images/products/hoodie2.jpg",
-    images: [ "images/products/hoodie2.jpg", "images/products/hoodie_black_2.png" ]
-  }, {
     ...COLORS.white,
     image: "images/products/hoodie1.jpg",
     images: [ "images/products/hoodie1.jpg", "images/products/hoodie_white_2.png" ]
+  }, {
+    ...COLORS.black,
+    image: "images/products/hoodie2.jpg",
+    images: [ "images/products/hoodie2.jpg", "images/products/hoodie_black_2.png" ]
   } ]
 }, {
   id: 4,
@@ -102,17 +102,17 @@ const PRODUCTS = [ {
   category: "sweatshirt",
   price: "€16",
   badge: null,
-  image: "images/products/sweatshirt2.jpg",
+  image: "images/products/sweatshirt1.jpg",
   description: "Sweatshirt with exclusive brand design.",
   sizes: [ "S", "M", "L", "XL" ],
   colors: [ {
-    ...COLORS.black,
-    image: "images/products/sweatshirt2.jpg",
-    images: [ "images/products/sweatshirt2.jpg", "images/products/sweatshirt_black_2.png" ]
-  }, {
     ...COLORS.white,
     image: "images/products/sweatshirt1.jpg",
     images: [ "images/products/sweatshirt1.jpg", "images/products/sweatshirt_white_2.png" ]
+  }, {
+    ...COLORS.black,
+    image: "images/products/sweatshirt2.jpg",
+    images: [ "images/products/sweatshirt2.jpg", "images/products/sweatshirt_black_2.png" ]
   } ]
 }, {
   id: 5,
@@ -133,14 +133,10 @@ const PRODUCTS = [ {
   category: "polo",
   price: "€12",
   badge: "New",
-  image: "images/products/polo-azul-1-1.jpeg",
+  image: "images/products/polo-branco-1-1.jpeg",
   description: "Men's polo shirt with exclusive brand design.",
   sizes: [ "S", "M", "L", "XL" ],
   colors: [ {
-    ...COLORS.navy,
-    image: "images/products/polo-azul-1-1.jpeg",
-    images: [ "images/products/polo-azul-1-1.jpeg", "images/products/polo-azul-1-2.jpeg", "images/products/polo-azul-1-3.jpeg" ]
-  }, {
     ...COLORS.white,
     image: "images/products/polo-branco-1-1.jpeg",
     images: [ "images/products/polo-branco-1-1.jpeg", "images/products/polo-branco-1-2.jpeg", "images/products/polo-branco-1-3.jpeg" ]
@@ -148,6 +144,10 @@ const PRODUCTS = [ {
     ...COLORS.black,
     image: "images/products/polo-preto-1-1.jpeg",
     images: [ "images/products/polo-preto-1-1.jpeg", "images/products/polo-preto-1-2.jpeg", "images/products/polo-preto-1-3.jpeg" ]
+  }, {
+    ...COLORS.navy,
+    image: "images/products/polo-azul-1-1.jpeg",
+    images: [ "images/products/polo-azul-1-1.jpeg", "images/products/polo-azul-1-2.jpeg", "images/products/polo-azul-1-3.jpeg" ]
   } ]
 }, {
   id: 24,
@@ -183,17 +183,17 @@ const PRODUCTS = [ {
   category: "socks",
   price: "€5",
   badge: "Best Seller",
-  image: "images/products/socks_black_1.jpg",
+  image: "images/products/socks-white-1.jpg",
   description: "Socks with exclusive brand design.",
   sizes: [ "One Size" ],
   colors: [ {
-    ...COLORS.black,
-    image: "images/products/socks_black_1.jpg",
-    images: [ "images/products/socks_black_1.jpg", "images/products/socks_black_2.png" ]
-  }, {
     ...COLORS.white,
     image: "images/products/socks-white-1.jpg",
     images: [ "images/products/socks-white-1.jpg", "images/products/socks-white-2.png" ]
+  }, {
+    ...COLORS.black,
+    image: "images/products/socks_black_1.jpg",
+    images: [ "images/products/socks_black_1.jpg", "images/products/socks_black_2.png" ]
   } ]
 }, {
   id: 8,
@@ -387,6 +387,17 @@ const PRODUCTS = [ {
   images: [ "images/products/streetpack1.jpg", "images/products/streetpack2.jpg", "images/products/streetpack3.jpg" ],
   description: "The Street Pack: Cap + Phone Case. Everyday essentials, bundled at a saving.",
   components: [ { ref: 6 }, { ref: 16 } ],
+  colors: null
+}, {
+  id: 25,
+  name: "Gift Card",
+  family: "Gift Card",
+  category: "giftcard",
+  price: null,
+  badge: "New",
+  image: "images/products/giftcard1.jpg",
+  description: "Give the gift of choice. Pick a value, add a personal note, and we'll take care of the rest.",
+  sizes: null,
   colors: null
 } ];
 
@@ -618,6 +629,10 @@ function openModal(product) {
   cancelImageFade();
   selectedSize = null;
   selectedColor = null;
+  if (product.category === "giftcard") {
+    openGiftCardModal(product, modal, content);
+    return;
+  }
   if (product.components) {
     openPackModal(product, modal, content);
     return;
@@ -779,6 +794,143 @@ function openModal(product) {
   modal.setAttribute("aria-hidden", "false");
   document.body.style.overflow = "hidden";
   selectedColor = product.colors?.[0] ?? null;
+}
+
+
+function openGiftCardModal(product, modal, content) {
+  const lang = document.documentElement.dataset.lang || "en";
+  const t = TRANSLATIONS[lang];
+  const VALUES = [10, 25, 50, 100];
+  let selectedValue = null;
+  let customMode = false;
+  content.innerHTML = `
+    <div class="modal__layout">
+      <div class="modal__media">
+        <img
+          class="modal__image"
+          id="modalProductImage"
+          src="${product.image}"
+          alt="${tProduct(product, "name")}"
+          onerror="this.style.background='var(--color-navy-mid)'; this.removeAttribute('src')"
+        />
+      </div>
+      <div class="modal__details">
+        <div class="modal__meta">
+          <p class="modal__family">${tProduct(product, "family")}</p>
+          <h2 class="modal__title">${tProduct(product, "name")}</h2>
+        </div>
+        <p class="modal__desc">${tProduct(product, "description")}</p>
+
+        <div class="modal__sizes" style="margin-bottom:1.25rem">
+          <span class="modal__sizes-label">${t["giftcard.value"] || "Value"}</span>
+          <div class="modal__sizes-grid" id="gcValueGrid">
+            ${VALUES.map(v => `<button class="size-btn" data-value="${v}">€${v}</button>`).join("")}
+            <button class="size-btn" data-value="custom">${t["giftcard.custom"] || "Custom"}</button>
+          </div>
+          <div class="giftcard__custom-wrap" id="gcCustomWrap" hidden>
+            <div class="form-field" style="margin-top:0.75rem">
+              <input type="number" id="gcCustomInput" min="1" max="500" autocomplete="off">
+              <label for="gcCustomInput">${t["giftcard.customLabel"] || "Amount (€)"}</label>
+              <div class="form-field__line"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal__sizes" style="margin-bottom:0">
+          <span class="modal__sizes-label">${t["giftcard.details"] || "Personalise"}</span>
+          <div class="giftcard__fields">
+            <div class="form-field">
+              <input type="text" id="gcTo" autocomplete="off" required>
+              <label for="gcTo">${t["giftcard.to"] || "To"}</label>
+              <div class="form-field__line"></div>
+            </div>
+            <div class="form-field">
+              <input type="text" id="gcFrom" autocomplete="off">
+              <label for="gcFrom">${t["giftcard.from"] || "From (optional)"}</label>
+              <div class="form-field__line"></div>
+            </div>
+            <div class="form-field">
+              <textarea id="gcMessage" rows="3" autocomplete="off"></textarea>
+              <label for="gcMessage">${t["giftcard.message"] || "Message (optional)"}</label>
+              <div class="form-field__line"></div>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn btn--primary btn--full" id="modalAddBtn" style="margin-top:1.5rem">
+          ${t["modal.addToCart"] || "Add to Cart"}
+        </button>
+        <div class="modal__shipping-note">
+          ${(t["modal.shipping"] || "Free shipping over €50").split("•").map(perk => `<span class="perk">${perk.trim()}</span>`).join("")}
+        </div>
+      </div>
+    </div>
+  `;
+
+  content.querySelectorAll(".form-field input, .form-field textarea").forEach(field => {
+    field.addEventListener("input", () => {
+      field.classList.toggle("has-value", field.value.trim() !== "");
+    });
+  });
+
+  const customWrap = content.querySelector("#gcCustomWrap");
+  const customInput = content.querySelector("#gcCustomInput");
+
+  content.querySelectorAll(".size-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      content.querySelectorAll(".size-btn").forEach(b => b.classList.remove("selected"));
+      btn.classList.add("selected");
+      if (btn.dataset.value === "custom") {
+        customMode = true;
+        selectedValue = null;
+        customWrap.hidden = false;
+        customInput.focus();
+      } else {
+        customMode = false;
+        selectedValue = parseInt(btn.dataset.value);
+        customWrap.hidden = true;
+      }
+    });
+  });
+
+  content.querySelector("#modalAddBtn")?.addEventListener("click", () => {
+    const to = content.querySelector("#gcTo").value.trim();
+    const from = content.querySelector("#gcFrom").value.trim();
+    const message = content.querySelector("#gcMessage").value.trim();
+    if (customMode) {
+      const raw = parseFloat(customInput.value);
+      if (!raw || raw < 1) {
+        alert(t["giftcard.alertValue"] || "Please enter a valid amount.");
+        return;
+      }
+      selectedValue = raw;
+    }
+    if (!selectedValue) {
+      alert(t["giftcard.alertValue"] || "Please select a value first.");
+      return;
+    }
+    if (!to) {
+      alert(t["giftcard.alertTo"] || "Please fill in who the gift card is for.");
+      return;
+    }
+    Cart.add({
+      id: product.id,
+      name: product.name,
+      family: product.family,
+      price: selectedValue,
+      priceStr: `€${selectedValue}`,
+      size: null,
+      color: null,
+      image: product.image,
+      giftcard: { to, from, message, value: selectedValue }
+    });
+    closeModal();
+    setTimeout(() => Cart.open(), 350);
+  });
+
+  modal.classList.add("is-open");
+  modal.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
 }
 
 function closeModal() {
@@ -1123,6 +1275,11 @@ const PRODUCT_TRANSLATIONS = {
       name: "Top de Fitness de Senhora",
       family: "Top de Fitness de Senhora",
       description: "Top de fitness de senhora com design exclusivo da marca."
+    },
+    25: {
+      name: "Cartão Oferta",
+      family: "Cartão Oferta",
+      description: "Oferece a liberdade de escolha. Escolhe um valor, adiciona uma mensagem pessoal, e nós tratamos do resto."
     }
   }
 };
@@ -1264,7 +1421,19 @@ const TRANSLATIONS = {
     "info.returnsHeading": "Returns",
     "info.returnsBody": "If something isn't right with your order, get in touch within a reasonable time of receiving it and we'll do our best to sort it out. Items should be unused and in their original condition.",
     "info.contactHeading": "Questions?",
-    "info.contactBody": "For anything about your order, reach us through the contact form or by email and we'll get back to you."
+    "info.contactBody": "For anything about your order, reach us through the contact form or by email and we'll get back to you.",
+    "filter.giftcard": "Gift Cards",
+    "giftcard.value": "Value",
+    "giftcard.custom": "Custom",
+    "giftcard.customLabel": "Amount (€)",
+    "giftcard.details": "Personalise",
+    "giftcard.to": "To",
+    "giftcard.from": "From (optional)",
+    "giftcard.from_label": "From",
+    "giftcard.message": "Message (optional)",
+    "giftcard.message_label": "Message",
+    "giftcard.alertValue": "Please select or enter a value first.",
+    "giftcard.alertTo": "Please fill in who the gift card is for."
   },
   pt: {
     "nav.shop": "Loja",
@@ -1348,7 +1517,19 @@ const TRANSLATIONS = {
     "info.returnsHeading": "Devoluções",
     "info.returnsBody": "Se algo não estiver bem com a tua encomenda, contacta-nos num prazo razoável após a receção e faremos o nosso melhor para resolver. Os artigos devem estar por usar e na condição original.",
     "info.contactHeading": "Dúvidas?",
-    "info.contactBody": "Para qualquer questão sobre a tua encomenda, fala connosco através do formulário de contacto ou por email e respondemos assim que possível."
+    "info.contactBody": "Para qualquer questão sobre a tua encomenda, fala connosco através do formulário de contacto ou por email e respondemos assim que possível.",
+    "filter.giftcard": "Gift Cards",
+    "giftcard.value": "Valor",
+    "giftcard.custom": "Outro valor",
+    "giftcard.customLabel": "Montante (€)",
+    "giftcard.details": "Personalizar",
+    "giftcard.to": "Para",
+    "giftcard.from": "De (opcional)",
+    "giftcard.from_label": "De",
+    "giftcard.message": "Mensagem (opcional)",
+    "giftcard.message_label": "Mensagem",
+    "giftcard.alertValue": "Por favor escolhe ou introduz um valor primeiro.",
+    "giftcard.alertTo": "Por favor indica para quem é o cartão oferta."
   }
 };
 
@@ -1429,7 +1610,7 @@ const Cart = {
     } catch {}
   },
   add(item) {
-    const key = i => `${i.id}|${i.size}|${i.color}|${i.components ? JSON.stringify(i.components) : ""}`;
+    const key = i => `${i.id}|${i.size}|${i.color}|${i.components ? JSON.stringify(i.components) : ""}|${i.giftcard ? `${i.giftcard.to}|${i.giftcard.value}` : ""}`;
     const existing = this.items.find(i => key(i) === key(item));
     if (existing) {
       existing.qty += 1;
@@ -1506,7 +1687,10 @@ const Cart = {
       const product = PRODUCTS.find(p => p.id === item.id);
       const displayName = product ? tProduct(product, "name") : item.name;
       let metaHTML;
-      if (item.components && item.components.length > 0) {
+      if (item.giftcard) {
+        const gcParts = [`${t["giftcard.to"] || "To"}: ${item.giftcard.to}`, `€${item.giftcard.value}`];
+        metaHTML = `<p class="cart-item__meta">${gcParts.join(" · ")}</p>`;
+      } else if (item.components && item.components.length > 0) {
         metaHTML = item.components.map(c => {
           const refProduct = PRODUCTS.find(p => p.name === c.name);
           const cName = refProduct ? tProduct(refProduct, "name") : c.name;
@@ -1549,6 +1733,11 @@ const Cart = {
     return `\n      <div class="order__items">\n        ${this.items.map(item => {
       const product = PRODUCTS.find(p => p.id === item.id);
       const displayName = product ? tProduct(product, "name") : item.name;
+      if (item.giftcard) {
+        const gcTo = item.giftcard.to;
+        const gcFrom = item.giftcard.from ? ` ${t["giftcard.from_label"] || "from"} ${item.giftcard.from}` : "";
+        return `\n          <div class="order__item">\n            <span class="order__item-name">\n              ${item.qty} × ${displayName} — ${t["giftcard.to"] || "To"}: ${gcTo}${gcFrom}\n            </span>\n            <span class="order__item-price">€${(item.price * item.qty).toFixed(0)}</span>\n          </div>\n        `;
+      }
       return `\n          <div class="order__item">\n            <span class="order__item-name">\n              ${item.qty} × ${displayName}${item.color ? ` (${tColor(item.color)})` : ""} — ${tSize(item.size)}\n            </span>\n            <span class="order__item-price">€${(item.price * item.qty).toFixed(0)}</span>\n          </div>\n        `;
     }).join("")}\n      </div>\n      <div class="order__total-row">\n        <span>Total</span>\n        <span class="order__total">€${this.total().toFixed(0)}</span>\n      </div>\n    `;
   },
@@ -1558,6 +1747,13 @@ const Cart = {
     const lines = this.items.map(item => {
       const product = PRODUCTS.find(p => p.id === item.id);
       const displayName = product ? tProduct(product, "name") : item.name;
+      if (item.giftcard) {
+        const gc = item.giftcard;
+        const toLine = `      ${t["giftcard.to"] || "To"}: ${gc.to}`;
+        const fromLine = gc.from ? `\n      ${t["giftcard.from_label"] || "From"}: ${gc.from}` : "";
+        const msgLine = gc.message ? `\n      ${t["giftcard.message_label"] || "Message"}: ${gc.message}` : "";
+        return `  • ${item.qty} × ${displayName}  —  €${(item.price * item.qty).toFixed(0)}\n${toLine}${fromLine}${msgLine}`;
+      }
       if (item.components && item.components.length > 0) {
         const head = `  • ${item.qty} × ${displayName}  —  €${(item.price * item.qty).toFixed(0)}`;
         const sub = item.components.map(c => {
