@@ -393,7 +393,7 @@ const PRODUCTS = [ {
   name: "Gift Card",
   family: "Gift Card",
   category: "giftcard",
-  price: null,
+  price: "€10",
   badge: "New",
   image: "images/products/giftcard1.jpg",
   description: "Give the gift of choice. Pick a value, add a personal note, and we'll take care of the rest.",
@@ -500,7 +500,7 @@ function renderProducts() {
     const tFamily = tProduct(product, "family");
     const tBadgeLabel = product.badge ? tBadge(product.badge) : null;
     const colorDotsHtml = product.colors && product.colors.length > 0 ? `<div class="product-card__color-dots">\n           ${product.colors.slice(0, 5).map(c => `<span class="color-dot" style="background:${c.hex}" title="${tColor(c.label)}"></span>`).join("")}\n           ${product.colors.length > 5 ? `<span class="color-dot-more">+${product.colors.length - 5}</span>` : ""}\n         </div>` : "";
-    return `\n      <div\n        class="product-card"\n        data-category="${product.category}"\n        data-id="${product.id}"\n        data-name="${tName.toLowerCase()}"\n        data-price="${parseFloat(product.price.replace(/[^0-9.]/g, ""))}"\n        role="button"\n        tabindex="0"\n        aria-label="${viewLabel}: ${tName}"\n      >\n        <div class="product-card__image-wrap">\n          <img src="${product.image}" alt="${tName}" loading="lazy" onerror="this.style.display='none'" />\n          <div class="product-card__overlay">\n            <span class="product-card__overlay-btn">${viewLabel}</span>\n          </div>\n        </div>\n        <div class="product-card__body">\n          ${tBadgeLabel ? `<span class="product-card__badge">${tBadgeLabel}</span>` : ""}\n          <p class="product-card__name">${tName}</p>\n          <p class="product-card__family">${tFamily}</p>\n          <div class="product-card__footer">\n            <div class="product-card__price-block">\n              <p class="product-card__price">${product.price}</p>\n              ${product.save ? `<span class="product-card__save">${tSave(product.save)}</span>` : ""}\n            </div>\n            ${colorDotsHtml}\n          </div>\n        </div>\n      </div>\n    `;
+    return `\n      <div\n        class="product-card"\n        data-category="${product.category}"\n        data-id="${product.id}"\n        data-name="${tName.toLowerCase()}"\n        data-price="${parseFloat((product.price || "").replace(/[^0-9.]/g, "")) || 0}"\n        role="button"\n        tabindex="0"\n        aria-label="${viewLabel}: ${tName}"\n      >\n        <div class="product-card__image-wrap">\n          <img src="${product.image}" alt="${tName}" loading="lazy" onerror="this.style.display='none'" />\n          <div class="product-card__overlay">\n            <span class="product-card__overlay-btn">${viewLabel}</span>\n          </div>\n        </div>\n        <div class="product-card__body">\n          ${tBadgeLabel ? `<span class="product-card__badge">${tBadgeLabel}</span>` : ""}\n          <p class="product-card__name">${tName}</p>\n          <p class="product-card__family">${tFamily}</p>\n          <div class="product-card__footer">\n            <div class="product-card__price-block">\n              <p class="product-card__price">${product.category === "giftcard" ? t["giftcard.priceFrom"] || "From €10" : product.price}</p>\n              ${product.save ? `<span class="product-card__save">${tSave(product.save)}</span>` : ""}\n            </div>\n            ${colorDotsHtml}\n          </div>\n        </div>\n      </div>\n    `;
   }).join("");
   document.querySelectorAll(".product-card").forEach(card => {
     card.addEventListener("click", () => {
@@ -1432,6 +1432,7 @@ const TRANSLATIONS = {
     "giftcard.from_label": "From",
     "giftcard.message": "Message (optional)",
     "giftcard.message_label": "Message",
+    "giftcard.priceFrom": "From €10",
     "giftcard.alertValue": "Please select or enter a value first.",
     "giftcard.alertTo": "Please fill in who the gift card is for."
   },
@@ -1528,6 +1529,7 @@ const TRANSLATIONS = {
     "giftcard.from_label": "De",
     "giftcard.message": "Mensagem (opcional)",
     "giftcard.message_label": "Mensagem",
+    "giftcard.priceFrom": "Desde €10",
     "giftcard.alertValue": "Por favor escolhe ou introduz um valor primeiro.",
     "giftcard.alertTo": "Por favor indica para quem é o cartão oferta."
   }
