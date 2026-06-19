@@ -104,6 +104,9 @@ Each product object:
 | 21 | Office Pack | €25.50 | save €3 | 2-img `officepack1.jpg`+`officepack2.jpg`, One Size. PT "Pack Office". No components — nothing to choose. **Contents/description still placeholder** |
 | 22 | Street Pack | €15 | save €2 | 3-img `streetpack1/2/3.jpg`. PT "Pack Street". Components: Cap (ref 6), Phone Case (ref 16) |
 
+**Gift Cards** (category `giftcard`). No sizes, no colours, no fixed price. Value chosen at add-time. Custom modal path — see §6.2.
+| 25 | Gift Card | variable | — | `giftcard1.jpg`. EN "Gift Card", PT "Cartão Oferta". Preset values: €10, €25, €50, €100 + custom amount. Fields: To (required), From (optional), Message (optional). |
+
 ---
 
 ## 5. Image resolution model
@@ -138,6 +141,17 @@ Behaviour:
 - The cart line stores a `components: [{name, color, size}]` breakdown and displays it as sub-lines under the pack name. Cart dedup includes the serialized components, so two same packs with different selections are separate lines.
 - The order email lists the pack then an indented per-component breakdown, localised.
 - Office Pack (21) has NO `components` (nothing to choose) — it stays a plain `sizes:["One Size"]` add-to-cart.
+
+### 6.2 Gift card modal
+
+Gift cards (category `giftcard`) take a third render path: `openGiftCardModal(product, modal, content)`, entered before the pack check in `openModal`. The modal shows:
+- **Value picker** — four preset `size-btn` buttons (€10, €25, €50, €100) plus a "Custom" button. Picking "Custom" reveals a numeric `<input>` (`#gcCustomInput`, 1–500) beneath the grid. Picking a preset hides it again. No value is pre-selected; add-to-cart is blocked until one is chosen.
+- **Personalisation fields** — To (`#gcTo`, required), From (`#gcFrom`, optional), Message (`#gcMessage` textarea, optional). Standard `form-field` floating-label pattern. `has-value` class toggled on input.
+- **Add to cart** — validates value (required) and To (required) before calling `Cart.add()`. The cart item carries a `giftcard: { to, from, message, value }` object. `priceStr` and `price` are set from the chosen value.
+- **Cart display** — `metaHTML` branch checks `item.giftcard` first; shows "To: Joana · €25". No qty merge with a different recipient (dedup key includes `giftcard.to + giftcard.value`).
+- **Order summary + email** — dedicated branches in `Cart.summaryHTML()` and `Cart.emailBody()` render To / From / Message cleanly.
+- i18n keys: `giftcard.*` in both EN and PT (`TRANSLATIONS`), PT product name/description in `PRODUCT_TRANSLATIONS[25]`.
+- No image gallery (single `giftcard1.jpg`); no sizes/colors fields on the product object.
 
 ---
 
